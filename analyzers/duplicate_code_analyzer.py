@@ -33,9 +33,9 @@ from pathlib import Path
 from typing import Any
 
 from core.base_analyzer import AnalysisResult, ASTAnalyzer, Category, Finding, Severity
+from core.code_tokenizer import CodeTokenizer
 from core.config_manager import ConfigManager
 from core.reporter import create_reporter
-from core.code_tokenizer import CodeTokenizer
 
 
 @dataclass

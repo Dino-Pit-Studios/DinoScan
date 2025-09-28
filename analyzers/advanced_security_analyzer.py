@@ -278,7 +278,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             # IP Addresses (private ranges might be sensitive)
             SecurityPattern(
                 (
-                    r"\b(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\."  
+                    r"\b(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\."
                     r"|192\.168\.)[0-9]{1,3}\.[0-9]{1,3}\b"
                 ),
                 "Private IP address detected",
@@ -299,7 +299,9 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 )
             ),
             "us_phone_number": set(
-                pii_config.get("us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"])
+                pii_config.get(
+                    "us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"]
+                )
             ),
             "us_ssn": set(
                 pii_config.get("us_ssn", ["123-45-6789", "000-00-0000", "999-99-9999"])
@@ -612,8 +614,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         """Get security remediation suggestion based on CWE."""
         suggestions = {
             "CWE-798": (
-                "Move secrets to environment variables or "
-                "secure key management"
+                "Move secrets to environment variables or secure key management"
             ),
             "CWE-94": (
                 "Avoid dynamic code execution. "
@@ -629,11 +630,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             "CWE-200": "Avoid storing PII in code. Use data anonymization techniques",
         }
         return suggestions.get(
-            cwe,
-            (
-                "Review security implications and apply appropriate "
-                "mitigations"
-            )
+            cwe, ("Review security implications and apply appropriate mitigations")
         )
 
 
