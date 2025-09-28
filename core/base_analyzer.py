@@ -316,7 +316,7 @@ class BaseAnalyzer(ABC):
     def get_supported_extensions(self) -> set[str]:
         """Return set of file extensions this analyzer supports."""
 
-        ...
+        pass
 
     def safe_read_file(self, file_path: str) -> str | None:
         """Safely read file content."""
