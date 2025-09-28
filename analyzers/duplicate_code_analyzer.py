@@ -586,7 +586,7 @@ class CodeBlockExtractor(ast.NodeVisitor):
 
             self.generic_visit(node)
 
-    def main() -> None:
+    def main(argv: list) -> None:
         """Main entry point for the duplicate code analyzer."""
         parser = argparse.ArgumentParser(
             description="DinoScan Duplicate Code Detector",
