@@ -91,7 +91,7 @@ class ErrorHandler:
             "Completed %s analysis of %s: %s findings",
             analyzer_name,
             file_path,
-            finding_count
+            finding_count,
         )
 
     def log_file_skipped(self, file_path: str, reason: str) -> None:
