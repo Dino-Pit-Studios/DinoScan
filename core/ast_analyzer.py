@@ -192,7 +192,8 @@ class ComplexityVisitor(PythonASTVisitor):
         
         self.generic_visit(node)
     
-    def _calculate_complexity(self, node: ast.FunctionDef) -> int:
+    @staticmethod
+    def _calculate_complexity(node: ast.FunctionDef) -> int:
         """Calculate cyclomatic complexity of a function."""
         complexity = 1  # Base complexity
         
@@ -208,7 +209,8 @@ class ComplexityVisitor(PythonASTVisitor):
         
         return complexity
     
-    def _calculate_max_depth(self, node: ast.FunctionDef) -> int:
+    @staticmethod
+    def _calculate_max_depth(node: ast.FunctionDef) -> int:
         """Calculate maximum nesting depth in a function."""
         def get_depth(node: ast.AST, current_depth: int = 0) -> int:
             max_depth = current_depth
@@ -289,15 +291,18 @@ class StyleVisitor(PythonASTVisitor):
         
         self.generic_visit(node)
     
-    def _is_snake_case(self, name: str) -> bool:
+    @staticmethod
+    def _is_snake_case(name: str) -> bool:
         """Check if name follows snake_case convention."""
         return re.match(r'^[a-z_][a-z0-9_]*$', name) is not None
     
-    def _is_pascal_case(self, name: str) -> bool:
+    @staticmethod
+    def _is_pascal_case(name: str) -> bool:
         """Check if name follows PascalCase convention."""
         return re.match(r'^[A-Z][a-zA-Z0-9]*$', name) is not None
     
-    def _is_constant_context(self, node: ast.Assign) -> bool:
+    @staticmethod
+    def _is_constant_context(node: ast.Assign) -> bool:
         """Check if assignment is in a context where it's likely a constant."""
         # Simplified check - if assigned a literal value at module level
         if isinstance(node.value, (ast.Constant, ast.Str, ast.Num)):
@@ -380,7 +385,8 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
         # - tree-sitter for universal parsing
         self.parser_available = False
     
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported JavaScript/TypeScript file extensions."""
         return {".js", ".ts", ".jsx", ".tsx", ".vue", ".svelte"}
     

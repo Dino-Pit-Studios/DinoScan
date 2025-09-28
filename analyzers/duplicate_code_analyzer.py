@@ -69,7 +69,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         self.name = "DuplicateCodeAnalyzer"
         self._setup_duplicate_config()
 
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported Python file extensions."""
         return {".py", ".pyi", ".pyw"}
 
@@ -99,7 +100,7 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         self.skip_patterns = self.config.get('skip_patterns', [
             r'^class.*\(.*\):$',
             r'^def __init__\(self.*\):$',
-            r'^if __name__ == [\'"]__main__[\'"]:\s*$',
+            r'^if __name__ == [\'\"]__main__[\'\"]:\s*$',
             r'^\s*pass\s*$',
             r'^\s*return\s*$',
         ])
@@ -209,7 +210,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         
         return '\n'.join(normalized_lines)
 
-    def _tokenize_code(self, code: str) -> list[str]:
+    @staticmethod
+    def _tokenize_code(code: str) -> list[str]:
         """Tokenize normalized code for similarity analysis."""
         try:
             tree = ast.parse(code)
@@ -247,7 +249,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
 
         return fingerprints
 
-    def _compute_similarity_hash(self, code: str) -> str:
+    @staticmethod
+    def _compute_similarity_hash(code: str) -> str:
         """Compute a similarity hash for fast comparison."""
         # Remove variable names and literals for structural comparison
         normalized = re.sub(r'\b[a-zA-Z_]\w*\b', 'VAR', code)
@@ -365,7 +368,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
 
         return findings
 
-    def _compute_similarity(self, block1: CodeBlock, block2: CodeBlock) -> float:
+    @staticmethod
+    def _compute_similarity(block1: CodeBlock, block2: CodeBlock) -> float:
         """Compute similarity between two code blocks."""
         # Fingerprint-based similarity (Jaccard index)
         if block1.fingerprints and block2.fingerprints:
@@ -495,7 +499,8 @@ class CodeBlockExtractor(ast.NodeVisitor):
                     )
                     self.blocks.append(block)
 
-    def _get_end_line(self, node: ast.AST) -> int:
+    @staticmethod
+    def _get_end_line(node: ast.AST) -> int:
         """Get the ending line number of an AST node."""
         if hasattr(node, 'end_lineno') and node.end_lineno:
             return int(node.end_lineno)
@@ -546,6 +551,7 @@ class CodeTokenizer(ast.NodeVisitor):
 
 
 def main() -> None:
+    pass
     """Main entry point for the duplicate code analyzer."""
     parser = argparse.ArgumentParser(
         description='DinoScan Duplicate Code Detector',

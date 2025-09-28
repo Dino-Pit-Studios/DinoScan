@@ -62,7 +62,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
         self.search_paths: list[str] = []
         self._setup_search_paths()
     
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported Python file extensions."""
         return {".py", ".pyi", ".pyw"}
     
@@ -332,7 +333,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
                 module_info = self.modules[module_name]
                 
                 # Find the specific import causing the dependency
-                import_line = self._find_import_line(module_info, next_module)
+                import_line = CircularImportAnalyzer._find_import_line(module_info, next_module)
                 
                 finding = Finding(
                     rule_id="circular-import-detected",
@@ -349,7 +350,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
         
         return findings
     
-    def _find_import_line(self, module_info: ModuleInfo, target_module: str) -> int:
+    @staticmethod
+    def _find_import_line(module_info: ModuleInfo, target_module: str) -> int:
         """Find the line number where the problematic import occurs."""
         for import_info in module_info.imports:
             # Try to match the import to the target module

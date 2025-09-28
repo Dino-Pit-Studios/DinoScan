@@ -344,7 +344,8 @@ class SARIFReporter(Reporter):
         
         return results
     
-    def _severity_to_sarif_level(self, severity: Severity) -> str:
+    @staticmethod
+    def _severity_to_sarif_level(severity: Severity) -> str:
         """Convert DinoScan severity to SARIF level."""
         mapping = {
             Severity.CRITICAL: "error",

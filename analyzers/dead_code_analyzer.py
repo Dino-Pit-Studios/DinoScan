@@ -73,7 +73,8 @@ class DeadCodeAnalyzer(ASTAnalyzer):
         self.entry_points: set[str] = set()
         self._setup_detection_config()
     
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported Python file extensions."""
         return {".py", ".pyi", ".pyw"}
     
@@ -227,161 +228,115 @@ class DeadCodeAnalyzer(ASTAnalyzer):
         return findings
     
     def _is_dead_symbol(self, symbol: Symbol) -> bool:
-        """Determine if a symbol is dead (unused)."""
-        # Skip special methods and built-ins
-        if symbol.is_special or symbol.name in dir(builtins):
-            return False
-        
-        # Skip symbols in entry point files
-        if symbol.file_path in self.entry_points:
-            return False
-        
-        # Skip public API symbols if configured
-        if self.exclude_public_api and self._is_public_api_symbol(symbol):
-            return False
-        
-        # Skip framework-specific patterns
-        if self._is_framework_symbol(symbol):
-            return False
-        
-        # Check for usages
-        usages = self.usages.get(symbol.name, [])
-        
-        # Filter out self-references (definition in same file)
-        external_usages = [
-            usage for usage in usages 
-            if usage.file_path != symbol.file_path or 
-            self._is_meaningful_usage(usage, symbol)
-        ]
-        
-        return len(external_usages) == 0
+    """Determine if a symbol is dead (unused)."""
+    # Skip special methods and built-ins
+    if symbol.is_special or symbol.name in dir(builtins):
+        return False
     
-    def _is_public_api_symbol(self, symbol: Symbol) -> bool:
-        """Check if symbol is part of public API."""
-        # Check __all__ definitions
-        public_symbols = self.public_apis.get(symbol.file_path, set())
-        if public_symbols and symbol.name in public_symbols:
+    # Skip symbols in entry point files
+    if symbol.file_path in self.entry_points:
+        return False
+    
+    # Skip public API symbols if configured
+    if self.exclude_public_api and self._is_public_api_symbol(symbol):
+        return False
+    
+    # Skip framework-specific patterns
+    if self._is_framework_symbol(symbol):
+        return False
+    
+    # Check for usages
+    usages = self.usages.get(symbol.name, [])
+    
+    # Filter out self-references (definition in same file)
+    external_usages = [
+        usage for usage in usages 
+        if usage.file_path != symbol.file_path or 
+        self._is_meaningful_usage(usage, symbol)
+    ]
+    
+    return len(external_usages) == 0
+
+def _is_public_api_symbol(self, symbol: Symbol) -> bool:
+    """Check if symbol is part of public API."""
+    # Check __all__ definitions
+    public_symbols = self.public_apis.get(symbol.file_path, set())
+    if public_symbols and symbol.name in public_symbols:
+        return True
+    
+    # Public if not private and at module level
+    return not symbol.is_private and symbol.scope == 'module'
+
+def _is_framework_symbol(self, symbol: Symbol) -> bool:
+    """Check if symbol follows framework patterns."""
+    # Check decorators for framework patterns
+    for decorator in symbol.decorators:
+        if any(pattern in decorator for framework_patterns in self.framework_patterns.values() 
+              for pattern in framework_patterns):
             return True
-        
-        # Public if not private and at module level
-        return not symbol.is_private and symbol.scope == 'module'
     
-    def _is_framework_symbol(self, symbol: Symbol) -> bool:
-        """Check if symbol follows framework patterns."""
-        # Check decorators for framework patterns
-        for decorator in symbol.decorators:
-            if any(pattern in decorator for framework_patterns in self.framework_patterns.values() 
-                  for pattern in framework_patterns):
-                return True
-        
-        # Check name patterns
-        return any(re.match(pattern, symbol.name) for pattern in self.external_call_patterns)
-    
-    def _is_meaningful_usage(self, usage: Usage, symbol: Symbol) -> bool:
-        """Check if usage in same file is meaningful (not just definition)."""
-        # Usage after definition line is meaningful
-        return usage.line_number > symbol.line_number
-    
-    def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
-        """Create a finding for dead code symbol."""
-        severity_map = {
-            'function': Severity.MEDIUM,
-            'class': Severity.HIGH,
-            'variable': Severity.LOW,
-            'import': Severity.LOW
-        }
-        
-        severity = severity_map.get(symbol.symbol_type, Severity.LOW)
-        
-        # Adjust severity based on symbol characteristics
-        if symbol.is_private or (symbol.symbol_type == 'function' and symbol.decorators):
-            severity = Severity.LOW  # Private symbols or functions with decorators (might be framework callbacks)
-        
-        message = f"Unused {symbol.symbol_type}: '{symbol.name}'"
-        suggestion = self._get_removal_suggestion(symbol)
-        
-        return Finding(
-            rule_id=f"dead-code-{symbol.symbol_type}",
-            category=Category.DEAD_CODE,
-            severity=severity,
-            message=message,
-            file_path=symbol.file_path,
-            line_number=symbol.line_number,
-            column_number=symbol.column_number,
-            context=self.get_line_content(symbol.file_path, symbol.line_number),
-            suggestion=suggestion,
-            fixable=True,
-            tags={f"dead-{symbol.symbol_type}", "unused"}
-        )
-    
-    def _get_removal_suggestion(self, symbol: Symbol) -> str:
-        """Get suggestion for removing dead code."""
-        suggestions = {
-            'import': f"Remove unused import '{symbol.name}'",
-            'function': f"Remove unused function '{symbol.name}' or verify it's not part of public API",
-            'class': f"Remove unused class '{symbol.name}' or check if it's used dynamically",
-            'variable': f"Remove unused variable '{symbol.name}'"
-        }
-        
-        base_suggestion = suggestions.get(symbol.symbol_type, f"Remove unused {symbol.symbol_type} '{symbol.name}'")
-        
-        if symbol.is_private:
-            return base_suggestion + " (private symbol)"
-        if symbol.decorators:
-            return base_suggestion + " (check decorator usage)"
-        return base_suggestion
-    
-    def analyze_file(self, file_path: str) -> list[Finding]:  # noqa: ARG002
-        """Analyze single file (not used for dead code analysis)."""
-        # Dead code analysis requires project-wide analysis
-        return []
+    # Check name patterns
+    return any(re.match(pattern, symbol.name) for pattern in self.external_call_patterns)
 
+@staticmethod
+def _is_meaningful_usage(usage: Usage, symbol: Symbol) -> bool:
+    """Check if usage in same file is meaningful (not just definition)."""
+    # Usage after definition line is meaningful
+    return usage.line_number > symbol.line_number
 
-class SymbolCollector(ast.NodeVisitor):
-    """AST visitor to collect symbol definitions."""
+def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
+    """Create a finding for dead code symbol."""
+    severity_map = {
+        'function': Severity.MEDIUM,
+        'class': Severity.HIGH,
+        'variable': Severity.LOW,
+        'import': Severity.LOW
+    }
     
-    def __init__(self, file_path: str, config: dict[str, Any]):
-        self.file_path = file_path
-        self.config = config
-        self.symbols: list[Symbol] = []
-        self.public_symbols: set[str] = set()
-        self.current_class: str | None = None
-        self.scope_stack: list[str] = ['module']
+    severity = severity_map.get(symbol.symbol_type, Severity.LOW)
     
-    def visit_Assign(self, node: ast.Assign) -> None:
-        """Collect variable assignments."""
-        for target in node.targets:
-            if isinstance(target, ast.Name):
-                # Check for __all__ definition
-                if target.id == '__all__' and isinstance(node.value, (ast.List, ast.Tuple)):
-                    for elt in node.value.elts:
-                        if isinstance(elt, (ast.Str, ast.Constant)):
-                            name = elt.s if isinstance(elt, ast.Str) else elt.value
-                            if isinstance(name, str):
-                                self.public_symbols.add(name)
-                
-                # Regular variable
-                symbol = Symbol(
-                    name=target.id,
-                    symbol_type='variable',
-                    file_path=self.file_path,
-                    line_number=node.lineno,
-                    column_number=node.col_offset,
-                    is_private=target.id.startswith('_'),
-                    scope=self.scope_stack[-1],
-                    parent=self.current_class
-                )
-                self.symbols.append(symbol)
-        
-        self.generic_visit(node)
+    # Adjust severity based on symbol characteristics
+    if symbol.is_private or (symbol.symbol_type == 'function' and symbol.decorators):
+        severity = Severity.LOW  # Private symbols or functions with decorators (might be framework callbacks)
     
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """Collect function definitions."""
-        decorators = []
-        for decorator in node.decorator_list:
-            if isinstance(decorator, ast.Name):
-                decorators.append(decorator.id)
-            elif isinstance(decorator, ast.Attribute):
+    message = f"Unused {symbol.symbol_type}: '{symbol.name}'"
+    suggestion = self._get_removal_suggestion(symbol)
+    
+    return Finding(
+        rule_id=f"dead-code-{symbol.symbol_type}",
+        category=Category.DEAD_CODE,
+        severity=severity,
+        message=message,
+        file_path=symbol.file_path,
+        line_number=symbol.line_number,
+        column_number=symbol.column_number,
+        context=self.get_line_content(symbol.file_path, symbol.line_number),
+        suggestion=suggestion,
+        fixable=True,
+        tags={f"dead-{symbol.symbol_type}", "unused"}
+    )
+
+def _get_removal_suggestion(self, symbol: Symbol) -> str:
+    """Get suggestion for removing dead code."""
+    suggestions = {
+        'import': f"Remove unused import '{symbol.name}'",
+        'function': f"Remove unused function '{symbol.name}' or verify it's not part of public API",
+        'class': f"Remove unused class '{symbol.name}' or check if it's used dynamically",
+        'variable': f"Remove unused variable '{symbol.name}'"
+    }
+    
+    base_suggestion = suggestions.get(symbol.symbol_type, f"Remove unused {symbol.symbol_type} '{symbol.name}'")
+    
+    if symbol.is_private:
+        return base_suggestion + " (private symbol)"
+    if symbol.decorators:
+        return base_suggestion + " (check decorator usage)"
+    return base_suggestion
+
+def analyze_file(self, file_path: str) -> list[Finding]:  # noqa: ARG002
+    """Analyze single file (not used for dead code analysis)."""
+    # Dead code analysis requires project-wide analysis
+    return []
                 decorators.append(decorator.attr)
         
         symbol = Symbol(

@@ -70,7 +70,8 @@ class DocumentationAnalyzer(ASTAnalyzer):
         self.name = "DocumentationAnalyzer"
         self._setup_doc_config()
 
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported Python file extensions."""
         return {".py", ".pyi", ".pyw"}
 
@@ -364,7 +365,8 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         return findings
 
-    def _types_compatible(self, annotation: str, documented: str) -> bool:
+    @staticmethod
+    def _types_compatible(annotation: str, documented: str) -> bool:
         """Check if type annotation and documented type are compatible."""
         # Simple compatibility check - can be enhanced
         # Normalize types
@@ -482,6 +484,23 @@ class DocStringVisitor(ast.NodeVisitor):
         self.generic_visit(node)
         self.current_class = old_class
 
+    @staticmethod
+    def _detect_docstring_style(content: str) -> str:
+        """Detect the docstring style."""
+        # Google style: Args:, Returns:
+        if re.search(r'\b(Args|Arguments|Parameters):\s*\n', content):
+            return 'google'
+        
+        # Sphinx style: :param, :return
+        if re.search(r':param\s+\w+:', content) or re.search(r':return:', content):
+            return 'sphinx'
+        
+        # NumPy style: Parameters, Returns with dashes
+        if re.search(r'\n\s*Parameters\s*\n\s*-+', content):
+            return 'numpy'
+        
+        return 'plain'
+
     def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
         """Parse docstring to extract structured information."""
         docstring_info = DocstringInfo(content=content, line_number=line_number)
@@ -498,22 +517,6 @@ class DocStringVisitor(ast.NodeVisitor):
             self._parse_numpy_docstring(content, docstring_info)
 
         return docstring_info
-
-    def _detect_docstring_style(self, content: str) -> str:
-        """Detect the docstring style."""
-        # Google style: Args:, Returns:
-        if re.search(r'\b(Args|Arguments|Parameters):\s*\n', content):
-            return 'google'
-        
-        # Sphinx style: :param, :return
-        if re.search(r':param\s+\w+:', content) or re.search(r':return:', content):
-            return 'sphinx'
-        
-        # NumPy style: Parameters, Returns with dashes
-        if re.search(r'\n\s*Parameters\s*\n\s*-+', content):
-            return 'numpy'
-        
-        return 'plain'
 
     def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
         """Parse Google-style docstring."""
@@ -563,7 +566,7 @@ class DocStringVisitor(ast.NodeVisitor):
     def _parse_google_parameters(self, params_text: str, docstring_info: DocstringInfo) -> None:
         """Parse Google-style parameters section."""
         # Match parameter lines like "param_name (type): description"
-        param_pattern = r'^\s*(\w+)(?:\s*\(([^)]+)\))?\s*:\s*(.+?)(?=^\s*\w+\s*(?:\([^)]*\))?\s*:|$)'
+        param_pattern = r'^\s*(\w+)(?:\s*\([^)]*\))?\s*:\s*(.+?)(?=^\s*\w+\s*(?:\([^)]*\))?\s*:|$)'
         matches = re.findall(param_pattern, params_text, re.MULTILINE | re.DOTALL)
         
         for match in matches:

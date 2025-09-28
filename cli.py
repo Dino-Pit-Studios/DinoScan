@@ -47,7 +47,8 @@ class DinoScanCLI:
             'duplicates': DuplicateCodeAnalyzer,
         }
 
-    def create_parser(self) -> argparse.ArgumentParser:
+    @staticmethod
+    def create_parser() -> argparse.ArgumentParser:
         """Create the argument parser."""
         parser = argparse.ArgumentParser(
             prog='dinoscan',
@@ -194,7 +195,8 @@ Examples:
 
         return analyzers
 
-    def apply_profile(self, config: dict[str, Any], profile: str) -> None:
+    @staticmethod
+    def apply_profile(config: dict[str, Any], profile: str) -> None:
         """Apply analysis profile settings."""
         profiles = {
             'strict': {
@@ -388,7 +390,8 @@ Examples:
             if self._severity_priority(f.severity) >= min_priority
         ]
 
-    def _combine_results(self, results: list[AnalysisResult], project_path: str) -> AnalysisResult:
+    @staticmethod
+    def _combine_results(results: list[AnalysisResult], project_path: str) -> AnalysisResult:
         """Combine multiple analysis results."""
         combined = AnalysisResult(
             analyzer_name="DinoScan",

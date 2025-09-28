@@ -65,7 +65,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         self._setup_pii_allowlists()
         self._setup_entropy_detector()
     
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported file extensions."""
         return {
             ".py", ".js", ".ts", ".jsx", ".tsx", ".vue", ".svelte",
@@ -83,7 +84,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 'CWE-798'
             ),
             SecurityPattern(
-                r'aws[_-]?secret[_-]?access[_-]?key["\s]*[:=]["\s]*[A-Za-z0-9+/]{40}',
+                r'aws[_-]?secret[_-]?access[_-]?key["\s]*[:=]["\s]*[A-Za-z0-9+\/]{40}',
                 'AWS Secret Access Key detected',
                 Severity.CRITICAL,
                 'CWE-798'
@@ -281,7 +282,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 'CWE-200'
             )
         ]
-    
+
     def _setup_pii_allowlists(self) -> None:
         """Set up PII allowlists from configuration."""
         pii_config = self.config.get('pii_allowlists', {})
@@ -300,14 +301,15 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 '127.0.0.1', '0.0.0.0', '192.168.1.1'
             ]))
         }
-    
+
     def _setup_entropy_detector(self) -> None:
         """Set up entropy-based secret detection."""
         entropy_config = self.config.get('secret_detection_settings', {})
         self.min_entropy_threshold = entropy_config.get('min_entropy_threshold', 4.5)
         self.min_string_length = entropy_config.get('min_string_length', 20)
-    
-    def calculate_entropy(self, string: str) -> float:
+
+    @staticmethod
+    def calculate_entropy(string: str) -> float:
         """Calculate Shannon entropy of a string."""
         if not string:
             return 0.0
@@ -327,7 +329,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 entropy -= probability * math.log2(probability)
         
         return entropy
-    
+
     def is_high_entropy_string(self, string: str) -> bool:
         """Check if string has high entropy (potentially a secret)."""
         if len(string) < self.min_string_length:
@@ -335,7 +337,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         
         entropy = self.calculate_entropy(string)
         return entropy >= self.min_entropy_threshold
-    
+
     def analyze_file(self, file_path: str) -> list[Finding]:
         """Analyze file for security vulnerabilities."""
         findings = []
@@ -511,7 +513,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 return True
         return False
     
-    def _is_test_data(self, line: str, match_text: str) -> bool:
+    @staticmethod
+    def _is_test_data(line: str, match_text: str) -> bool:
         """Check if match appears to be test/example data."""
         line_lower = line.lower()
         match_lower = match_text.lower()
@@ -524,7 +527,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         return any(indicator in line_lower or indicator in match_lower 
                   for indicator in test_indicators)
     
-    def _is_likely_secret(self, string: str) -> bool:
+    @staticmethod
+    def _is_likely_secret(string: str) -> bool:
         """Additional heuristics to determine if high-entropy string is likely a secret."""
         # Check for common secret characteristics
         has_mixed_case = any(c.islower() for c in string) and any(c.isupper() for c in string)
@@ -544,7 +548,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         string_lower = string.lower()
         return any(indicator in string_lower for indicator in secret_indicators)
     
-    def _get_security_suggestion(self, cwe: str) -> str:
+    @staticmethod
+    def _get_security_suggestion(cwe: str) -> str:
         """Get security remediation suggestion based on CWE."""
         suggestions = {
             'CWE-798': 'Move secrets to environment variables or secure key management',
@@ -594,7 +599,7 @@ class SecurityASTVisitor(ast.NodeVisitor):
             # Check for dangerous method calls
             if (isinstance(node.func.value, ast.Name) and 
                 node.func.value.id == 'os' and 
-                node.func.attr == 'system'):
+                node.func.attr == 'system')
                 
                 if node.args and self._has_dynamic_input(node.args[0]):
                     self.findings.append(Finding(
@@ -658,7 +663,8 @@ class SecurityASTVisitor(ast.NodeVisitor):
         
         self.generic_visit(node)
     
-    def _has_dynamic_input(self, node: ast.AST) -> bool:
+    @staticmethod
+    def _has_dynamic_input(node: ast.AST) -> bool:
         """Check if AST node involves dynamic input (simplified heuristic)."""
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue)):
             return True

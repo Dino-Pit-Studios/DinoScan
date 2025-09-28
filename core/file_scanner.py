@@ -75,7 +75,7 @@ class FileScanner:
                 return True
         
         return False
-    
+
     def scan_directory(self, directory: str) -> Iterator[str]:
         """
         Scan directory for files to analyze.
@@ -99,14 +99,14 @@ class FileScanner:
                 
                 if not self.should_exclude_file(file_path):
                     yield os.path.abspath(file_path)
-    
+
     def scan_files(self, paths: list[str]) -> Iterator[str]:
         """
         Scan multiple files and directories.
         
         Args:
             paths: List of file or directory paths
-            
+        
         Yields:
             Absolute file paths that should be analyzed
         """
@@ -120,30 +120,31 @@ class FileScanner:
                 yield from self.scan_directory(str(path_obj))
             else:
                 print(f"Warning: Path does not exist or is not accessible: {path}")
-    
-    def get_file_language(self, file_path: str) -> str | None:
-        """
-        Determine the programming language of a file based on its extension.
-        
-        Returns:
-            Language identifier or None if not supported
-        """
-        extension = Path(file_path).suffix.lower()
-        
-        language_map = {
-            '.py': 'python',
-            '.pyi': 'python',
-            '.pyw': 'python',
-            '.js': 'javascript',
-            '.jsx': 'javascript',
-            '.ts': 'typescript',
-            '.tsx': 'typescript',
-            '.vue': 'vue',
-            '.svelte': 'svelte'
-        }
-        
-        return language_map.get(extension)
-    
+
+        @staticmethod
+        def get_file_language(file_path: str) -> str | None:
+            """
+            Determine the programming language of a file based on its extension.
+            
+            Returns:
+                Language identifier or None if not supported
+            """
+            extension = Path(file_path).suffix.lower()
+            
+            language_map = {
+                '.py': 'python',
+                '.pyi': 'python',
+                '.pyw': 'python',
+                '.js': 'javascript',
+                '.jsx': 'javascript',
+                '.ts': 'typescript',
+                '.tsx': 'typescript',
+                '.vue': 'vue',
+                '.svelte': 'svelte'
+            }
+            
+            return language_map.get(extension)
+
     def group_files_by_language(self, file_paths: list[str]) -> dict[str, list[str]]:
         """
         Group files by programming language.
@@ -161,7 +162,7 @@ class FileScanner:
                 groups[language].append(file_path)
         
         return groups
-    
+
     def get_project_info(self, directory: str) -> dict[str, Any]:
         """
         Gather information about a project directory.
