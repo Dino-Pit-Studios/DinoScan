@@ -412,7 +412,7 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
         self.parser_available = False
 
     @staticmethod
-    def get_supported_extensions() -> set[str]:
+    def get_supported_extensions(cls) -> set[str]:
         """Return supported JavaScript/TypeScript file extensions."""
         return {".js", ".ts", ".jsx", ".tsx", ".vue", ".svelte"}
 
