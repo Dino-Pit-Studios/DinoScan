@@ -1,0 +1,25 @@
+{
+  "excludePatterns": [
+    "__pycache__/**",
+    ".git/**",
+    "node_modules/**",
+    "venv/**",
+    "build/**",
+    "dist/**",
+    "*.pyc",
+    "*.log",
+    "test_*.py",
+    "*_test.py"
+  ],
+  "maxFileSize": 2097152,
+  "enabledAnalyzers": {
+    "security": true,
+    "deadCode": false,
+    "documentation": true,
+    "duplicateCode": false,
+    "circularImports": true
+  },
+  "analysisProfile": "standard",
+  "recursiveAnalysis": true,
+  "ignoreHiddenFiles": true
+}
