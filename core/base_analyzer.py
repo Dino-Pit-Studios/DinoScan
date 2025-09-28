@@ -315,7 +315,6 @@ class BaseAnalyzer(ABC):
     @abstractmethod
     def get_supported_extensions(self) -> set[str]:
         """Return set of file extensions this analyzer supports."""
-        pass
 
     def safe_read_file(self, file_path: str) -> str | None:
         """Safely read file content."""
@@ -390,7 +389,6 @@ class BaseAnalyzer(ABC):
             project_path=project_path,
             config=self.config,
         )
-
         # Use enhanced file scanning
         try:
             analyzable_files = self.file_type_manager.get_analyzable_files(
@@ -440,7 +438,8 @@ class BaseAnalyzer(ABC):
 
         return files
 
-    def get_rule_documentation(self) -> dict[str, str]:
+    @staticmethod
+    def get_rule_documentation() -> dict[str, str]:
         """Return documentation for all rules implemented by this analyzer."""
         return {}
 
