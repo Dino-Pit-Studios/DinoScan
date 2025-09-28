@@ -135,7 +135,10 @@ class DocumentationAnalyzer(ASTAnalyzer):
                         file_path=file_path,
                         line_number=1,
                         column_number=0,
-                        suggestion="Add a module-level docstring describing the module's purpose",
+                        suggestion=(
+                            "Add a module-level docstring describing the "
+                            "module's purpose"
+                        ),
                         tags={"docstring", "module"},
                     )
                 )
@@ -145,11 +148,17 @@ class DocumentationAnalyzer(ASTAnalyzer):
                         rule_id="short-module-docstring",
                         category=Category.DOCUMENTATION,
                         severity=Severity.LOW,
-                        message=f"Module docstring too short ({len(module_docstring)} chars)",
+                        message=(
+                            f"Module docstring too short "
+                            f"({len(module_docstring)} chars)"
+                        ),
                         file_path=file_path,
                         line_number=1,
                         column_number=0,
-                        suggestion=f"Expand docstring to at least {self.min_docstring_length} characters",
+                        suggestion=(
+                            f"Expand docstring to at least "
+                            f"{self.min_docstring_length} characters"
+                        ),
                         tags={"docstring", "module", "length"},
                     )
                 )
@@ -192,11 +201,17 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     rule_id="missing-function-docstring",
                     category=Category.DOCUMENTATION,
                     severity=severity,
-                    message=f"Missing docstring for {'method' if func.is_method else 'function'} '{func.name}'",
+                    message=(
+                        f"Missing docstring for {'method' if func.is_method else 'function'} "
+                        f"'{func.name}'"
+                    ),
                     file_path=file_path,
                     line_number=func.line_number,
                     column_number=0,
-                    suggestion=f"Add docstring describing the {'method' if func.is_method else 'function'}'s purpose",
+                    suggestion=(
+                        f"Add docstring describing the "
+                        f"{'method' if func.is_method else 'function'}'s purpose"
+                    ),
                     tags={"docstring", "function" if not func.is_method else "method"},
                 )
             )
@@ -212,11 +227,17 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     rule_id="short-function-docstring",
                     category=Category.DOCUMENTATION,
                     severity=Severity.LOW,
-                    message=f"Docstring too short for '{func.name}' ({len(func.docstring.content)} chars)",
+                    message=(
+                        f"Docstring too short for '{func.name}' "
+                        f"({len(func.docstring.content)} chars)"
+                    ),
                     file_path=file_path,
                     line_number=func.docstring.line_number,
                     column_number=0,
-                    suggestion=f"Expand docstring to at least {self.min_docstring_length} characters",
+                    suggestion=(
+                        f"Expand docstring to at least {self.min_docstring_length} "
+                        "characters"
+                    ),
                     tags={"docstring", "function", "length"},
                 )
             )
@@ -228,7 +249,10 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     rule_id="docstring-style-mismatch",
                     category=Category.DOCUMENTATION,
                     severity=Severity.LOW,
-                    message=f"Docstring style '{func.docstring.style}' doesn't match preferred '{self.preferred_style}'",
+                    message=(
+                        f"Docstring style '{func.docstring.style}' "
+                        f"doesn't match preferred '{self.preferred_style}'"
+                    ),
                     file_path=file_path,
                     line_number=func.docstring.line_number,
                     column_number=0,
@@ -262,17 +286,26 @@ class DocumentationAnalyzer(ASTAnalyzer):
         findings = []
 
         if not class_info["docstring"] and self.require_class_docstring:
-            severity = Severity.MEDIUM if not class_info["is_private"] else Severity.LOW
+            severity = (
+                Severity.MEDIUM
+                if not class_info["is_private"]
+                else Severity.LOW
+            )
             findings.append(
                 Finding(
                     rule_id="missing-class-docstring",
                     category=Category.DOCUMENTATION,
                     severity=severity,
-                    message=f"Missing docstring for class '{class_info['name']}'",
+                    message=(
+                        f"Missing docstring for class '{class_info['name']}'"
+                    ),
                     file_path=file_path,
                     line_number=class_info["line_number"],
                     column_number=0,
-                    suggestion="Add class docstring describing the class purpose and usage",
+                    suggestion=(
+                        "Add class docstring describing the class purpose and "
+                        "usage"
+                    ),
                     tags={"docstring", "class"},
                 )
             )
@@ -302,7 +335,10 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     rule_id="missing-parameter-doc",
                     category=Category.DOCUMENTATION,
                     severity=Severity.MEDIUM,
-                    message=f"Missing documentation for parameter '{param}' in '{func.name}'",
+                    message=(
+                        f"Missing documentation for parameter '{param}' "
+                        f"in '{func.name}'"
+                    ),
                     file_path=file_path,
                     line_number=func.docstring.line_number,
                     column_number=0,
@@ -318,11 +354,17 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     rule_id="extra-parameter-doc",
                     category=Category.DOCUMENTATION,
                     severity=Severity.LOW,
-                    message=f"Documentation for non-existent parameter '{param}' in '{func.name}'",
+                    message=(
+                        f"Documentation for non-existent parameter '{param}' "
+                        f"in '{func.name}'"
+                    ),
                     file_path=file_path,
                     line_number=func.docstring.line_number,
                     column_number=0,
-                    suggestion=f"Remove documentation for parameter '{param}' or check parameter name",
+                    suggestion=(
+                        f"Remove documentation for parameter '{param}' "
+                        "or check parameter name"
+                    ),
                     tags={"docstring", "parameter", "extra"},
                 )
             )
@@ -374,18 +416,29 @@ class DocumentationAnalyzer(ASTAnalyzer):
                             rule_id="type-annotation-mismatch",
                             category=Category.DOCUMENTATION,
                             severity=Severity.LOW,
-                            message=f"Type annotation '{annotation_type}' doesn't match documented type '{doc_type}' for parameter '{param}'",
+                            message=(
+                                f"Type annotation '{annotation_type}' doesn't match "
+                                f"documented type '{doc_type}' "
+                                f"for parameter '{param}'"
+                            ),
                             file_path=file_path,
                             line_number=func.docstring.line_number,
                             column_number=0,
-                            suggestion="Update type annotation or documentation to match",
+                            suggestion=(
+                                "Update type annotation or documentation to "
+                                "match"
+                            ),
                             tags={"docstring", "type", "mismatch"},
                         )
                     )
 
         return findings
 
-    def _validate_examples(self, func: FunctionInfo, file_path: str) -> list[Finding]:
+    def _validate_examples(
+        self,
+        func: FunctionInfo,
+        file_path: str,
+    ) -> list[Finding]:
         """Validate code examples in docstring."""
         findings: list[Finding] = []
 
@@ -566,56 +619,58 @@ class DocStringVisitor(ast.NodeVisitor):
 
         return docstring_info
 
+    def _extract_google_sections(self, lines: list[str]) -> dict[str, list[str]]:
+        """Extract sections from Google-style docstring lines."""
+        header_patterns = {
+            re.compile(r"\s*(Args|Arguments|Parameters):\s*$"): "parameters",
+            re.compile(r"\s*Returns:\s*$"): "returns",
+            re.compile(r"\s*Examples?:\s*$"): "examples",
+        }
+        sections: dict[str, list[str]] = {}
+        current_section = None
+        section_content: list[str] = []
+
+        for line in lines:
+            matched = False
+            for pattern, name in header_patterns.items():
+                if pattern.match(line):
+                    if current_section and section_content:
+                        sections[current_section] = section_content
+                    current_section = name
+                    section_content = []
+                    matched = True
+                    break
+            if not matched and current_section:
+                section_content.append(line)
+
+        if current_section and section_content:
+            sections[current_section] = section_content
+
+        return sections
+
     def _parse_google_docstring(
         self, content: str, docstring_info: DocstringInfo
     ) -> None:
         """Parse Google-style docstring."""
         lines = content.split("\n")
-        current_section = None
-        section_content: list[str] = []
+        raw_sections = self._extract_google_sections(lines)
 
-        for line in lines:
-            # Check for section headers
-            if re.match(r"\s*(Args|Arguments|Parameters):\s*$", line):
-                if current_section and section_content:
-                    docstring_info.sections[current_section] = "\n".join(
-                        section_content
-                    )
-                current_section = "parameters"
-                section_content = []
-            elif re.match(r"\s*Returns:\s*$", line):
-                if current_section and section_content:
-                    docstring_info.sections[current_section] = "\n".join(
-                        section_content
-                    )
-                current_section = "returns"
-                section_content = []
-            elif re.match(r"\s*Examples?:\s*$", line):
-                if current_section and section_content:
-                    docstring_info.sections[current_section] = "\n".join(
-                        section_content
-                    )
-                current_section = "examples"
-                section_content = []
-            elif current_section:
-                section_content.append(line)
+        # Assign joined section content to docstring_info.sections
+        for name, content_lines in raw_sections.items():
+            docstring_info.sections[name] = "\n".join(content_lines)
 
-        # Handle last section
-        if current_section and section_content:
-            docstring_info.sections[current_section] = "\n".join(section_content)
-
-        # Parse parameters from parameters section
-        if "parameters" in docstring_info.sections:
+        # Parse parameters
+        if "parameters" in raw_sections:
             self._parse_google_parameters(
                 docstring_info.sections["parameters"], docstring_info
             )
 
         # Parse returns
-        if "returns" in docstring_info.sections:
+        if "returns" in raw_sections:
             docstring_info.returns = docstring_info.sections["returns"].strip()
 
         # Parse examples
-        if "examples" in docstring_info.sections:
+        if "examples" in raw_sections:
             example_text = docstring_info.sections["examples"]
             # Extract code blocks (simplified)
             code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
@@ -751,14 +806,22 @@ Examples:
     )
 
     parser.add_argument(
-        "--no-private", action="store_true", help="Skip private methods and functions"
+        "--no-private",
+        action="store_true",
+        help="Skip private methods and functions",
     )
 
     parser.add_argument(
-        "--no-examples", action="store_true", help="Skip example validation"
+        "--no-examples",
+        action="store_true",
+        help="Skip example validation",
     )
 
-    parser.add_argument("--verbose", action="store_true", help="Show verbose output")
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show verbose output",
+    )
 
     args = parser.parse_args()
 
@@ -800,7 +863,8 @@ Examples:
         if args.verbose:
             stats = result.get_summary_stats()
             sys.stderr.write(
-                f"Analysis complete: {stats['total_findings']} documentation issues found\n"
+                f"Analysis complete: {stats['total_findings']} "
+                "documentation issues found\n"
             )
 
         # Create reporter and output results

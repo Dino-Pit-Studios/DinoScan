@@ -79,7 +79,10 @@ Examples:
         analyzer_group = parser.add_argument_group("Analyzer Selection")
         analyzer_group.add_argument(
             "--analyzers",
-            help="Comma-separated list of analyzers to run (security,circular,deadcode,docs,duplicates)",
+            help=(
+                "Comma-separated list of analyzers to run "
+                "(security,circular,deadcode,docs,duplicates)"
+            ),
             default="all",
         )
         analyzer_group.add_argument(
@@ -117,8 +120,7 @@ Examples:
             help="Minimum severity level to report",
         )
         filter_group.add_argument(
-            "--max-findings",
-            type=int,
+            "--max-findings", type=int,
             help="Maximum number of findings to report per analyzer",
         )
         filter_group.add_argument(
@@ -324,12 +326,11 @@ Examples:
             stats = combined_result.get_summary_stats()
             if stats.get("critical_severity", 0) > 0:
                 return 2
-            elif stats.get("high_severity", 0) > 0:
+            if stats.get("high_severity", 0) > 0:
                 return 1
-            elif stats.get("medium_severity", 0) > 5:  # Many medium issues
+            if stats.get("medium_severity", 0) > 5:  # Many medium issues
                 return 1
-            else:
-                return 0
+            return 0
 
         except KeyboardInterrupt:
             sys.stderr.write("\nAnalysis interrupted by user\n")

@@ -290,7 +290,8 @@ class BaseAnalyzer(ABC):
         return True
 
     def analyze_file(self, file_path: str) -> list[Finding]:
-        """Analyze a single file and return findings with enhanced error handling."""
+        """Analyze a single file and return findings with enhanced
+        error handling."""
         if not self.should_analyze_file(file_path):
             return []
 
@@ -315,7 +316,6 @@ class BaseAnalyzer(ABC):
     @abstractmethod
     def get_supported_extensions(self) -> set[str]:
         """Return set of file extensions this analyzer supports."""
-        pass
 
     def safe_read_file(self, file_path: str) -> str | None:
         """Safely read file content."""

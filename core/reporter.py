@@ -25,7 +25,6 @@ class Reporter(ABC):
     @abstractmethod
     def format_results(self, result: AnalysisResult) -> str:
         """Format analysis results as string."""
-        pass
 
     def save_results(self, result: AnalysisResult, output_path: str) -> None:
         """Save results to file."""
@@ -262,7 +261,10 @@ class SARIFReporter(Reporter):
     def format_results(self, result: AnalysisResult) -> str:
         """Format results in SARIF format."""
         sarif_report = {
-            "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json",
+            "$schema": (
+                "https://schemastore.azurewebsites.net/schemas/json/"
+                "sarif-2.1.0.json"
+            ),
             "version": "2.1.0",
             "runs": [
                 {
@@ -270,8 +272,12 @@ class SARIFReporter(Reporter):
                         "driver": {
                             "name": result.analyzer_name,
                             "version": result.version,
-                            "informationUri": "https://github.com/dinoscan/dinoscan",
-                            "rules": self._generate_rules(result.findings),
+                            "informationUri": (
+                                "https://github.com/dinoscan/dinoscan"
+                            ),
+                            "rules": self._generate_rules(
+                                result.findings
+                            ),
                         }
                     },
                     "results": self._generate_results(result.findings),

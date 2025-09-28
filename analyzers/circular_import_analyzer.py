@@ -184,8 +184,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
             return self._resolve_relative_import(
                 import_info, current_file, project_path
             )
-        else:
-            return self._resolve_absolute_import(import_info, project_path)
+        return self._resolve_absolute_import(import_info, project_path)
 
     def _resolve_relative_import(
         self, import_info: ImportInfo, current_file: str, project_path: str
@@ -275,6 +274,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
         sccs = []
 
         def strongconnect(node: str) -> None:
+            """Recursively explore the graph from the given node, assigning indices and lowlinks to identify strongly connected components."""
             nonlocal index
 
             # Set the depth index for this node
@@ -340,7 +340,10 @@ class CircularImportAnalyzer(ASTAnalyzer):
                     rule_id="circular-import-detected",
                     category=Category.IMPORTS,
                     severity=severity,
-                    message=f"Circular import detected: {' -> '.join(cycle + [cycle[0]])}",
+                    message=(
+                        f"Circular import detected: "
+                        f"{' -> '.join(cycle + [cycle[0]])}"
+                    ),
                     file_path=module_info.file_path,
                     line_number=import_line,
                     context=self._get_import_context(module_info, import_line),
@@ -378,9 +381,15 @@ class CircularImportAnalyzer(ASTAnalyzer):
     def _get_circular_import_suggestion(self, cycle: list[str]) -> str:
         """Get suggestion for resolving circular import."""
         if len(cycle) == 2:
-            return "Consider restructuring code to eliminate mutual dependencies. Options: merge modules, extract common functionality, or use late imports."
-        else:
-            return f"Complex circular dependency involving {len(cycle)} modules. Consider redesigning the module structure to create a more hierarchical dependency graph."
+            return (
+                "Consider restructuring code to eliminate mutual dependencies. "
+                "Options: merge modules, extract common functionality, or use late imports."
+            )
+        return (
+            f"Complex circular dependency involving {len(cycle)} modules. "
+            f"Consider redesigning the module structure to create a more hierarchical "
+            f"dependency graph."
+        )
 
     def analyze_file(self, file_path: str) -> list[Finding]:
         """Analyze single file (not used for circular imports)."""

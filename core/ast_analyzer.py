@@ -23,8 +23,6 @@ class PythonASTAnalyzer(ASTAnalyzer):
 
     def _setup_visitors(self) -> None:
         """Set up AST visitor classes for different analysis types."""
-        # We'll add visitor classes as we implement specific analyzers
-        pass
 
     def get_supported_extensions(self) -> set[str]:
         """Return supported Python file extensions."""
@@ -119,7 +117,10 @@ class SecurityVisitor(PythonASTVisitor):
                     severity=Severity.HIGH,
                     message=f"Use of {func_name}() can lead to code injection",
                     node=node,
-                    suggestion=f"Avoid using {func_name}(). Consider safer alternatives.",
+                    suggestion=(
+                        f"Avoid using {func_name}(). "
+                        + f"Consider safer alternatives."
+                    ),
                     cwe="CWE-94",
                 )
 
@@ -152,7 +153,10 @@ class SecurityVisitor(PythonASTVisitor):
                     severity=Severity.MEDIUM,
                     message="pickle module can be unsafe with untrusted data",
                     node=node,
-                    suggestion="Consider using json or other safe serialization formats",
+                    suggestion=(
+                        "Consider using json or other safe serialization "
+                        "formats"
+                    ),
                     cwe="CWE-502",
                 )
 
@@ -176,7 +180,10 @@ class ComplexityVisitor(PythonASTVisitor):
                 rule_id="python-complexity-cyclomatic",
                 category=Category.COMPLEXITY,
                 severity=Severity.MEDIUM,
-                message=f"Function '{node.name}' has cyclomatic complexity of {complexity} (max: {self.max_complexity})",
+                message=(
+                    f"Function '{node.name}' has cyclomatic complexity of {complexity} "
+                    f"(max: {self.max_complexity})"
+                ),
                 node=node,
                 suggestion="Consider breaking this function into smaller functions",
             )
@@ -188,7 +195,10 @@ class ComplexityVisitor(PythonASTVisitor):
                 rule_id="python-complexity-nesting",
                 category=Category.COMPLEXITY,
                 severity=Severity.MEDIUM,
-                message=f"Function '{node.name}' has nesting depth of {max_depth} (max: {self.max_nested_depth})",
+                message=(
+                    f"Function '{node.name}' has nesting depth of {max_depth} "
+                    f"(max: {self.max_nested_depth})"
+                ),
                 node=node,
                 suggestion="Consider extracting nested logic into separate functions",
             )
@@ -217,6 +227,7 @@ class ComplexityVisitor(PythonASTVisitor):
         """Calculate maximum nesting depth in a function."""
 
         def get_depth(node: ast.AST, current_depth: int = 0) -> int:
+            """Recursively compute the maximum nesting depth in the given AST node."""
             max_depth = current_depth
 
             for child in ast.iter_child_nodes(node):

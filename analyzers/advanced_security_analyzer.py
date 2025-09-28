@@ -599,7 +599,7 @@ class SecurityASTVisitor(ast.NodeVisitor):
             # Check for dangerous method calls
             if (isinstance(node.func.value, ast.Name) and 
                 node.func.value.id == 'os' and 
-                node.func.attr == 'system')
+                node.func.attr == 'system'):
                 
                 if node.args and self._has_dynamic_input(node.args[0]):
                     self.findings.append(Finding(

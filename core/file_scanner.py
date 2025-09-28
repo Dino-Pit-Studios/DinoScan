@@ -160,30 +160,6 @@ class FileScanner:
             else:
                 print(f"Warning: Path does not exist or is not accessible: {path}")
 
-        @staticmethod
-        def get_file_language(file_path: str) -> str | None:
-            """
-            Determine the programming language of a file based on its extension.
-
-            Returns:
-                Language identifier or None if not supported
-            """
-            extension = Path(file_path).suffix.lower()
-
-            language_map = {
-                ".py": "python",
-                ".pyi": "python",
-                ".pyw": "python",
-                ".js": "javascript",
-                ".jsx": "javascript",
-                ".ts": "typescript",
-                ".tsx": "typescript",
-                ".vue": "vue",
-                ".svelte": "svelte",
-            }
-
-            return language_map.get(extension)
-
     def group_files_by_language(self, file_paths: list[str]) -> dict[str, list[str]]:
         """
         Group files by programming language.

@@ -178,56 +178,55 @@ class DeadCodeAnalyzer(ASTAnalyzer):
                     continue
                 
                 file_path = str(Path(root) / file)
-                
-                if self.should_analyze_file(file_path):
-                    self._analyze_file_usages(file_path)
+            if self.should_analyze_file(file_path):
+                self._analyze_file_usages(file_path)
+
+def _analyze_file_usages(self, file_path: str) -> None:
+    """Analyze symbol usages in a single file."""
+    tree = self.parse_file(file_path)
+    if not tree:
+        return
     
-    def _analyze_file_usages(self, file_path: str) -> None:
-        """Analyze symbol usages in a single file."""
-        tree = self.parse_file(file_path)
-        if not tree:
-            return
-        
-        visitor = UsageCollector(file_path, self.symbols)
-        visitor.visit(tree)
-        
-        # Store usages
-        for usage in visitor.usages:
-            self.usages[usage.symbol_name].append(usage)
+    visitor = UsageCollector(file_path, self.symbols)
+    visitor.visit(tree)
     
-    def _identify_entry_points(self, project_path: str) -> None:
-        """Identify entry points that keep code alive."""
-        # Look for common entry point patterns
-        entry_patterns = [
-            'main.py', '__main__.py', 'manage.py', 'app.py', 'server.py',
-            'run.py', 'start.py', 'cli.py', 'setup.py'
-        ]
-        
-        for root, _dirs, files in os.walk(project_path):
-            for file in files:
-                if file in entry_patterns:
-                    self.entry_points.add(str(Path(root) / file))
-        
-        # Look for if __name__ == '__main__' patterns
-        for symbols_list in self.symbols.values():
-            for symbol in symbols_list:
-                if symbol.name == '__main__' and symbol.symbol_type == 'variable':
-                    self.entry_points.add(symbol.file_path)
+    # Store usages
+    for usage in visitor.usages:
+        self.usages[usage.symbol_name].append(usage)
+
+def _identify_entry_points(self, project_path: str) -> None:
+    """Identify entry points that keep code alive."""
+    # Look for common entry point patterns
+    entry_patterns = [
+        'main.py', '__main__.py', 'manage.py', 'app.py', 'server.py',
+        'run.py', 'start.py', 'cli.py', 'setup.py'
+    ]
     
-    def _analyze_dead_code(self) -> list[Finding]:
-        """Analyze collected symbols and usages to find dead code."""
-        findings = []
-        
-        for _symbol_name, symbols_list in self.symbols.items():
-            for symbol in symbols_list:
-                if self._is_dead_symbol(symbol):
-                    finding = self._create_dead_code_finding(symbol)
-                    if finding:
-                        findings.append(finding)
-        
-        return findings
+    for root, _dirs, files in os.walk(project_path):
+        for file in files:
+            if file in entry_patterns:
+                self.entry_points.add(str(Path(root) / file))
     
-    def _is_dead_symbol(self, symbol: Symbol) -> bool:
+    # Look for if __name__ == '__main__' patterns
+    for symbols_list in self.symbols.values():
+        for symbol in symbols_list:
+            if symbol.name == '__main__' and symbol.symbol_type == 'variable':
+                self.entry_points.add(symbol.file_path)
+
+def _analyze_dead_code(self) -> list[Finding]:
+    """Analyze collected symbols and usages to find dead code."""
+    findings = []
+    
+    for _symbol_name, symbols_list in self.symbols.items():
+        for symbol in symbols_list:
+            if self._is_dead_symbol(symbol):
+                finding = self._create_dead_code_finding(symbol)
+                if finding:
+                    findings.append(finding)
+    
+    return findings
+
+def _is_dead_symbol(self, symbol: Symbol) -> bool:
     """Determine if a symbol is dead (unused)."""
     # Skip special methods and built-ins
     if symbol.is_special or symbol.name in dir(builtins):

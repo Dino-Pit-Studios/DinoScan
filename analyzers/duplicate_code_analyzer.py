@@ -322,7 +322,10 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
                     line_number=block1.start_line,
                     column_number=0,
                     context=self._get_context_preview(block1),
-                    suggestion=f"Consider extracting common code into a function. Duplicate found at {Path(block2.file_path).name}:{block2.start_line}",
+                    suggestion=(
+                        f"Consider extracting common code into a function. Duplicate found at "
+                        f"{Path(block2.file_path).name}:{block2.start_line}"
+                    ),
                     tags={"duplicate", "exact", f"{line_count}-lines"},
                 )
                 findings.append(finding)
@@ -332,12 +335,17 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
                     rule_id="exact-duplicate",
                     category=Category.DUPLICATES,
                     severity=Severity.LOW,  # Lower severity for secondary occurrence
-                    message=f"Duplicate of code block at {Path(block1.file_path).name}:{block1.start_line}",
+                    message=(
+                        f"Duplicate of code block at "
+                        f"{Path(block1.file_path).name}:{block1.start_line}"
+                    ),
                     file_path=block2.file_path,
                     line_number=block2.start_line,
                     column_number=0,
                     context=self._get_context_preview(block2),
-                    suggestion="Consider removing this duplicate and calling the extracted function",
+                    suggestion=(
+                        "Consider removing this duplicate and calling the extracted function"
+                    ),
                     tags={"duplicate", "exact", f"{line_count}-lines", "secondary"},
                 )
                 findings.append(finding2)
@@ -373,12 +381,19 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
                         rule_id=f"{match_type}-duplicate",
                         category=Category.DUPLICATES,
                         severity=Severity.MEDIUM if similarity > 0.9 else Severity.LOW,
-                        message=f"{match_type.title()} duplicate code ({similarity:.1%} similar, {line_count} lines)",
+                        message=(
+                            f"{match_type.title()} duplicate code "
+                            f"({similarity:.1%} similar, {line_count} lines)"
+                        ),
                         file_path=block1.file_path,
                         line_number=block1.start_line,
                         column_number=0,
                         context=self._get_context_preview(block1),
-                        suggestion=f"Consider refactoring similar code. Related code at {Path(block2.file_path).name}:{block2.start_line}",
+                        suggestion=(
+                            f"Consider refactoring similar code. "
+                            f"Related code at {Path(block2.file_path).name}:"
+                            f"{block2.start_line}"
+                        ),
                         tags={
                             "duplicate",
                             match_type,
@@ -548,80 +563,84 @@ class CodeBlockExtractor(ast.NodeVisitor):
             return ""
 
 
-class CodeTokenizer(ast.NodeVisitor):
-    """AST visitor to extract tokens for similarity analysis."""
+    class CodeTokenizer(ast.NodeVisitor):
+        """AST visitor to extract tokens for similarity analysis."""
 
-    def __init__(self) -> None:
-        self.tokens: list[str] = []
+        def __init__(self) -> None:
+            """Initialize the CodeTokenizer instance."""
+            self.tokens: list[str] = []
 
-    def visit(self, node: ast.AST) -> None:
-        """Visit AST node and extract tokens."""
-        # Add node type as token
-        self.tokens.append(type(node).__name__)
-
-        # Add specific tokens based on node type
-        if isinstance(node, ast.Name):
-            self.tokens.append("NAME")  # Normalize variable names
-        elif isinstance(node, (ast.Constant, ast.Str, ast.Num)):
-            self.tokens.append("LITERAL")  # Normalize literals
-        elif isinstance(node, ast.operator):
+        def visit(self, node: ast.AST) -> None:
+            """Visit AST node and extract tokens."""
+            # Add node type as token
             self.tokens.append(type(node).__name__)
-        elif isinstance(node, ast.keyword):
-            self.tokens.append("KEYWORD")
 
-        self.generic_visit(node)
+            # Add specific tokens based on node type
+            if isinstance(node, ast.Name):
+                self.tokens.append("NAME")  # Normalize variable names
+            elif isinstance(node, (ast.Constant, ast.Str, ast.Num)):
+                self.tokens.append("LITERAL")  # Normalize literals
+            elif isinstance(node, ast.operator):
+                self.tokens.append(type(node).__name__)
+            elif isinstance(node, ast.keyword):
+                self.tokens.append("KEYWORD")
+
+            self.generic_visit(node)
 
 
-def main() -> None:
-    pass
-    """Main entry point for the duplicate code analyzer."""
-    parser = argparse.ArgumentParser(
-        description="DinoScan Duplicate Code Detector",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+    def main() -> None:
+        """Main entry point for the duplicate code analyzer."""
+        parser = argparse.ArgumentParser(
+            description="DinoScan Duplicate Code Detector",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
 Examples:
   %(prog)s /path/to/project
   %(prog)s /path/to/file.py --threshold 0.9
   %(prog)s /path/to/project --output-format json --output-file duplicates.json
         """,
-    )
+        )
 
-    parser.add_argument("path", help="Path to analyze (file or directory)")
+        parser.add_argument("path", help="Path to analyze (file or directory)")
 
-    parser.add_argument(
-        "--output-format",
-        choices=["console", "json", "xml", "sarif"],
-        default="console",
-        help="Output format (default: console)",
-    )
+        parser.add_argument(
+            "--output-format",
+            choices=["console", "json", "xml", "sarif"],
+            default="console",
+            help="Output format (default: console)",
+        )
 
-    parser.add_argument(
-        "--output-file", help="Output file path (default: print to stdout)"
-    )
+        parser.add_argument(
+            "--output-file", help="Output file path (default: print to stdout)"
+        )
 
-    parser.add_argument("--config", help="Configuration file path")
+        parser.add_argument("--config", help="Configuration file path")
 
-    parser.add_argument(
-        "--threshold", type=float, help="Similarity threshold (0.0-1.0)"
-    )
+        parser.add_argument(
+            "--threshold", type=float, help="Similarity threshold (0.0-1.0)"
+        )
 
-    parser.add_argument(
-        "--min-lines", type=int, help="Minimum lines for duplicate detection"
-    )
+        parser.add_argument(
+            "--min-lines", type=int, help="Minimum lines for duplicate detection"
+        )
 
-    parser.add_argument(
-        "--no-structural",
-        action="store_true",
-        help="Disable structural similarity detection",
-    )
+        parser.add_argument(
+            "--no-structural",
+            action="store_true",
+            help="Disable structural similarity detection",
+        )
 
-    parser.add_argument(
-        "--enable-partial",
-        action="store_true",
-        help="Enable partial duplicate detection",
-    )
+        parser.add_argument(
+            "--enable-partial",
+            action="store_true",
+            help="Enable partial duplicate detection",
+        )
 
-    parser.add_argument("--verbose", action="store_true", help="Show verbose output")
+        parser.add_argument(
+            "--verbose",
+            action="store_true",
+            help="Show verbose output",
+        )
 
     args = parser.parse_args()
 
@@ -644,7 +663,9 @@ Examples:
 
     try:
         if args.verbose:
-            sys.stderr.write(f"Starting duplicate code analysis of {args.path}...\n")
+            sys.stderr.write(
+                f"Starting duplicate code analysis of {args.path}...\n"
+            )
 
         # Analyze file or project
         if Path(args.path).is_file():
@@ -663,7 +684,8 @@ Examples:
         if args.verbose:
             stats = result.get_summary_stats()
             sys.stderr.write(
-                f"Analysis complete: {stats['total_findings']} duplicate code issues found\n"
+                f"Analysis complete: {stats['total_findings']} duplicate code "
+                f"issues found\n"
             )
 
         # Create reporter and output results
