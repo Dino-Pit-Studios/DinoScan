@@ -264,14 +264,23 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             ),
             # Credit Card Numbers (basic pattern)
             SecurityPattern(
-                r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b",
+                (
+                    r"\b(?:4[0-9]{12}(?:[0-9]{3})?"
+                    r"|5[1-5][0-9]{14}"
+                    r"|3[47][0-9]{13}"
+                    r"|3[0-9]{13}"
+                    r"|6(?:011|5[0-9]{2})[0-9]{12})\b"
+                ),
                 "Credit card number detected",
                 Severity.HIGH,
                 "CWE-200",
             ),
             # IP Addresses (private ranges might be sensitive)
             SecurityPattern(
-                r"\b(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\.|192\.168\.)[0-9]{1,3}\.[0-9]{1,3}\b",
+                (
+                    r"\b(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\."  
+                    r"|192\.168\.)[0-9]{1,3}\.[0-9]{1,3}\b"
+                ),
                 "Private IP address detected",
                 Severity.LOW,
                 "CWE-200",
@@ -290,9 +299,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 )
             ),
             "us_phone_number": set(
-                pii_config.get(
-                    "us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"]
-                )
+                pii_config.get("us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"])
             ),
             "us_ssn": set(
                 pii_config.get("us_ssn", ["123-45-6789", "000-00-0000", "999-99-9999"])
@@ -513,7 +520,10 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                                 if entropy_score < 5.0
                                 else Severity.HIGH
                             ),
-                            message=f"High-entropy string detected (entropy: {entropy_score:.2f})",
+                            message=(
+                                f"High-entropy string detected (entropy: "
+                                f"{entropy_score:.2f})"
+                            ),
                             file_path=file_path,
                             line_number=line_num,
                             column_number=match.start() + 1,
@@ -522,7 +532,10 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                             confidence=min(
                                 0.9, entropy_score / 6.0
                             ),  # Scale confidence with entropy
-                            suggestion="Verify if this is a secret that should be moved to environment variables",
+                            suggestion=(
+                                "Verify if this is a secret that should be moved to "
+                                "environment variables"
+                            ),
                         )
                         findings.append(finding)
 
@@ -564,7 +577,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
 
     @staticmethod
     def _is_likely_secret(string: str) -> bool:
-        """Additional heuristics to determine if high-entropy string is likely a secret."""
+        """Additional heuristics to determine if high-entropy string is
+        likely a secret."""
         # Check for common secret characteristics
         has_mixed_case = any(c.islower() for c in string) and any(
             c.isupper() for c in string
@@ -597,8 +611,14 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
     def _get_security_suggestion(cwe: str) -> str:
         """Get security remediation suggestion based on CWE."""
         suggestions = {
-            "CWE-798": "Move secrets to environment variables or secure key management",
-            "CWE-94": "Avoid dynamic code execution. Use safe alternatives or input validation",
+            "CWE-798": (
+                "Move secrets to environment variables or "
+                "secure key management"
+            ),
+            "CWE-94": (
+                "Avoid dynamic code execution. "
+                "Use safe alternatives or input validation"
+            ),
             "CWE-78": "Use subprocess with shell=False and validate inputs",
             "CWE-89": "Use parameterized queries or ORM frameworks",
             "CWE-22": "Validate file paths and use path.resolve() to prevent traversal",
@@ -609,7 +629,11 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             "CWE-200": "Avoid storing PII in code. Use data anonymization techniques",
         }
         return suggestions.get(
-            cwe, "Review security implications and apply appropriate mitigations"
+            cwe,
+            (
+                "Review security implications and apply appropriate "
+                "mitigations"
+            )
         )
 
 
@@ -640,7 +664,10 @@ class SecurityASTVisitor(ast.NodeVisitor):
                             line_number=node.lineno,
                             column_number=node.col_offset,
                             cwe="CWE-94",
-                            suggestion=f"Avoid {func_name}(). Use safe alternatives for dynamic behavior",
+                            suggestion=(
+                                f"Avoid {func_name}(). Use safe alternatives "
+                                f"for dynamic behavior"
+                            ),
                         )
                     )
 
@@ -662,7 +689,10 @@ class SecurityASTVisitor(ast.NodeVisitor):
                             line_number=node.lineno,
                             column_number=node.col_offset,
                             cwe="CWE-78",
-                            suggestion="Use subprocess.run() with shell=False and input validation",
+                            suggestion=(
+                                "Use subprocess.run() with shell=False and input "
+                                "validation"
+                            ),
                         )
                     )
 
@@ -677,7 +707,10 @@ class SecurityASTVisitor(ast.NodeVisitor):
                         rule_id="python-security-pickle-import",
                         category=Category.SECURITY,
                         severity=Severity.MEDIUM,
-                        message=f"Import of {alias.name} module (unsafe deserialization risk)",
+                        message=(
+                            f"Import of {alias.name} module "
+                            "(unsafe deserialization risk)"
+                        ),
                         file_path=self.file_path,
                         line_number=node.lineno,
                         column_number=node.col_offset,
@@ -713,12 +746,18 @@ class SecurityASTVisitor(ast.NodeVisitor):
                                     rule_id="python-security-hardcoded-secret",
                                     category=Category.SECURITY,
                                     severity=Severity.HIGH,
-                                    message=f"Potential hardcoded secret in variable '{target.id}'",
+                                    message=(
+                                        f"Potential hardcoded secret in "
+                                        f"variable '{target.id}'"
+                                    ),
                                     file_path=self.file_path,
                                     line_number=node.lineno,
                                     column_number=node.col_offset,
                                     cwe="CWE-798",
-                                    suggestion="Move secrets to environment variables or secure configuration",
+                                    suggestion=(
+                                        "Move secrets to environment "
+                                        "variables or secure configuration"
+                                    ),
                                 )
                             )
 
@@ -806,7 +845,8 @@ Examples:
         if args.verbose:
             stats = result.get_summary_stats()
             print(
-                f"Analysis complete: {stats['total_findings']} findings in {stats['files_analyzed']} files"
+                f"Analysis complete: {stats['total_findings']} findings in "
+                f"{stats['files_analyzed']} files"
             )
 
         # Create reporter and output results

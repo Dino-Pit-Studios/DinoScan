@@ -156,8 +156,9 @@ class DocumentationAnalyzer(ASTAnalyzer):
                         line_number=1,
                         column_number=0,
                         suggestion=(
-                            f"Expand docstring to at least "
-                            f"{self.min_docstring_length} characters"
+                            "Expand docstring to at least "
+                            f"{self.min_docstring_length} "
+                            "characters"
                         ),
                         tags={"docstring", "module", "length"},
                     )
@@ -209,8 +210,9 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     line_number=func.line_number,
                     column_number=0,
                     suggestion=(
-                        f"Add docstring describing the "
-                        f"{'method' if func.is_method else 'function'}'s purpose"
+                        "Add docstring describing the "
+                        f"{'method' if func.is_method else 'function'}"
+                        "'s purpose"
                     ),
                     tags={"docstring", "function" if not func.is_method else "method"},
                 )
@@ -235,7 +237,8 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     line_number=func.docstring.line_number,
                     column_number=0,
                     suggestion=(
-                        f"Expand docstring to at least {self.min_docstring_length} "
+                        "Expand docstring to at least "
+                        f"{self.min_docstring_length} "
                         "characters"
                     ),
                     tags={"docstring", "function", "length"},
@@ -447,7 +450,12 @@ class DocumentationAnalyzer(ASTAnalyzer):
                         rule_id="invalid-docstring-example",
                         category=Category.DOCUMENTATION,
                         severity=Severity.LOW,
-                        message=f"Syntax error in docstring example for '{func.name}': {e.msg}",
+                        message=(
+                            "Syntax error in docstring example for '"
+                            + func.name
+                            + "': "
+                            + e.msg
+                        ),
                         file_path=file_path,
                         line_number=func.docstring.line_number,
                         column_number=0,

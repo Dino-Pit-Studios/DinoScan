@@ -274,7 +274,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
         sccs = []
 
         def strongconnect(node: str) -> None:
-            """Recursively explore the graph from the given node, assigning indices and lowlinks to identify strongly connected components."""
+            """Recursively explore the graph from the given node, assigning
+            indices and lowlinks to identify strongly connected components."""
             nonlocal index
 
             # Set the depth index for this node
@@ -382,12 +383,13 @@ class CircularImportAnalyzer(ASTAnalyzer):
         if len(cycle) == 2:
             return (
                 "Consider restructuring code to eliminate mutual dependencies. "
-                "Options: merge modules, extract common functionality, or use late imports."
+                "Options: merge modules, extract common functionality, "
+                "or use late imports."
             )
         return (
             f"Complex circular dependency involving {len(cycle)} modules. "
-            f"Consider redesigning the module structure to create a more hierarchical "
-            f"dependency graph."
+            f"Consider redesigning the module structure to create a more "
+            "hierarchical dependency graph."
         )
 
     def analyze_file(self, file_path: str) -> list[Finding]:

@@ -35,6 +35,7 @@ from typing import Any
 from core.base_analyzer import AnalysisResult, ASTAnalyzer, Category, Finding, Severity
 from core.config_manager import ConfigManager
 from core.reporter import create_reporter
+from core.code_tokenizer import CodeTokenizer
 
 
 @dataclass
@@ -323,8 +324,9 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
                     column_number=0,
                     context=self._get_context_preview(block1),
                     suggestion=(
-                        f"Consider extracting common code into a function. Duplicate found at "
-                        f"{Path(block2.file_path).name}:{block2.start_line}"
+                        f"Consider extracting common code into a function. "
+                        f"Duplicate found at {Path(block2.file_path).name}:"
+                        f"{block2.start_line}"
                     ),
                     tags={"duplicate", "exact", f"{line_count}-lines"},
                 )
@@ -344,7 +346,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
                     column_number=0,
                     context=self._get_context_preview(block2),
                     suggestion=(
-                        "Consider removing this duplicate and calling the extracted function"
+                        "Consider removing this duplicate and calling the extracted "
+                        "function"
                     ),
                     tags={"duplicate", "exact", f"{line_count}-lines", "secondary"},
                 )
@@ -586,10 +589,13 @@ class CodeBlockExtractor(ast.NodeVisitor):
 
             self.generic_visit(node)
 
+    @staticmethod
     def main(argv: list) -> None:
         """Main entry point for the duplicate code analyzer."""
         parser = argparse.ArgumentParser(
             description="DinoScan Duplicate Code Detector",
+        )
+        parser = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
@@ -717,4 +723,9 @@ Examples:
 if __name__ == "__main__":
 
     def main():
-        pass
+        """
+        Main entry point for the duplicate code analyzer.
+        Parses command-line arguments, performs the duplicate code analysis,
+        and outputs or saves the results based on provided options.
+        """
+        raise NotImplementedError()

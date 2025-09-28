@@ -315,6 +315,7 @@ def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
         tags={f"dead-{symbol.symbol_type}", "unused"}
     )
 
+
 def _get_removal_suggestion(self, symbol: Symbol) -> str:
     """Get suggestion for removing dead code."""
     suggestions = {
@@ -336,28 +337,7 @@ def analyze_file(self, file_path: str) -> list[Finding]:  # noqa: ARG002
     """Analyze single file (not used for dead code analysis)."""
     # Dead code analysis requires project-wide analysis
     return []
-                decorators.append(decorator.attr)
-        
-        symbol = Symbol(
-            name=node.name,
-            symbol_type='function',
-            file_path=self.file_path,
-            line_number=node.lineno,
-            column_number=node.col_offset,
-            is_private=node.name.startswith('_'),
-            is_special=node.name.startswith('__') and node.name.endswith('__'),
-            is_property='property' in decorators,
-            decorators=decorators,
-            scope=self.scope_stack[-1],
-            parent=self.current_class
-        )
-        self.symbols.append(symbol)
-        
-        # Enter function scope
-        self.scope_stack.append('function')
-        self.generic_visit(node)
-        self.scope_stack.pop()
-    
+
     def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
         """Collect async function definitions."""
         decorators = []
@@ -387,6 +367,7 @@ def analyze_file(self, file_path: str) -> list[Finding]:  # noqa: ARG002
         self.scope_stack.pop()
     
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        
         """Collect class definitions."""
         decorators = []
         for decorator in node.decorator_list:

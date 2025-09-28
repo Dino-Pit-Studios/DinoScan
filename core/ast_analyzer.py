@@ -118,7 +118,7 @@ class SecurityVisitor(PythonASTVisitor):
                     message=f"Use of {func_name}() can lead to code injection",
                     node=node,
                     suggestion=(
-                        f"Avoid using {func_name}(). " + f"Consider safer alternatives."
+                        f"Avoid using {func_name}(). " + "Consider safer alternatives."
                     ),
                     cwe="CWE-94",
                 )
@@ -412,7 +412,7 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
         self.parser_available = False
 
     @staticmethod
-    def get_supported_extensions(cls) -> set[str]:
+    def get_supported_extensions(origin) -> set[str]:
         """Return supported JavaScript/TypeScript file extensions."""
         return {".js", ".ts", ".jsx", ".tsx", ".vue", ".svelte"}
 
