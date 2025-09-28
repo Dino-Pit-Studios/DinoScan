@@ -202,25 +202,8 @@ class FileTypeManager:
 
     def get_analyzable_files(self, directory: str, config: Dict) -> List[str]:
         """Get list of files that can be analyzed based on configuration."""
-        try:
-            from .file_scanner import FileScanner
-        except ImportError:
-            # Fallback implementation if FileScanner not available
-            return self._simple_file_scan(directory)
-
-        scanner = FileScanner(config)
-        files = []
-
-        try:
-            for file_path in scanner.scan_directory(directory):
-                if self.is_text_file(file_path):
-                    files.append(file_path)
-        except Exception:
-            # Fallback to simple scan if FileScanner fails
-            files = self._simple_file_scan(directory)
-
-        return files
-
+        # Use the simple file scan implementation directly.
+        return self._simple_file_scan(directory)
     def _simple_file_scan(self, directory: str) -> List[str]:
         """Simple fallback file scanning implementation."""
         files = []
