@@ -29,7 +29,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from core.base_analyzer import ASTAnalyzer, Finding, Severity, Category
+from core.base_analyzer import ASTAnalyzer, Category, Finding, Severity
 from core.config_manager import ConfigManager
 from core.file_scanner import FileScanner
 from core.reporter import create_reporter
