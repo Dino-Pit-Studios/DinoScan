@@ -120,7 +120,8 @@ Examples:
             help="Minimum severity level to report",
         )
         filter_group.add_argument(
-            "--max-findings", type=int,
+            "--max-findings",
+            type=int,
             help="Maximum number of findings to report per analyzer",
         )
         filter_group.add_argument(

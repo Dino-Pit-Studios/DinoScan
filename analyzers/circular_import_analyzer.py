@@ -341,8 +341,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
                     category=Category.IMPORTS,
                     severity=severity,
                     message=(
-                        f"Circular import detected: "
-                        f"{' -> '.join(cycle + [cycle[0]])}"
+                        f"Circular import detected: {' -> '.join(cycle + [cycle[0]])}"
                     ),
                     file_path=module_info.file_path,
                     line_number=import_line,

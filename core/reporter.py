@@ -262,8 +262,7 @@ class SARIFReporter(Reporter):
         """Format results in SARIF format."""
         sarif_report = {
             "$schema": (
-                "https://schemastore.azurewebsites.net/schemas/json/"
-                "sarif-2.1.0.json"
+                "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0.json"
             ),
             "version": "2.1.0",
             "runs": [
@@ -272,12 +271,8 @@ class SARIFReporter(Reporter):
                         "driver": {
                             "name": result.analyzer_name,
                             "version": result.version,
-                            "informationUri": (
-                                "https://github.com/dinoscan/dinoscan"
-                            ),
-                            "rules": self._generate_rules(
-                                result.findings
-                            ),
+                            "informationUri": ("https://github.com/dinoscan/dinoscan"),
+                            "rules": self._generate_rules(result.findings),
                         }
                     },
                     "results": self._generate_results(result.findings),

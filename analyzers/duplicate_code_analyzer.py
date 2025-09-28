@@ -562,7 +562,6 @@ class CodeBlockExtractor(ast.NodeVisitor):
         except (IndexError, ValueError):
             return ""
 
-
     class CodeTokenizer(ast.NodeVisitor):
         """AST visitor to extract tokens for similarity analysis."""
 
@@ -586,7 +585,6 @@ class CodeBlockExtractor(ast.NodeVisitor):
                 self.tokens.append("KEYWORD")
 
             self.generic_visit(node)
-
 
     def main() -> None:
         """Main entry point for the duplicate code analyzer."""
@@ -663,9 +661,7 @@ Examples:
 
     try:
         if args.verbose:
-            sys.stderr.write(
-                f"Starting duplicate code analysis of {args.path}...\n"
-            )
+            sys.stderr.write(f"Starting duplicate code analysis of {args.path}...\n")
 
         # Analyze file or project
         if Path(args.path).is_file():

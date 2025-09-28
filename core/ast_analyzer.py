@@ -118,8 +118,7 @@ class SecurityVisitor(PythonASTVisitor):
                     message=f"Use of {func_name}() can lead to code injection",
                     node=node,
                     suggestion=(
-                        f"Avoid using {func_name}(). "
-                        + f"Consider safer alternatives."
+                        f"Avoid using {func_name}(). " + f"Consider safer alternatives."
                     ),
                     cwe="CWE-94",
                 )
@@ -154,8 +153,7 @@ class SecurityVisitor(PythonASTVisitor):
                     message="pickle module can be unsafe with untrusted data",
                     node=node,
                     suggestion=(
-                        "Consider using json or other safe serialization "
-                        "formats"
+                        "Consider using json or other safe serialization formats"
                     ),
                     cwe="CWE-502",
                 )

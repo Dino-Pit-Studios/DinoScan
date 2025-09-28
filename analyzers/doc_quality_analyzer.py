@@ -286,25 +286,18 @@ class DocumentationAnalyzer(ASTAnalyzer):
         findings = []
 
         if not class_info["docstring"] and self.require_class_docstring:
-            severity = (
-                Severity.MEDIUM
-                if not class_info["is_private"]
-                else Severity.LOW
-            )
+            severity = Severity.MEDIUM if not class_info["is_private"] else Severity.LOW
             findings.append(
                 Finding(
                     rule_id="missing-class-docstring",
                     category=Category.DOCUMENTATION,
                     severity=severity,
-                    message=(
-                        f"Missing docstring for class '{class_info['name']}'"
-                    ),
+                    message=(f"Missing docstring for class '{class_info['name']}'"),
                     file_path=file_path,
                     line_number=class_info["line_number"],
                     column_number=0,
                     suggestion=(
-                        "Add class docstring describing the class purpose and "
-                        "usage"
+                        "Add class docstring describing the class purpose and usage"
                     ),
                     tags={"docstring", "class"},
                 )
@@ -425,8 +418,7 @@ class DocumentationAnalyzer(ASTAnalyzer):
                             line_number=func.docstring.line_number,
                             column_number=0,
                             suggestion=(
-                                "Update type annotation or documentation to "
-                                "match"
+                                "Update type annotation or documentation to match"
                             ),
                             tags={"docstring", "type", "mismatch"},
                         )
