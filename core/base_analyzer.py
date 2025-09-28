@@ -307,7 +307,8 @@ class BaseAnalyzer(ABC):
             self.error_handler.logger.error(f"Error analyzing {file_path}: {e}")
             return []
 
-    def _do_analysis(self, file_path: str) -> list[Finding]:
+    @staticmethod
+    def _do_analysis(file_path: str) -> list[Finding]:
         """Default analysis implementation - can be overridden by subclasses."""
         return []
 
@@ -329,7 +330,8 @@ class BaseAnalyzer(ABC):
         analyzer_key = self.name.lower().replace("analyzer", "")
         return self.settings_manager.is_analyzer_enabled(analyzer_key)
 
-    def get_analyzer_type(self) -> str:
+    @staticmethod
+    def get_analyzer_type() -> str:
         """Get the type/category of this analyzer."""
         return "general"
 
