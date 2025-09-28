@@ -4,9 +4,8 @@ Test script for DinoScan functionality without package installation.
 """
 
 import os
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 # Add current directory to path for local imports
 sys.path.insert(0, os.path.dirname(__file__))

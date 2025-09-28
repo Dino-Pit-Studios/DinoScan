@@ -5,21 +5,25 @@ This is the VS Code extension for DinoScan - providing comprehensive AST-based P
 ## Features
 
 ### 🔍 **Real-time Analysis**
+
 - Automatic analysis on file save
 - Live diagnostics integrated with VS Code Problems panel
 - Support for all DinoScan analyzers (security, circular imports, dead code, documentation, duplicates)
 
 ### 🎯 **Smart Integration**
+
 - Context menu integration for Python files
 - Status bar showing analysis progress and findings count
 - Command palette integration for all DinoScan commands
 
 ### 📊 **Rich Reporting**
+
 - Interactive HTML reports with detailed findings
 - Export to JSON, SARIF formats
 - Integrated output channel for detailed logs
 
 ### ⚙️ **Configurable Analysis**
+
 - Three analysis profiles: strict, standard, relaxed
 - Enable/disable specific analyzers
 - Exclude patterns for files and directories
@@ -27,25 +31,25 @@ This is the VS Code extension for DinoScan - providing comprehensive AST-based P
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `DinoScan: Analyze Current File` | Analyze the currently open Python file |
-| `DinoScan: Analyze Workspace` | Analyze all Python files in workspace |
-| `DinoScan: Show Analysis Report` | Display detailed HTML report |
-| `DinoScan: Clear All Diagnostics` | Clear all DinoScan findings |
-| `DinoScan: Toggle Auto Analysis` | Enable/disable automatic analysis on save |
+| Command                           | Description                               |
+| --------------------------------- | ----------------------------------------- |
+| `DinoScan: Analyze Current File`  | Analyze the currently open Python file    |
+| `DinoScan: Analyze Workspace`     | Analyze all Python files in workspace     |
+| `DinoScan: Show Analysis Report`  | Display detailed HTML report              |
+| `DinoScan: Clear All Diagnostics` | Clear all DinoScan findings               |
+| `DinoScan: Toggle Auto Analysis`  | Enable/disable automatic analysis on save |
 
 ## Configuration
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `dinoscan.analysisProfile` | Analysis strictness (strict/standard/relaxed) | `standard` |
-| `dinoscan.enabledAnalyzers` | Which analyzers to run | All enabled |
-| `dinoscan.excludePatterns` | File patterns to exclude | `tests/`, `venv/`, `__pycache__/` |
-| `dinoscan.autoAnalysis` | Auto-analyze on save | `true` |
-| `dinoscan.showStatusBar` | Show status in status bar | `true` |
-| `dinoscan.maxFileSize` | Maximum file size to analyze (bytes) | `1048576` (1MB) |
-| `dinoscan.outputFormat` | Default output format | `console` |
+| Setting                     | Description                                   | Default                           |
+| --------------------------- | --------------------------------------------- | --------------------------------- |
+| `dinoscan.analysisProfile`  | Analysis strictness (strict/standard/relaxed) | `standard`                        |
+| `dinoscan.enabledAnalyzers` | Which analyzers to run                        | All enabled                       |
+| `dinoscan.excludePatterns`  | File patterns to exclude                      | `tests/`, `venv/`, `__pycache__/` |
+| `dinoscan.autoAnalysis`     | Auto-analyze on save                          | `true`                            |
+| `dinoscan.showStatusBar`    | Show status in status bar                     | `true`                            |
+| `dinoscan.maxFileSize`      | Maximum file size to analyze (bytes)          | `1048576` (1MB)                   |
+| `dinoscan.outputFormat`     | Default output format                         | `console`                         |
 
 ## Installation Requirements
 
