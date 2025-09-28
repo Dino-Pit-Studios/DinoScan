@@ -304,7 +304,7 @@ class BaseAnalyzer(ABC):
             )
             return findings
         except Exception as e:
-            self.error_handler.logger.error(f"Error analyzing {file_path}: {e}")
+            self.error_handler.logger.error("Error analyzing %s: %s", file_path, e)
             return []
 
     @staticmethod
@@ -418,7 +418,7 @@ class BaseAnalyzer(ABC):
                 result.files_analyzed.append(file_path)
             except Exception as e:
                 # Log error and continue
-                self.error_handler.logger.error(f"Error analyzing {file_path}: {e}")
+                self.error_handler.logger.error("Error analyzing %s: %s", file_path, e)
                 result.files_skipped.append(file_path)
 
         result.analysis_duration = time.time() - start_time
