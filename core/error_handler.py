@@ -4,9 +4,9 @@ Centralized error handling for DinoScan analyzers.
 """
 
 import logging
-from typing import Any, Optional
-from pathlib import Path
 from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Optional
 
 
 class DinoScanError(Exception):
@@ -48,17 +48,17 @@ class ErrorHandler:
         """Context manager for file operations with consistent error handling."""
         try:
             yield
-        except (OSError, IOError) as e:
-            self.logger.warning(f"Failed {operation} {file_path}: {e}")
+        except OSError as e:
+            self.logger.warning("Failed %s %s: %s", operation, file_path, e)
             raise FileReadError(f"Cannot read file {file_path}: {e}") from e
         except UnicodeDecodeError as e:
-            self.logger.warning(f"Encoding error in {file_path}: {e}")
+            self.logger.warning("Encoding error in %s: %s", file_path, e)
             raise FileReadError(f"Encoding error in {file_path}: {e}") from e
         except SyntaxError as e:
-            self.logger.debug(f"Syntax error in {file_path}: {e}")
+            self.logger.debug("Syntax error in %s: %s", file_path, e)
             raise ParseError(f"Syntax error in {file_path}: {e}") from e
         except Exception as e:
-            self.logger.error(f"Unexpected error {operation} {file_path}: {e}")
+            self.logger.error("Unexpected error %s %s: %s", operation, file_path, e)
             raise DinoScanError(f"Unexpected error {operation} {file_path}: {e}") from e
 
     def safe_file_read(self, file_path: str, encoding: str = "utf-8") -> Optional[str]:
@@ -81,16 +81,19 @@ class ErrorHandler:
 
     def log_analysis_start(self, file_path: str, analyzer_name: str) -> None:
         """Log the start of analysis for a file."""
-        self.logger.debug(f"Starting {analyzer_name} analysis of {file_path}")
+        self.logger.debug("Starting %s analysis of %s", analyzer_name, file_path)
 
     def log_analysis_complete(
         self, file_path: str, analyzer_name: str, finding_count: int
     ) -> None:
         """Log the completion of analysis for a file."""
         self.logger.debug(
-            f"Completed {analyzer_name} analysis of {file_path}: {finding_count} findings"
+            "Completed %s analysis of %s: %s findings",
+            analyzer_name,
+            file_path,
+            finding_count,
         )
 
     def log_file_skipped(self, file_path: str, reason: str) -> None:
         """Log when a file is skipped during analysis."""
-        self.logger.debug(f"Skipping {file_path}: {reason}")
+        self.logger.debug("Skipping %s: %s", file_path, reason)

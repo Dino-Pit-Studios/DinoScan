@@ -3,11 +3,11 @@
 Enhanced settings management with proper integration.
 """
 
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+import fnmatch
 import json
 import os
-import fnmatch
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class SettingsManager:
@@ -40,7 +40,8 @@ class SettingsManager:
 
         return settings
 
-    def _get_default_settings(self) -> Dict[str, Any]:
+    @staticmethod
+    def _get_default_settings() -> Dict[str, Any]:
         """Get default settings."""
         return {
             "excludePatterns": [
@@ -104,7 +105,8 @@ class SettingsManager:
                     pass
         return {}
 
-    def _camel_to_snake(self, name: str) -> str:
+    @staticmethod
+    def _camel_to_snake(name: str) -> str:
         """Convert camelCase to snake_case."""
         result = []
         for i, char in enumerate(name):
@@ -113,7 +115,8 @@ class SettingsManager:
             result.append(char.lower())
         return "".join(result)
 
-    def _load_env_settings(self) -> Dict[str, Any]:
+    @staticmethod
+    def _load_env_settings() -> Dict[str, Any]:
         """Load settings from environment variables."""
         env_settings = {}
 
@@ -148,7 +151,8 @@ class SettingsManager:
 
         return env_settings
 
-    def _load_json_config(self, config_path: str) -> Dict[str, Any]:
+    @staticmethod
+    def _load_json_config(config_path: str) -> Dict[str, Any]:
         """Load configuration from JSON file."""
         try:
             with open(config_path, "r", encoding="utf-8") as f:

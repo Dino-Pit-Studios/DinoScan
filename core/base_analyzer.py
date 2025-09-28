@@ -304,16 +304,18 @@ class BaseAnalyzer(ABC):
             )
             return findings
         except Exception as e:
-            self.error_handler.logger.error(f"Error analyzing {file_path}: {e}")
+            self.error_handler.logger.error("Error analyzing %s: %s", file_path, e)
             return []
 
-    def _do_analysis(self, file_path: str) -> list[Finding]:
+    @staticmethod
+    def _do_analysis(file_path: str) -> list[Finding]:
         """Default analysis implementation - can be overridden by subclasses."""
         return []
 
     @abstractmethod
     def get_supported_extensions(self) -> set[str]:
         """Return set of file extensions this analyzer supports."""
+
         ...
 
     def safe_read_file(self, file_path: str) -> str | None:
@@ -329,7 +331,8 @@ class BaseAnalyzer(ABC):
         analyzer_key = self.name.lower().replace("analyzer", "")
         return self.settings_manager.is_analyzer_enabled(analyzer_key)
 
-    def get_analyzer_type(self) -> str:
+    @staticmethod
+    def get_analyzer_type() -> str:
         """Get the type/category of this analyzer."""
         return "general"
 
@@ -388,7 +391,6 @@ class BaseAnalyzer(ABC):
             project_path=project_path,
             config=self.config,
         )
-
         # Use enhanced file scanning
         try:
             analyzable_files = self.file_type_manager.get_analyzable_files(
@@ -416,7 +418,7 @@ class BaseAnalyzer(ABC):
                 result.files_analyzed.append(file_path)
             except Exception as e:
                 # Log error and continue
-                self.error_handler.logger.error(f"Error analyzing {file_path}: {e}")
+                self.error_handler.logger.error("Error analyzing %s: %s", file_path, e)
                 result.files_skipped.append(file_path)
 
         result.analysis_duration = time.time() - start_time
@@ -438,7 +440,8 @@ class BaseAnalyzer(ABC):
 
         return files
 
-    def get_rule_documentation(self) -> dict[str, str]:
+    @staticmethod
+    def get_rule_documentation() -> dict[str, str]:
         """Return documentation for all rules implemented by this analyzer."""
         return {}
 
