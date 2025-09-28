@@ -12,7 +12,7 @@ from .duplicate_code_analyzer import DuplicateCodeAnalyzer
 
 __all__ = [
     "AdvancedSecurityAnalyzer",
-    "CircularImportAnalyzer", 
+    "CircularImportAnalyzer",
     "DeadCodeAnalyzer",
     "DocumentationAnalyzer",
     "DuplicateCodeAnalyzer",
