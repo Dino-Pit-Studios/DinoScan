@@ -204,6 +204,7 @@ class FileTypeManager:
         """Get list of files that can be analyzed based on configuration."""
         # Use the simple file scan implementation directly.
         return self._simple_file_scan(directory)
+
     def _simple_file_scan(self, directory: str) -> List[str]:
         """Simple fallback file scanning implementation."""
         files = []
