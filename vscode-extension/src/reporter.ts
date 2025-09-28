@@ -248,7 +248,7 @@ export class DinoscanReporter {
                     <h3>Findings (${totalFindings})</h3>
                     ${diagnostics
                       .map(
-                        (finding) => `
+                                                    <div class="finding-file">${_.escape(path.basename(finding.file))}</div>
                         <div class="finding-item">
                             <div class="finding-header">
                                 <div>
