@@ -5,8 +5,8 @@
  * including webview panels and output channels.
  */
 
-import * as vscode from 'vscode';
-import * as path from 'path';
+import * as vscode from "vscode";
+import * as path from "path";
 
 export class DinoscanReporter {
   private readonly context: vscode.ExtensionContext;
@@ -15,7 +15,7 @@ export class DinoscanReporter {
 
   constructor(context: vscode.ExtensionContext) {
     this.context = context;
-    this.outputChannel = vscode.window.createOutputChannel('DinoScan');
+    this.outputChannel = vscode.window.createOutputChannel("DinoScan");
   }
 
   /**
@@ -28,12 +28,14 @@ export class DinoscanReporter {
     }
 
     this.reportPanel = vscode.window.createWebviewPanel(
-      'dinoscanReport',
-      'DinoScan Analysis Report',
+      "dinoscanReport",
+      "DinoScan Analysis Report",
       vscode.ViewColumn.Two,
       {
         enableScripts: true,
-        localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'media'))],
+        localResourceRoots: [
+          vscode.Uri.file(path.join(this.context.extensionPath, "media")),
+        ],
       }
     );
 
@@ -66,20 +68,25 @@ export class DinoscanReporter {
     // Get all diagnostics from the collection
     vscode.languages
       .getDiagnostics()
-      .forEach(([uri, fileDiagnostics]: [vscode.Uri, readonly vscode.Diagnostic[]]) => {
-        fileDiagnostics
-          .filter((d: vscode.Diagnostic) => d.source === 'DinoScan')
-          .forEach((diagnostic: vscode.Diagnostic) => {
-            diagnostics.push({
-              file: uri.fsPath,
-              line: diagnostic.range.start.line + 1,
-              column: diagnostic.range.start.character + 1,
-              message: diagnostic.message,
-              severity: this.mapSeverityToString(diagnostic.severity),
-              code: diagnostic.code?.toString() || 'Unknown',
+      .forEach(
+        ([uri, fileDiagnostics]: [
+          vscode.Uri,
+          readonly vscode.Diagnostic[]
+        ]) => {
+          fileDiagnostics
+            .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
+            .forEach((diagnostic: vscode.Diagnostic) => {
+              diagnostics.push({
+                file: uri.fsPath,
+                line: diagnostic.range.start.line + 1,
+                column: diagnostic.range.start.character + 1,
+                message: diagnostic.message,
+                severity: this.mapSeverityToString(diagnostic.severity),
+                code: diagnostic.code?.toString() || "Unknown",
+              });
             });
-          });
-      });
+        }
+      );
 
     return diagnostics.sort((a, b) => {
       // Sort by severity, then by file
@@ -87,7 +94,9 @@ export class DinoscanReporter {
       const severityDiff =
         severityOrder[a.severity as keyof typeof severityOrder] -
         severityOrder[b.severity as keyof typeof severityOrder];
-      if (severityDiff !== 0) return severityDiff;
+      if (severityDiff !== 0) {
+        return severityDiff;
+      }
 
       return a.file.localeCompare(b.file);
     });
@@ -218,7 +227,9 @@ export class DinoscanReporter {
                     <div>Warnings</div>
                 </div>
                 <div class="summary-item info">
-                    <div class="summary-number">${severityCounts.Information + severityCounts.Hint}</div>
+                    <div class="summary-number">${
+                      severityCounts.Information + severityCounts.Hint
+                    }</div>
                     <div>Info/Hints</div>
                 </div>
             </div>
@@ -237,21 +248,31 @@ export class DinoscanReporter {
                     <h3>Findings (${totalFindings})</h3>
                     ${diagnostics
                       .map(
-                        finding => `
+                        (finding) => `
                         <div class="finding-item">
                             <div class="finding-header">
                                 <div>
-                                    <div class="finding-file">${path.basename(finding.file)}</div>
-                                    <div class="finding-location">Line ${finding.line}, Column ${finding.column}</div>
+                                    <div class="finding-file">${path.basename(
+                                      finding.file
+                                    )}</div>
+                                    <div class="finding-location">Line ${
+                                      finding.line
+                                    }, Column ${finding.column}</div>
                                 </div>
-                                <div class="finding-severity severity-${finding.severity.toLowerCase()}">${finding.severity}</div>
+                                <div class="finding-severity severity-${finding.severity.toLowerCase()}">${
+                          finding.severity
+                        }</div>
                             </div>
-                            <div class="finding-message">${finding.message}</div>
-                            <div class="finding-code">Rule: ${finding.code}</div>
+                            <div class="finding-message">${
+                              finding.message
+                            }</div>
+                            <div class="finding-code">Rule: ${
+                              finding.code
+                            }</div>
                         </div>
                     `
                       )
-                      .join('')}
+                      .join("")}
                 </div>
             `
             }
@@ -263,10 +284,12 @@ export class DinoscanReporter {
   /**
    * Get counts of findings by severity
    */
-  private getSeverityCounts(diagnostics: DiagnosticInfo[]): Record<string, number> {
+  private getSeverityCounts(
+    diagnostics: DiagnosticInfo[]
+  ): Record<string, number> {
     const counts = { Error: 0, Warning: 0, Information: 0, Hint: 0 };
 
-    diagnostics.forEach(diagnostic => {
+    diagnostics.forEach((diagnostic) => {
       counts[diagnostic.severity as keyof typeof counts]++;
     });
 
@@ -279,15 +302,15 @@ export class DinoscanReporter {
   private mapSeverityToString(severity: vscode.DiagnosticSeverity): string {
     switch (severity) {
       case vscode.DiagnosticSeverity.Error:
-        return 'Error';
+        return "Error";
       case vscode.DiagnosticSeverity.Warning:
-        return 'Warning';
+        return "Warning";
       case vscode.DiagnosticSeverity.Information:
-        return 'Information';
+        return "Information";
       case vscode.DiagnosticSeverity.Hint:
-        return 'Hint';
+        return "Hint";
       default:
-        return 'Unknown';
+        return "Unknown";
     }
   }
 
@@ -295,7 +318,9 @@ export class DinoscanReporter {
    * Log message to output channel
    */
   public log(message: string): void {
-    this.outputChannel.appendLine(`[${new Date().toLocaleTimeString()}] ${message}`);
+    this.outputChannel.appendLine(
+      `[${new Date().toLocaleTimeString()}] ${message}`
+    );
   }
 
   /**
