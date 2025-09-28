@@ -314,7 +314,7 @@ class BaseAnalyzer(ABC):
     @abstractmethod
     def get_supported_extensions(self) -> set[str]:
         """Return set of file extensions this analyzer supports."""
-        pass
+        ...
 
     def safe_read_file(self, file_path: str) -> str | None:
         """Safely read file content."""
@@ -442,6 +442,22 @@ class BaseAnalyzer(ABC):
         """Return documentation for all rules implemented by this analyzer."""
         return {}
 
+    @staticmethod
+    def normalize_path(file_path: str) -> str:
+        """Normalize a file path for consistent comparison."""
+        return os.path.normpath(os.path.abspath(file_path))
+
+    @staticmethod
+    def get_file_extension(file_path: str) -> str:
+        """Get the file extension from a file path."""
+        return Path(file_path).suffix.lower()
+
+    @staticmethod
+    def is_python_file(file_path: str) -> bool:
+        """Check if a file is a Python file based on extension."""
+        python_extensions = {".py", ".pyw", ".pyx", ".pyi"}
+        return BaseAnalyzer.get_file_extension(file_path) in python_extensions
+
 
 class ASTAnalyzer(BaseAnalyzer):
     """Base class for AST-based analyzers with enhanced parsing."""
@@ -473,6 +489,11 @@ class ASTAnalyzer(BaseAnalyzer):
         if content is None:
             return ""
 
+        return self.get_line_content_from_string(content, line_number)
+
+    @staticmethod
+    def get_line_content_from_string(content: str, line_number: int) -> str:
+        """Get the content of a specific line from string content."""
         try:
             lines = content.splitlines()
             if 1 <= line_number <= len(lines):
@@ -489,6 +510,13 @@ class ASTAnalyzer(BaseAnalyzer):
         if content is None:
             return ""
 
+        return self.get_context_lines_from_string(content, line_number, context_size)
+
+    @staticmethod
+    def get_context_lines_from_string(
+        content: str, line_number: int, context_size: int = 3
+    ) -> str:
+        """Get context lines around a specific line from string content."""
         try:
             lines = content.splitlines()
             start_line = max(0, line_number - context_size - 1)
@@ -501,3 +529,40 @@ class ASTAnalyzer(BaseAnalyzer):
     def clear_cache(self) -> None:
         """Clear the AST cache."""
         self._ast_cache.clear()
+
+    @staticmethod
+    def extract_string_literals(node: ast.AST) -> list[str]:
+        """Extract all string literals from an AST node."""
+        string_literals = []
+        for child in ast.walk(node):
+            if isinstance(child, ast.Constant) and isinstance(child.value, str):
+                string_literals.append(child.value)
+            elif isinstance(child, ast.Str):  # Python < 3.8 compatibility
+                string_literals.append(child.s)
+        return string_literals
+
+    @staticmethod
+    def get_function_complexity(node: ast.FunctionDef) -> int:
+        """Calculate cyclomatic complexity of a function."""
+        complexity = 1  # Base complexity
+        for child in ast.walk(node):
+            if isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+                complexity += 1
+            elif isinstance(child, ast.ExceptHandler):
+                complexity += 1
+            elif isinstance(child, ast.BoolOp) and isinstance(
+                child.op, (ast.And, ast.Or)
+            ):
+                complexity += len(child.values) - 1
+        return complexity
+
+    @staticmethod
+    def get_node_name(node: ast.AST) -> str:
+        """Get the name of an AST node if it has one."""
+        if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)):
+            return node.name
+        elif isinstance(node, ast.Name):
+            return node.id
+        elif isinstance(node, ast.arg):
+            return node.arg
+        return ""
