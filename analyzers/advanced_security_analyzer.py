@@ -298,7 +298,7 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 pii_config.get("us_ssn", ["123-45-6789", "000-00-0000", "999-99-9999"])
             ),
             "ip_address": set(
-                pii_config.get("ip_address", ["127.0.0.1", "0.0.0.0", "192.168.1.1"])
+                pii_config.get("ip_address", ["127.0.0.1", "192.168.1.1"])
             ),
         }
 
