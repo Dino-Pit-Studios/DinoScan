@@ -1,0 +1,12 @@
+# DinoScan Package Structure
+include README.md
+include LICENSE
+include config.json
+include DSguide.md
+recursive-include dinoscan *.py
+recursive-include dinoscan/core *.py
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude * .mypy_cache
+recursive-exclude * .pytest_cache

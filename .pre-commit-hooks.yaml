@@ -1,0 +1,30 @@
+# DinoScan Pre-commit Hook Configuration
+# Add this to your .pre-commit-config.yaml file
+
+repos:
+  - repo: https://github.com/DinoAir/DinoScan
+    rev: v2.0.0
+    hooks:
+      - id: dinoscan-security
+        name: DinoScan Security Analysis
+        description: Run security vulnerability analysis
+        entry: dinoscan
+        args: [security, --format, console]
+        language: python
+        files: \.py$
+
+      - id: dinoscan-all
+        name: DinoScan Full Analysis
+        description: Run comprehensive code analysis
+        entry: dinoscan
+        args: [all, --format, console, --profile, standard]
+        language: python
+        files: \.py$
+
+      - id: dinoscan-strict
+        name: DinoScan Strict Analysis
+        description: Run strict analysis for critical code
+        entry: dinoscan
+        args: [all, --format, console, --profile, strict]
+        language: python
+        files: ^(src/|lib/).+\.py$

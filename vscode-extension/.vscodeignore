@@ -1,0 +1,36 @@
+# Build outputs
+out/test/**
+src/**
+.vscode-test/**
+.vscode-test-web/**
+
+# Development files
+.vscode/**
+.gitignore
+.eslintrc.json
+tsconfig.json
+
+# Dependencies (will be bundled)
+node_modules/**
+
+# Documentation (keep these)
+!README.md
+!LICENSE
+!CHANGELOG.md
+
+# Build scripts
+build.sh
+build.bat
+*.md
+!README.md
+
+# Source TypeScript files (compiled versions in out/)
+src/
+**.ts
+**.map
+
+# Development and testing
+.nyc_output/
+coverage/
+**.test.js
+test/

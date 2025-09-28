@@ -1,0 +1,63 @@
+name: 'DinoScan Code Analysis'
+description: 'Run comprehensive AST-based Python code analysis with DinoScan'
+author: 'DinoAir'
+
+branding:
+  icon: 'search'
+  color: 'blue'
+
+inputs:
+  path:
+    description: 'Path to analyze (relative to repository root)'
+    required: false
+    default: '.'
+
+  analyzers:
+    description: 'Comma-separated list of analyzers to run (security,circular,dead-code,docs,duplicates,all)'
+    required: false
+    default: 'all'
+
+  profile:
+    description: 'Analysis profile: strict, standard, or relaxed'
+    required: false
+    default: 'standard'
+
+  format:
+    description: 'Output format: console, json, xml, sarif'
+    required: false
+    default: 'sarif'
+
+  fail-on:
+    description: 'Fail build on: high, medium, low, or never'
+    required: false
+    default: 'high'
+
+  exclude:
+    description: 'Comma-separated list of paths/patterns to exclude'
+    required: false
+    default: 'tests/,venv/,__pycache__/'
+
+outputs:
+  findings-count:
+    description: 'Total number of findings'
+  high-severity-count:
+    description: 'Number of high severity findings'
+  medium-severity-count:
+    description: 'Number of medium severity findings'
+  low-severity-count:
+    description: 'Number of low severity findings'
+  report-file:
+    description: 'Path to the generated report file'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.analyzers }}
+    - ${{ inputs.path }}
+    - '--profile'
+    - ${{ inputs.profile }}
+    - '--format'
+    - ${{ inputs.format }}
+    - '--output'
+    - '/github/workspace/dinoscan-report.${{ inputs.format }}'

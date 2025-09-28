@@ -1,0 +1,140 @@
+{
+  "analyzers": {
+    "security": {
+      "enabled": true,
+      "severity_levels": {
+        "high": ["sql_injection", "code_injection", "path_traversal"],
+        "medium": ["hardcoded_secrets", "weak_crypto", "insecure_random"],
+        "low": ["todo_comments", "debug_statements"]
+      },
+      "entropy_threshold": 4.5,
+      "min_secret_length": 8,
+      "exclude_patterns": ["test_*", "*_test.py", "tests/*"],
+      "custom_patterns": []
+    },
+    "circular_imports": {
+      "enabled": true,
+      "max_depth": 50,
+      "ignore_test_files": true,
+      "exclude_patterns": ["__pycache__/*", "*.pyc", ".git/*"]
+    },
+    "dead_code": {
+      "enabled": true,
+      "min_lines": 6,
+      "include_tests": false,
+      "aggressive_mode": false,
+      "exclude_public_api": true,
+      "framework_patterns": {
+        "django": ["admin", "models", "views", "urls", "forms", "serializers"],
+        "flask": ["app", "route", "blueprint"],
+        "fastapi": ["router", "endpoint", "dependency"],
+        "pytest": ["test_", "fixture", "conftest"],
+        "click": ["command", "group", "option", "argument"]
+      }
+    },
+    "documentation": {
+      "enabled": true,
+      "preferred_style": "google",
+      "enforce_style": false,
+      "require_module_docstring": true,
+      "require_class_docstring": true,
+      "require_function_docstring": true,
+      "require_method_docstring": true,
+      "require_parameter_docs": true,
+      "require_return_docs": true,
+      "check_type_consistency": true,
+      "check_private_methods": false,
+      "check_special_methods": false,
+      "validate_examples": true,
+      "min_docstring_length": 10
+    },
+    "duplicate_code": {
+      "enabled": true,
+      "min_lines": 6,
+      "min_tokens": 50,
+      "similarity_threshold": 0.8,
+      "winnow_k": 17,
+      "winnow_w": 4,
+      "detect_exact": true,
+      "detect_structural": true,
+      "detect_partial": false,
+      "ignore_whitespace": true,
+      "ignore_comments": true,
+      "ignore_imports": true,
+      "ignore_docstrings": true,
+      "skip_patterns": [
+        "^class.*\\(.*\\):$",
+        "^def __init__\\(self.*\\):$",
+        "^if __name__ == ['\"]__main__['\"]:\\s*$",
+        "^\\s*pass\\s*$",
+        "^\\s*return\\s*$"
+      ]
+    },
+    "style": {
+      "enabled": true,
+      "max_line_length": 88,
+      "max_complexity": 10,
+      "max_function_length": 50,
+      "max_class_length": 500,
+      "enforce_naming_conventions": true,
+      "require_type_annotations": true,
+      "check_imports_order": true,
+      "auto_fix": false,
+      "external_tools": {
+        "black": {
+          "enabled": true,
+          "line_length": 88
+        },
+        "isort": {
+          "enabled": true,
+          "profile": "black"
+        },
+        "pylint": {
+          "enabled": false
+        },
+        "flake8": {
+          "enabled": true,
+          "max_line_length": 88,
+          "ignore": ["E203", "W503"]
+        }
+      }
+    }
+  },
+  "global": {
+    "output_format": "console",
+    "show_context": true,
+    "use_colors": true,
+    "max_findings_per_file": 20,
+    "exclude_dirs": [
+      "__pycache__",
+      ".git",
+      ".pytest_cache",
+      ".mypy_cache",
+      "node_modules",
+      ".venv",
+      "venv",
+      "env"
+    ],
+    "exclude_files": ["*.pyc", "*.pyo", "*.pyd", ".DS_Store", "Thumbs.db"],
+    "parallel_analysis": true,
+    "cache_results": true,
+    "verbose": false
+  },
+  "reporting": {
+    "formats": ["console", "json", "xml", "sarif"],
+    "console": {
+      "use_colors": true,
+      "show_summary": true,
+      "group_by_severity": true,
+      "show_context_lines": 3
+    },
+    "json": {
+      "pretty_print": true,
+      "include_metadata": true
+    },
+    "sarif": {
+      "version": "2.1.0",
+      "include_snippets": true
+    }
+  }
+}

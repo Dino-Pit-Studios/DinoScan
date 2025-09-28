@@ -1,0 +1,225 @@
+{
+  "name": "dinoscan-vscode",
+  "displayName": "DinoScan Code Analyzer",
+  "description": "Comprehensive AST-based Python code analysis directly in VS Code",
+  "version": "2.0.3",
+  "publisher": "dinoair",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DinoAir/DinoScan"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages",
+    "Other"
+  ],
+  "keywords": [
+    "python",
+    "static-analysis",
+    "security",
+    "code-quality",
+    "ast"
+  ],
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "dinoscanPanel",
+          "title": "DinoScan",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "views": {
+      "dinoscanPanel": [
+        {
+          "id": "dinoscanFindingsView",
+          "name": "Findings",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dinoscan.analyzeFile",
+        "title": "DinoScan: Analyze Current File",
+        "icon": "$(search)",
+        "category": "DinoScan"
+      },
+      {
+        "command": "dinoscan.analyzeWorkspace",
+        "title": "DinoScan: Analyze Workspace",
+        "icon": "$(folder)",
+        "category": "DinoScan"
+      },
+      {
+        "command": "dinoscan.showReport",
+        "title": "DinoScan: Show Analysis Report",
+        "icon": "$(output)",
+        "category": "DinoScan"
+      },
+      {
+        "command": "dinoscan.clearDiagnostics",
+        "title": "DinoScan: Clear All Diagnostics",
+        "icon": "$(clear-all)",
+        "category": "DinoScan"
+      },
+      {
+        "command": "dinoscan.toggleAutoAnalysis",
+        "title": "DinoScan: Toggle Auto Analysis",
+        "icon": "$(sync)",
+        "category": "DinoScan"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "dinoscan.analyzeFile",
+          "when": "resourceExtname == .py",
+          "group": "dinoscan@1"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "dinoscan.analyzeFile",
+          "when": "resourceExtname == .py",
+          "group": "dinoscan@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "dinoscan.analyzeFile",
+          "when": "resourceExtname == .py",
+          "group": "navigation@1"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "dinoscan.analyzeFile",
+          "when": "editorLangId == python"
+        },
+        {
+          "command": "dinoscan.analyzeWorkspace"
+        },
+        {
+          "command": "dinoscan.showReport"
+        },
+        {
+          "command": "dinoscan.clearDiagnostics"
+        },
+        {
+          "command": "dinoscan.toggleAutoAnalysis"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DinoScan",
+      "properties": {
+        "dinoscan.analysisProfile": {
+          "type": "string",
+          "enum": [
+            "strict",
+            "standard",
+            "relaxed"
+          ],
+          "default": "standard",
+          "description": "Analysis strictness profile"
+        },
+        "dinoscan.enabledAnalyzers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "security",
+              "circular",
+              "dead-code",
+              "docs",
+              "duplicates"
+            ]
+          },
+          "default": [
+            "security",
+            "circular",
+            "dead-code",
+            "docs",
+            "duplicates"
+          ],
+          "description": "Which analyzers to run"
+        },
+        "dinoscan.excludePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "tests/",
+            "venv/",
+            "__pycache__/"
+          ],
+          "description": "File patterns to exclude from analysis"
+        },
+        "dinoscan.executablePath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional absolute or workspace-relative path to the DinoScan executable or Python entry script"
+        },
+        "dinoscan.autoAnalysis": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically analyze Python files on save"
+        },
+        "dinoscan.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show DinoScan status in the status bar"
+        },
+        "dinoscan.maxFileSize": {
+          "type": "number",
+          "default": 1048576,
+          "description": "Maximum file size to analyze (in bytes)"
+        },
+        "dinoscan.outputFormat": {
+          "type": "string",
+          "enum": [
+            "console",
+            "json",
+            "sarif"
+          ],
+          "default": "console",
+          "description": "Output format for analysis reports"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "@vscode/vsce": "^2.19.0",
+    "eslint": "^8.50.0",
+    "typescript": "^5.0.0"
+  }
+}

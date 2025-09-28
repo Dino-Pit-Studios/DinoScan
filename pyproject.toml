@@ -1,0 +1,100 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "dinoscan"
+version = "2.0.0"
+description = "Comprehensive AST-based Python code analysis toolkit"
+authors = ["DinoScan Development Team <dev@dinoair.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/DinoPitStudiosllc/DinoAir"
+repository = "https://github.com/DinoPitStudiosllc/DinoAir"
+documentation = "https://github.com/DinoPitStudiosllc/DinoAir/blob/main/DinoScan/README.md"
+keywords = ["static-analysis", "code-quality", "security", "ast", "linting"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Security",
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pyyaml = "^6.0"
+colorama = { version = "^0.4.6", markers = "sys_platform == 'win32'" }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+black = "^23.7.0"
+isort = "^5.12.0"
+mypy = "^1.5.0"
+flake8 = "^6.0.0"
+pre-commit = "^3.3.0"
+
+[tool.poetry.scripts]
+dinoscan = "dinoscan.cli:main"
+dinoscan-security = "dinoscan.analyzers.advanced_security_analyzer:main"
+dinoscan-circular = "dinoscan.analyzers.circular_import_analyzer:main"
+dinoscan-deadcode = "dinoscan.analyzers.dead_code_analyzer:main"
+dinoscan-docs = "dinoscan.analyzers.doc_quality_analyzer:main"
+dinoscan-duplicates = "dinoscan.analyzers.duplicate_code_analyzer:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.mypy_cache
+  | \.pytest_cache
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+known_first_party = ["dinoscan"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = [
+    "tests",
+]
+python_files = [
+    "test_*.py",
+    "*_test.py",
+]
