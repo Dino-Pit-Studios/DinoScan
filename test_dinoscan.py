@@ -3,12 +3,11 @@
 Enhanced test script for DinoScan functionality with improved error handling and settings integration.
 """
 
-import os
-from pathlib import Path
-import sys
-import json
 import argparse
-
+import json
+import os
+import sys
+from pathlib import Path
 
 # Add current directory to path for local imports
 sys.path.insert(0, os.path.dirname(__file__))
@@ -20,9 +19,9 @@ try:
     from analyzers.dead_code_analyzer import DeadCodeAnalyzer
     from analyzers.doc_quality_analyzer import DocumentationAnalyzer
     from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
-    from core.settings_manager import SettingsManager
-    from core.file_types import FileTypeManager
     from core.error_handler import ErrorHandler
+    from core.file_types import FileTypeManager
+    from core.settings_manager import SettingsManager
 
     def create_enhanced_config(workspace_path: str | None = None) -> dict:
         """Create enhanced configuration with proper settings integration."""

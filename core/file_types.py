@@ -3,9 +3,9 @@
 Enhanced file type detection and language mapping.
 """
 
-from pathlib import Path
-from typing import Dict, Set, Optional, List
 import mimetypes
+from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 
 class FileTypeManager:

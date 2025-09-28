@@ -4,9 +4,9 @@ Centralized error handling for DinoScan analyzers.
 """
 
 import logging
-from typing import Any, Optional
-from pathlib import Path
 from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Optional
 
 
 class DinoScanError(Exception):

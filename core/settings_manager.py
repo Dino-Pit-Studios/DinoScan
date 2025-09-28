@@ -3,11 +3,11 @@
 Enhanced settings management with proper integration.
 """
 
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+import fnmatch
 import json
 import os
-import fnmatch
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class SettingsManager:
