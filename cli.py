@@ -342,7 +342,8 @@ Examples:
                 traceback.print_exc()
             return 1
 
-    def _severity_priority(self, severity: Severity) -> int:
+    @staticmethod
+    def _severity_priority(severity: Severity) -> int:
         """Get numeric priority for severity comparison."""
         priority_map = {
             Severity.INFO: 0,
