@@ -725,9 +725,9 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
     """
     return self.parse_google_parameters(content, docstring_info)
 
-    Populates the provided DocstringInfo with parsed NumPy docstring sections.
-    """
-    return self.parse_numpy_docstring(content, docstring_info)
+
+
+
 
  def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
      """Public wrapper to parse Sphinx-style docstring.
