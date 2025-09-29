@@ -179,10 +179,10 @@ class DocumentationAnalyzer(ASTAnalyzer):
     def _get_missing_docstring_findings(
         self, func: FunctionInfo, file_path: str
         ) -> list[Finding]:
-            (
-                "Identify functions or methods missing a docstring and return "
-                "corresponding findings."
-            )
+            """
+            Identify functions or methods missing a docstring and return
+            corresponding findings.
+            """
             findings: list[Finding] = []
             requires = self.require_function_docstring or (
                 func.is_method and self.require_method_docstring
