@@ -519,15 +519,19 @@ class SecurityASTVisitor(ast.NodeVisitor):
 
     def _check_dangerous_functions(self, node: ast.Call) -> None:
         """Check for dangerous function calls."""
-        if isinstance(node.func, ast.Name) and node.func.id in ("eval", "exec") and node.args and self._has_dynamic_input(node.args[0]):
+        if (
+            isinstance(node.func, ast.Name)
+            and node.func.id in ("eval", "exec")
+            and node.args
+            and self._has_dynamic_input(node.args[0])
+        ):
             self.findings.append(
                 Finding(
                     rule_id=f"python-security-{node.func.id}",
                     category=Category.SECURITY,
                     severity=Severity.CRITICAL,
                     message=(
-                        f"Dynamic {node.func.id}() call with "
-                        "potential user input"
+                        f"Dynamic {node.func.id}() call with potential user input"
                     ),
                     file_path=self.file_path,
                     line_number=node.lineno,
@@ -563,7 +567,11 @@ class SecurityASTVisitor(ast.NodeVisitor):
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue)):
             return True
 
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ("input", "raw_input"):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in ("input", "raw_input")
+        ):
             return True
 
         return False
