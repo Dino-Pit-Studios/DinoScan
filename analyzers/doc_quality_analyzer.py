@@ -701,12 +701,6 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
     """Public wrapper to detect the style of a docstring."""
     return self._detect_docstring_style(content)
 
- def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
-    """Public wrapper to parse 'parameters' section of Google-style docstring.
-
-    Populates parameters info in the provided DocstringInfo.
-    """
-    return self._parse_google_parameters(content, docstring_info)
 
 
 
