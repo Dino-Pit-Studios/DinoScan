@@ -146,9 +146,9 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     )
                 )
 
-        def _analyze_function_docs(
-            self, func: FunctionInfo, file_path: str
-        ) -> list[Finding]:
+    def _analyze_function_docs(
+        self, func: FunctionInfo, file_path: str
+    ) -> list[Finding]:
         findings: list[Finding] = []
 
         if self._should_skip_function(func):
