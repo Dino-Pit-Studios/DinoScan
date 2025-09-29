@@ -124,7 +124,7 @@ For more information, visit: https://github.com/DinoAir/DinoScan
 
         all_findings = []
         files_analyzed = []
-        
+
         for analyzer in analyzers_to_run:
             if args.verbose:
                 print(f"Running {analyzer.__class__.__name__}...")
@@ -143,7 +143,7 @@ For more information, visit: https://github.com/DinoAir/DinoScan
         # Create reporter and output results
         from core.base_analyzer import AnalysisResult
         from datetime import datetime
-        
+
         # Create an AnalysisResult object for the reporter
         result = AnalysisResult(
             analyzer_name=", ".join(a.__class__.__name__ for a in analyzers_to_run),
@@ -153,7 +153,7 @@ For more information, visit: https://github.com/DinoAir/DinoScan
             findings=all_findings,
             files_analyzed=files_analyzed,
         )
-        
+
         reporter = create_reporter(args.format)
         if args.output:
             reporter.save_results(result, str(args.output))
