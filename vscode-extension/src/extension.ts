@@ -8,7 +8,8 @@
 import { spawn, spawnSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-import * as vscode from "vscode";
+import { window } from "vscode";
+import type { ExtensionContext } from "vscode";
 import type { DinoscanFinding } from "./diagnosticProvider";
 import { DinoscanDiagnosticProvider } from "./diagnosticProvider";
 import { DinoscanFindingsTreeProvider } from "./findingsView";
@@ -31,6 +32,11 @@ const ALL_ANALYZERS: AnalyzerName[] = [
 ];
 const ANALYZER_SET = new Set<AnalyzerName>(ALL_ANALYZERS);
 
+/**
+ * Normalizes the given analyzer name to a valid AnalyzerName.
+ * @param name The analyzer name input, possibly undefined or null.
+ * @returns The normalized AnalyzerName if valid; otherwise, null.
+ */
 function normalizeAnalyzerName(
   name: string | undefined | null,
 ): AnalyzerName | null {
@@ -42,18 +48,23 @@ function normalizeAnalyzerName(
   return ANALYZER_SET.has(candidate) ? candidate : null;
 }
 
-export function activate(context: vscode.ExtensionContext) {
+/**
+ * Activates the DinoScan VS Code extension.
+ * Initializes diagnostic providers, status bar, reporter, views, and registers commands.
+ * @param context The extension context provided by VS Code.
+ */
+export function activate(context: ExtensionContext) {
   console.log("DinoScan extension is now active!");
 
   // Initialize providers
   const diagnosticProvider = new DinoscanDiagnosticProvider();
   const statusBar = new DinoscanStatusBar();
   const reporter = new DinoscanReporter(context);
-  const output = vscode.window.createOutputChannel("DinoScan");
+  const output = window.createOutputChannel("DinoScan");
   context.subscriptions.push(output);
 
   const findingsTreeProvider = new DinoscanFindingsTreeProvider(context);
-  const findingsTreeView = vscode.window.createTreeView(
+  const findingsTreeView = window.createTreeView(
     "dinoscanFindingsView",
     {
       treeDataProvider: findingsTreeProvider,
@@ -174,6 +185,11 @@ export function activate(context: vscode.ExtensionContext) {
   showWelcomeMessage(context);
 }
 
+/**
+ * Called when the DinoScan extension is deactivated.
+ *
+ * @returns {void}
+ */
 export function deactivate() {
   console.log("DinoScan extension is now deactivated!");
 }
@@ -364,6 +380,12 @@ interface DinoscanInvocation {
   args: string[];
 }
 
+/**
+ * Extracts a fix suggestion from a given message string.
+ * Scans for the 'Fix:' marker and returns the suggestion text before the next period or end of string.
+ * @param message - The input message containing a fix suggestion.
+ * @returns The fix suggestion text, or null if no suggestion is found.
+ */
 function extractFixSuggestion(message: string): string | null {
   const marker = "Fix:";
   const index = message.indexOf(marker);
@@ -377,6 +399,13 @@ function extractFixSuggestion(message: string): string | null {
     .trim();
 }
 
+/**
+ * Runs DinoScan analysis on a text document, aggregates unique findings, and updates diagnostics.
+ * @param document The text document to analyze.
+ * @param diagnosticProvider The provider used to update diagnostics based on findings.
+ * @param output The output channel for logging analysis progress and results.
+ * @returns A promise that resolves when analysis is complete.
+ */
 async function runDinoscanAnalysis(
   document: vscode.TextDocument,
   diagnosticProvider: DinoscanDiagnosticProvider,
@@ -441,6 +470,18 @@ async function runDinoscanAnalysis(
   );
 }
 
+/**
+ * Executes a DinoScan analyzer invocation with the specified parameters.
+ *
+ * @param invocation The DinoScan invocation configuration including command and args.
+ * @param analyzer The name of the analyzer to run or "all" to run all analyzers.
+ * @param document The VSCode text document to analyze.
+ * @param analysisProfile The analysis profile to use.
+ * @param excludePatterns Array of glob patterns to exclude from analysis.
+ * @param workspaceRoot The workspace root directory or undefined for default.
+ * @param output The output channel for logging analyzer output.
+ * @returns A promise that resolves to an array of DinoScan findings.
+ */
 function executeDinoscanInvocation(
   invocation: DinoscanInvocation,
   analyzer: "all" | AnalyzerName,
@@ -532,6 +573,11 @@ function executeDinoscanInvocation(
 /**
  * Find DinoScan executable in PATH or common locations
  */
+/**
+ * Finds an executable invocation for the dinoscan tool based on workspace and configuration.
+ * @param output - The VSCode output channel for logging.
+ * @returns A DinoscanInvocation if a usable invocation is found, otherwise null.
+ */
 function findDinoscanExecutable(
   output: vscode.OutputChannel,
 ): DinoscanInvocation | null {
@@ -542,6 +588,11 @@ function findDinoscanExecutable(
   const pythonCandidates = ["python", "python3", "py"];
   const candidateInvocations: DinoscanInvocation[] = [];
 
+  /**
+   * Attempts to resolve the given path to an absolute file path relative to the workspace root.
+   * @param maybePath - The potential file path to resolve.
+   * @returns The resolved absolute path if it exists, otherwise null.
+   */
   const tryResolvePath = (maybePath: string): string | null => {
     if (!maybePath) {
       return null;
@@ -556,6 +607,10 @@ function findDinoscanExecutable(
     return fs.existsSync(absolutePath) ? absolutePath : null;
   };
 
+  /**
+   * Adds candidate invocations for a Python script to the list of potential dinoscan invocations.
+   * @param scriptPath - The path to the Python script.
+   */
   const pushScriptCandidates = (scriptPath: string | null) => {
     if (!scriptPath) {
       return;
@@ -566,6 +621,9 @@ function findDinoscanExecutable(
     });
   };
 
+  /**
+   * Adds candidate invocations for the "dinoscan" command and Python module invocations.
+   */
   const pushCommandCandidates = () => {
     candidateInvocations.push({ command: "dinoscan", args: [] });
     pythonCandidates.forEach((pythonCommand) => {
@@ -620,6 +678,13 @@ function findDinoscanExecutable(
   return null;
 }
 
+/**
+ * Checks whether a given Dinoscan invocation can be executed and responds to the --help flag.
+ * @param invocation - The DinoscanInvocation containing the command and its arguments.
+ * @param cwd - The current working directory to execute the command in. If undefined, the default working directory is used.
+ * @param output - The VSCode OutputChannel where probe results and errors are logged.
+ * @returns True if the invocation exits with status 0 when passed --help; otherwise, false.
+ */
 function isInvocationUsable(
   invocation: DinoscanInvocation,
   cwd: string | undefined,
