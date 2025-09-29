@@ -300,8 +300,9 @@ class PatternMatcher:
             for indicator in test_indicators
         )
 
+    @staticmethod
     def _create_pattern_finding(
-        self, pattern: SecurityPattern, match, line: str, line_num: int, file_path: str
+        pattern: SecurityPattern, match, line: str, line_num: int, file_path: str
     ) -> Finding:
         """Create a Finding object for pattern detection."""
         return Finding(
@@ -436,10 +437,16 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                         pattern, lines, file_path, analysis_type
                     )
                 )
+                    )
+                )
 
         return findings
 
-    def _analyze_entropy(self, file_path: str, content: str) -> list[Finding]:
+    def _analyze_entropy(
+        self,
+        file_path: str,
+        content: str,
+    ) -> list[Finding]:
         """Analyze file for high-entropy strings (potential secrets)."""
         if not self.config.get("secret_detection_settings", {}).get(
             "enable_high_entropy_detection", True
@@ -474,7 +481,10 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                                 if entropy_score < 5.0
                                 else Severity.HIGH
                             ),
-                            message=f"High-entropy string detected (entropy: {entropy_score:.2f})",
+                            message=(
+                                f"High-entropy string detected "
+                                f"(entropy: {entropy_score:.2f})"
+                            ),
                             file_path=file_path,
                             line_number=line_num,
                             column_number=match.start() + 1,
@@ -510,20 +520,22 @@ class SecurityASTVisitor(ast.NodeVisitor):
 
     def _check_dangerous_functions(self, node: ast.Call) -> None:
         """Check for dangerous function calls."""
-        if isinstance(node.func, ast.Name) and node.func.id in ("eval", "exec"):
-            if node.args and self._has_dynamic_input(node.args[0]):
-                self.findings.append(
-                    Finding(
-                        rule_id=f"python-security-{node.func.id}",
-                        category=Category.SECURITY,
-                        severity=Severity.CRITICAL,
-                        message=f"Dynamic {node.func.id}() call with potential user input",
-                        file_path=self.file_path,
-                        line_number=node.lineno,
-                        column_number=node.col_offset,
-                        cwe="CWE-94",
-                    )
+        if isinstance(node.func, ast.Name) and node.func.id in ("eval", "exec") and node.args and self._has_dynamic_input(node.args[0]):
+            self.findings.append(
+                Finding(
+                    rule_id=f"python-security-{node.func.id}",
+                    category=Category.SECURITY,
+                    severity=Severity.CRITICAL,
+                    message=(
+                        f"Dynamic {node.func.id}() call with "
+                        "potential user input"
+                    ),
+                    file_path=self.file_path,
+                    line_number=node.lineno,
+                    column_number=node.col_offset,
+                    cwe="CWE-94",
                 )
+            )
 
     def visit_Import(self, node: ast.Import) -> None:
         """Check imports for security concerns."""
@@ -534,7 +546,10 @@ class SecurityASTVisitor(ast.NodeVisitor):
                         rule_id="python-security-pickle-import",
                         category=Category.SECURITY,
                         severity=Severity.MEDIUM,
-                        message=f"Import of {alias.name} module (unsafe deserialization risk)",
+                        message=(
+                            f"Import of {alias.name} module "
+                            "(unsafe deserialization risk)"
+                        ),
                         file_path=self.file_path,
                         line_number=node.lineno,
                         column_number=node.col_offset,
@@ -549,9 +564,8 @@ class SecurityASTVisitor(ast.NodeVisitor):
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue)):
             return True
 
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
-            if node.func.id in ("input", "raw_input"):
-                return True
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in ("input", "raw_input"):
+            return True
 
         return False
 
