@@ -683,13 +683,6 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
 
 
 # Public wrappers for protected methods
- def detect_docstring_style(self, content: str) -> str:
-    """Determine the style of the provided docstring content.
-
-    Returns the detected style as a string.
-    """
-    return self._detect_docstring_style(content)
-
  def extract_google_sections(self, lines) -> dict:
     """Extract sections from Google-style docstring lines.
 
