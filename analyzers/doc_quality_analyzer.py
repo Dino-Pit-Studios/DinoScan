@@ -35,7 +35,13 @@ from core.config_manager import ConfigManager
 from core.reporter import create_reporter
 
 
-@dataclass
+parser = argparse.ArgumentParser(
+    description="DinoScan Documentation Quality Analyzer: Analyze and validate docstrings and documentation quality in Python code.",
+    epilog="""Examples:
+  %(prog)s /path/to/file.py --style google
+  %(prog)s /path/to/project --output-format json --output-file docs.json
+""",
+)
 class DocstringInfo:
     """Information about a docstring."""
 
@@ -679,9 +685,7 @@ def _parse_google_docstring(
         # Extract code blocks (simplified)
         code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
         docstring_info.examples = [block.strip() for block in code_blocks]
-  %(prog)s /path/to/file.py --style google
-  %(prog)s /path/to/project --output-format json --output-file docs.json
-        """,
+
     )
 
     parser.add_argument("path", help="Path to analyze (file or directory)")
