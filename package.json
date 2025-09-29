@@ -1,0 +1,29 @@
+{
+  "name": "dinoscan",
+  "version": "2.0.2",
+  "description": "Advanced Python code analysis tool with security and quality scanning",
+  "type": "module",
+  "scripts": {
+    "test": "python -m pytest",
+    "lint": "python -m pylint dinoscan.py",
+    "format": "python -m black ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dino-Pit-Studios/DinoScan.git"
+  },
+  "keywords": [
+    "python",
+    "code-analysis",
+    "static-analysis",
+    "security",
+    "linting"
+  ],
+  "author": "Dino Pit Studios",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

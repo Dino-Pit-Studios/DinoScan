@@ -80,7 +80,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          # Only enable cache if package-lock.json exists
+          cache: ${{ hashFiles('**/package-lock.json') != '' && 'npm' || '' }}
 
       # Install Python dependencies for better analysis
       - name: Install Python dependencies
@@ -95,10 +96,14 @@ jobs:
 
       # Install Node.js dependencies for better analysis
       - name: Install Node.js dependencies
-        if: matrix.language == 'javascript-typescript'
+        if: matrix.language == 'javascript-typescript' && hashFiles('**/package.json') != ''
         run: |
-          if [ -f package.json ]; then
+          if [ -f package-lock.json ]; then
             npm ci
+          elif [ -f yarn.lock ]; then
+            npm install -g yarn && yarn install --frozen-lockfile
+          elif [ -f package.json ]; then
+            npm install
           fi
 
       # Initializes the CodeQL tools for scanning.
@@ -124,11 +129,10 @@ jobs:
               - "**/build/**"
               - "**/dist/**"
 
-            # Include additional query packs
+            # Include standard query packs (security-queries pack doesn't exist)
             packs:
               - codeql/python-queries
               - codeql/javascript-queries
-              - codeql/security-queries
 
       # If the analyze step fails for one of the languages you are analyzing with
       # "We were unable to automatically build your code", modify the matrix above
