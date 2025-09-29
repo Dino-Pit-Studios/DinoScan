@@ -368,7 +368,6 @@ class CircularImportAnalyzer(ASTAnalyzer):
 
     def _get_import_context(self, module_info: ModuleInfo, line_number: int) -> str:
         """Get the context around an import statement."""
-        import os
 
         # Whitelist of allowed module filenames
         allowed_filenames = {"module1.py", "module2.py", "module3.py"}
@@ -383,7 +382,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
         except Exception:
             pass
 
-        return ""
+        return """
 
     def _get_circular_import_suggestion(self, cycle: list[str]) -> str:
         """Get suggestion for resolving circular import."""
