@@ -1,0 +1,6 @@
+diff --git a/vscode-extension/src/reporter.ts b/vscode-extension/src/reporter.ts
+--- a/vscode-extension/src/reporter.ts
++++ b/vscode-extension/src/reporter.ts
+@@ -90,1 +90,1 @@
+-      if (severityDiff !== 0) return severityDiff;
++      if (severityDiff !== 0) {return severityDiff;}
