@@ -64,13 +64,10 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(output);
 
   const findingsTreeProvider = new DinoscanFindingsTreeProvider(context);
-  const findingsTreeView = window.createTreeView(
-    "dinoscanFindingsView",
-    {
-      treeDataProvider: findingsTreeProvider,
-      showCollapseAll: true,
-    },
-  );
+  const findingsTreeView = window.createTreeView("dinoscanFindingsView", {
+    treeDataProvider: findingsTreeProvider,
+    showCollapseAll: true,
+  });
   context.subscriptions.push(findingsTreeView);
 
   statusBar.updateVisibility();
