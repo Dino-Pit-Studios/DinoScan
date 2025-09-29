@@ -25,7 +25,8 @@ class PythonASTAnalyzer(ASTAnalyzer):
     def _setup_visitors(self) -> None:
         """Set up AST visitor classes for different analysis types."""
 
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported Python file extensions."""
         return {".py", ".pyi", ".pyw"}
 

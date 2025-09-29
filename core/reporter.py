@@ -33,7 +33,8 @@ class Reporter(ABC):
         with Path(output_path).open("w", encoding="utf-8") as f:
             f.write(formatted_output)
 
-    def print_results(self, result: AnalysisResult) -> None:
+    @staticmethod
+    def print_results(result: AnalysisResult) -> None:
         """Print results to console."""
         print(self.format_results(result))
 

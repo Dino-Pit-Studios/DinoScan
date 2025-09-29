@@ -308,8 +308,9 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         return findings
 
+    @staticmethod
     def _check_parameter_docs(
-        self, func: FunctionInfo, file_path: str
+        func: FunctionInfo, file_path: str
     ) -> list[Finding]:
         """Check parameter documentation completeness."""
         findings: list[Finding] = []
@@ -367,7 +368,10 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         return findings
 
-    def _check_return_docs(self, func: FunctionInfo, file_path: str) -> list[Finding]:
+    @staticmethod
+    def _check_return_docs(
+        func: FunctionInfo, file_path: str
+    ) -> list[Finding]:
         """Check return value documentation."""
         findings: list[Finding] = []
 
@@ -429,10 +433,9 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         return findings
 
+    @staticmethod
     def _validate_examples(
-        self,
-        func: FunctionInfo,
-        file_path: str,
+        func: FunctionInfo, file_path: str,
     ) -> list[Finding]:
         """Validate code examples in docstring."""
         findings: list[Finding] = []
@@ -570,209 +573,112 @@ class DocStringVisitor(ast.NodeVisitor):
         old_class = self.current_class
         self.current_class = node.name
 
-        # Extract class docstring
-        docstring_content = ast.get_docstring(node)
+    # Extract class docstring
+    docstring_content = ast.get_docstring(node)
 
-        class_info = {
-            "name": node.name,
-            "line_number": node.lineno,
-            "is_private": node.name.startswith("_"),
-            "docstring": docstring_content,
-        }
+    class_info = {
+        "name": node.name,
+        "line_number": node.lineno,
+        "is_private": node.name.startswith("_"),
+        "docstring": docstring_content,
+    }
 
-        self.classes.append(class_info)
+    self.classes.append(class_info)
 
-        self.generic_visit(node)
-        self.current_class = old_class
+    self.generic_visit(node)
+    self.current_class = old_class
 
-    @staticmethod
-    def _detect_docstring_style(content: str) -> str:
-        """Detect the docstring style."""
-        # Google style: Args:, Returns:
-        if re.search(r"\b(Args|Arguments|Parameters):\s*\n", content):
-            return "google"
+@staticmethod
+def _detect_docstring_style(content: str) -> str:
+    """Detect the docstring style."""
+    # Google style: Args:, Returns:
+    if re.search(r"\b(Args|Arguments|Parameters):\s*\n", content):
+        return "google"
 
-        # Sphinx style: :param, :return
-        if re.search(r":param\s+\w+:", content) or re.search(r":return:", content):
-            return "sphinx"
+    # Sphinx style: :param, :return
+    if re.search(r":param\s+\w+:", content) or re.search(r":return:", content):
+        return "sphinx"
 
-        # NumPy style: Parameters, Returns with dashes
-        if re.search(r"\n\s*Parameters\s*\n\s*-+", content):
-            return "numpy"
+    # NumPy style: Parameters, Returns with dashes
+    if re.search(r"\n\s*Parameters\s*\n\s*-+", content):
+        return "numpy"
 
-        return "plain"
+    return "plain"
 
-    def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
-        """Parse docstring to extract structured information."""
-        docstring_info = DocstringInfo(content=content, line_number=line_number)
+def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
+    """Parse docstring to extract structured information."""
+    docstring_info = DocstringInfo(content=content, line_number=line_number)
 
-        # Detect docstring style
-        docstring_info.style = self._detect_docstring_style(content)
+    # Detect docstring style
+    docstring_info.style = self._detect_docstring_style(content)
 
-        # Parse based on style
-        if docstring_info.style == "google":
-            self._parse_google_docstring(content, docstring_info)
-        elif docstring_info.style == "sphinx":
-            self._parse_sphinx_docstring(content, docstring_info)
-        elif docstring_info.style == "numpy":
-            self._parse_numpy_docstring(content, docstring_info)
+    # Parse based on style
+    if docstring_info.style == "google":
+        self._parse_google_docstring(content, docstring_info)
+    elif docstring_info.style == "sphinx":
+        self._parse_sphinx_docstring(content, docstring_info)
+    elif docstring_info.style == "numpy":
+        self._parse_numpy_docstring(content, docstring_info)
 
-        return docstring_info
+    return docstring_info
 
-    def _extract_google_sections(self, lines: list[str]) -> dict[str, list[str]]:
-        """Extract sections from Google-style docstring lines."""
-        header_patterns = {
-            re.compile(r"\s*(Args|Arguments|Parameters):\s*$"): "parameters",
-            re.compile(r"\s*Returns:\s*$"): "returns",
-            re.compile(r"\s*Examples?:\s*$"): "examples",
-        }
-        sections: dict[str, list[str]] = {}
-        current_section = None
-        section_content: list[str] = []
+@staticmethod
+def _extract_google_sections(lines: list[str]) -> dict[str, list[str]]:
+    """Extract sections from Google-style docstring lines."""
+    header_patterns = {
+        re.compile(r"\s*(Args|Arguments|Parameters):\s*$"): "parameters",
+        re.compile(r"\s*Returns:\s*$"): "returns",
+        re.compile(r"\s*Examples?:\s*$"): "examples",
+    }
+    sections: dict[str, list[str]] = {}
+    current_section = None
+    section_content: list[str] = []
 
-        for line in lines:
-            matched = False
-            for pattern, name in header_patterns.items():
-                if pattern.match(line):
-                    if current_section and section_content:
-                        sections[current_section] = section_content
-                    current_section = name
-                    section_content = []
-                    matched = True
-                    break
-            if not matched and current_section:
-                section_content.append(line)
+    for line in lines:
+        matched = False
+        for pattern, name in header_patterns.items():
+            if pattern.match(line):
+                if current_section and section_content:
+                    sections[current_section] = section_content
+                current_section = name
+                section_content = []
+                matched = True
+                break
+        if not matched and current_section:
+            section_content.append(line)
 
-        if current_section and section_content:
-            sections[current_section] = section_content
+    if current_section and section_content:
+        sections[current_section] = section_content
 
-        return sections
+    return sections
 
-    def _parse_google_docstring(
-        self, content: str, docstring_info: DocstringInfo
-    ) -> None:
-        """Parse Google-style docstring."""
-        lines = content.split("\n")
-        raw_sections = self._extract_google_sections(lines)
+def _parse_google_docstring(
+    self, content: str, docstring_info: DocstringInfo
+) -> None:
+    """Parse Google-style docstring."""
+    lines = content.split("\n")
+    raw_sections = self._extract_google_sections(lines)
 
-        # Assign joined section content to docstring_info.sections
-        for name, content_lines in raw_sections.items():
-            docstring_info.sections[name] = "\n".join(content_lines)
+    # Assign joined section content to docstring_info.sections
+    for name, content_lines in raw_sections.items():
+        docstring_info.sections[name] = "\n".join(content_lines)
 
-        # Parse parameters
-        if "parameters" in raw_sections:
-            self._parse_google_parameters(
-                docstring_info.sections["parameters"], docstring_info
-            )
-
-        # Parse returns
-        if "returns" in raw_sections:
-            docstring_info.returns = docstring_info.sections["returns"].strip()
-
-        # Parse examples
-        if "examples" in raw_sections:
-            example_text = docstring_info.sections["examples"]
-            # Extract code blocks (simplified)
-            code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
-            docstring_info.examples = [block.strip() for block in code_blocks]
-
-    def _parse_google_parameters(
-        self, params_text: str, docstring_info: DocstringInfo
-    ) -> None:
-        """Parse Google-style parameters section."""
-        # Match parameter lines like "param_name (type): description"
-        param_pattern = (
-            r"^\s*(\w+)(?:\s*\([^)]*\))?\s*:\s*(.+?)(?=^\s*\w+\s*(?:\([^)]*\))?\s*:|$)"
+    # Parse parameters
+    if "parameters" in raw_sections:
+        self._parse_google_parameters(
+            docstring_info.sections["parameters"], docstring_info
         )
-        matches = re.findall(param_pattern, params_text, re.MULTILINE | re.DOTALL)
 
-        for match in matches:
-            param_name, param_type, param_desc = match
-            if param_type:
-                docstring_info.parameters[param_name.strip()] = param_type.strip()
-            else:
-                # Try to extract type from description
-                type_match = re.match(r"^(\w+)\s*:\s*(.+)", param_desc.strip())
-                if type_match:
-                    docstring_info.parameters[param_name.strip()] = type_match.group(1)
+    # Parse returns
+    if "returns" in raw_sections:
+        docstring_info.returns = docstring_info.sections["returns"].strip()
 
-    def _parse_sphinx_docstring(
-        self, content: str, docstring_info: DocstringInfo
-    ) -> None:
-        """Parse Sphinx-style docstring."""
-        # Extract :param name: descriptions
-        param_pattern = r":param\s+(\w+):\s*(.+?)(?=:param|\Z|:return:|:type:)"
-        param_matches = re.findall(param_pattern, content, re.DOTALL)
-
-        for param_name, _param_desc in param_matches:
-            docstring_info.parameters[param_name.strip()] = (
-                "unknown"  # Type extracted separately
-            )
-
-        # Extract :type name: type annotations
-        type_pattern = r":type\s+(\w+):\s*(.+?)(?=:type|\Z|:param:|:return:)"
-        type_matches = re.findall(type_pattern, content, re.DOTALL)
-
-        for param_name, param_type in type_matches:
-            if param_name.strip() in docstring_info.parameters:
-                docstring_info.parameters[param_name.strip()] = param_type.strip()
-
-        # Extract :return: description
-        return_match = re.search(r":return:\s*(.+?)(?=:rtype:|\Z)", content, re.DOTALL)
-        if return_match:
-            docstring_info.returns = return_match.group(1).strip()
-
-    def _parse_numpy_docstring(
-        self, content: str, docstring_info: DocstringInfo
-    ) -> None:
-        """Parse NumPy-style docstring."""
-        # This is a simplified parser - a full implementation would be more complex
-        lines = content.split("\n")
-        in_parameters = False
-        in_returns = False
-
-        for i, line in enumerate(lines):
-            # Look for Parameters section
-            if (
-                re.match(r"\s*Parameters\s*$", line)
-                and i + 1 < len(lines)
-                and "---" in lines[i + 1]
-            ):
-                in_parameters = True
-                in_returns = False
-                continue
-            # Look for Returns section
-            if (
-                re.match(r"\s*Returns\s*$", line)
-                and i + 1 < len(lines)
-                and "---" in lines[i + 1]
-            ):
-                in_returns = True
-                in_parameters = False
-                continue
-
-            # Parse parameter lines
-            if in_parameters:
-                param_match = re.match(r"^\s*(\w+)\s*:\s*(.+)", line)
-                if param_match:
-                    param_name, param_type = param_match.groups()
-                    docstring_info.parameters[param_name.strip()] = param_type.strip()
-
-            # Parse return info
-            elif in_returns:
-                if line.strip():
-                    docstring_info.returns = line.strip()
-                    break
-
-
-def main() -> None:
-    """Main entry point for the documentation analyzer."""
-    parser = argparse.ArgumentParser(
-        description="DinoScan Documentation Quality Analyzer",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s /path/to/project
+    # Parse examples
+    if "examples" in raw_sections:
+        example_text = docstring_info.sections["examples"]
+        # Extract code blocks (simplified)
+        code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
+        docstring_info.examples = [block.strip() for block in code_blocks]
   %(prog)s /path/to/file.py --style google
   %(prog)s /path/to/project --output-format json --output-file docs.json
         """,

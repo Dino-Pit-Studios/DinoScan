@@ -158,7 +158,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
             print(f"Error analyzing {file_path}: {e}")
             return None
 
-    def _get_module_name(self, file_path: str, project_path: str) -> str:
+    @staticmethod
+    def _get_module_name(file_path: str, project_path: str) -> str:
         """Convert file path to module name."""
         # Make path relative to project
         try:
@@ -316,7 +317,6 @@ class CircularImportAnalyzer(ASTAnalyzer):
     def _create_circular_import_findings(self, cycle: list[str]) -> list[Finding]:
         """Create findings for a circular import cycle."""
         findings = []
-
         # Determine cycle severity based on size
         if len(cycle) == 2:
             severity = Severity.HIGH
@@ -347,7 +347,9 @@ class CircularImportAnalyzer(ASTAnalyzer):
                     file_path=module_info.file_path,
                     line_number=import_line,
                     context=self._get_import_context(module_info, import_line),
-                    suggestion=self._get_circular_import_suggestion(cycle),
+                    suggestion=CircularImportAnalyzer._get_circular_import_suggestion(
+                        cycle
+                    ),
                     tags={"circular-import", f"cycle-length-{len(cycle)}"},
                 )
                 findings.append(finding)
@@ -384,7 +386,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
 
         return ""
 
-    def _get_circular_import_suggestion(self, cycle: list[str]) -> str:
+    @staticmethod
+    def _get_circular_import_suggestion(cycle: list[str]) -> str:
         """Get suggestion for resolving circular import."""
         if len(cycle) == 2:
             return (
