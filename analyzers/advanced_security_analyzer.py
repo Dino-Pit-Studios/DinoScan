@@ -19,19 +19,14 @@ Enhanced features over PowerShell version:
 
 import argparse
 import ast
-import base64
-import hashlib
-import json
 import math
 import re
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 from core.base_analyzer import ASTAnalyzer, Category, Finding, Severity
 from core.config_manager import ConfigManager
-from core.file_scanner import FileScanner
 from core.reporter import create_reporter
 
 
@@ -55,39 +50,13 @@ class SecurityPattern:
         self.context_required = context_required
 
 
-class AdvancedSecurityAnalyzer(ASTAnalyzer):
-    """Advanced security analyzer with AST-based detection."""
-
-    def __init__(self, config: dict[str, Any] | None = None):
-        super().__init__(config)
-        self.name = "AdvancedSecurityAnalyzer"
-        self._setup_patterns()
-        self._setup_pii_allowlists()
-        self._setup_entropy_detector()
+class SecurityPatternFactory:
+    """Factory class to create security patterns."""
 
     @staticmethod
-    def get_supported_extensions() -> set[str]:
-        """Return supported file extensions."""
-        return {
-            ".py",
-            ".js",
-            ".ts",
-            ".jsx",
-            ".tsx",
-            ".vue",
-            ".svelte",
-            ".json",
-            ".yaml",
-            ".yml",
-            ".env",
-            ".cfg",
-            ".ini",
-            ".toml",
-        }
-
-    def _setup_patterns(self) -> None:
-        """Set up security detection patterns."""
-        self.secret_patterns = [
+    def create_secret_patterns() -> list[SecurityPattern]:
+        """Create secret detection patterns."""
+        return [
             # AWS Credentials
             SecurityPattern(
                 r"AKIA[0-9A-Z]{16}",
@@ -108,23 +77,10 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 Severity.CRITICAL,
                 "CWE-798",
             ),
-            SecurityPattern(
-                r"gho_[A-Za-z0-9]{36}",
-                "GitHub OAuth Token detected",
-                Severity.CRITICAL,
-                "CWE-798",
-            ),
             # OpenAI API Keys
             SecurityPattern(
                 r"sk-[A-Za-z0-9]{48,}",
                 "OpenAI API Key detected",
-                Severity.CRITICAL,
-                "CWE-798",
-            ),
-            # Slack Tokens
-            SecurityPattern(
-                r"xox[baprs]-[A-Za-z0-9\-]{10,}",
-                "Slack Token detected",
                 Severity.CRITICAL,
                 "CWE-798",
             ),
@@ -142,23 +98,12 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 Severity.HIGH,
                 "CWE-798",
             ),
-            # Database Connection Strings
-            SecurityPattern(
-                r"(mongodb|mysql|postgresql)://[^:\s]+:[^@\s]+@[^/\s]+",
-                "Database connection string with credentials detected",
-                Severity.HIGH,
-                "CWE-798",
-            ),
-            # Private Keys
-            SecurityPattern(
-                r"-----BEGIN [A-Z ]*PRIVATE KEY-----",
-                "Private key detected",
-                Severity.CRITICAL,
-                "CWE-798",
-            ),
         ]
 
-        self.vulnerability_patterns = [
+    @staticmethod
+    def create_vulnerability_patterns() -> list[SecurityPattern]:
+        """Create vulnerability detection patterns."""
+        return [
             # Code Injection
             SecurityPattern(
                 r"\beval\s*\(\s*[^)]*\+[^)]*\)",
@@ -179,25 +124,12 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 Severity.CRITICAL,
                 "CWE-78",
             ),
-            SecurityPattern(
-                r"subprocess\.(call|run|Popen)\s*\([^)]*shell\s*=\s*True[^)]*\+[^)]*\)",
-                "Command injection via subprocess with shell=True",
-                Severity.CRITICAL,
-                "CWE-78",
-            ),
             # SQL Injection
             SecurityPattern(
                 r'(execute|query)\s*\(\s*["\'][^"\']*\+[^"\']*["\']',
                 "SQL injection via string concatenation",
                 Severity.HIGH,
                 "CWE-89",
-            ),
-            # Path Traversal
-            SecurityPattern(
-                r"(open|read|write)\s*\([^)]*\.\./[^)]*\)",
-                "Path traversal vulnerability detected",
-                Severity.HIGH,
-                "CWE-22",
             ),
             # Unsafe Deserialization
             SecurityPattern(
@@ -206,41 +138,12 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 Severity.CRITICAL,
                 "CWE-502",
             ),
-            SecurityPattern(
-                r"yaml\.load\s*\(",
-                "Unsafe YAML deserialization (use yaml.safe_load)",
-                Severity.HIGH,
-                "CWE-502",
-            ),
-            # Weak Cryptography
-            SecurityPattern(
-                r"\b(md5|sha1)\s*\(",
-                "Weak cryptographic hash function",
-                Severity.MEDIUM,
-                "CWE-327",
-            ),
-            SecurityPattern(
-                r"random\.random\(\)",
-                "Weak random number generation (use secrets module)",
-                Severity.MEDIUM,
-                "CWE-338",
-            ),
-            # SSL/TLS Issues
-            SecurityPattern(
-                r"ssl_verify\s*=\s*False",
-                "SSL certificate verification disabled",
-                Severity.HIGH,
-                "CWE-295",
-            ),
-            SecurityPattern(
-                r"verify\s*=\s*False",
-                "SSL verification disabled in requests",
-                Severity.HIGH,
-                "CWE-295",
-            ),
         ]
 
-        self.pii_patterns = [
+    @staticmethod
+    def create_pii_patterns() -> list[SecurityPattern]:
+        """Create PII detection patterns."""
+        return [
             # Email addresses
             SecurityPattern(
                 r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
@@ -262,58 +165,14 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                 Severity.HIGH,
                 "CWE-200",
             ),
-            # Credit Card Numbers (basic pattern)
-            SecurityPattern(
-                (
-                    r"\b(?:4[0-9]{12}(?:[0-9]{3})?"
-                    r"|5[1-5][0-9]{14}"
-                    r"|3[47][0-9]{13}"
-                    r"|3[0-9]{13}"
-                    r"|6(?:011|5[0-9]{2})[0-9]{12})\b"
-                ),
-                "Credit card number detected",
-                Severity.HIGH,
-                "CWE-200",
-            ),
-            # IP Addresses (private ranges might be sensitive)
-            SecurityPattern(
-                (
-                    r"\b(?:10\.|172\.(?:1[6-9]|2[0-9]|3[01])\."
-                    r"|192\.168\.)[0-9]{1,3}\.[0-9]{1,3}\b"
-                ),
-                "Private IP address detected",
-                Severity.LOW,
-                "CWE-200",
-            ),
         ]
 
-    def _setup_pii_allowlists(self) -> None:
-        """Set up PII allowlists from configuration."""
-        pii_config = self.config.get("pii_allowlists", {})
 
-        self.pii_allowlists = {
-            "email_address": set(
-                pii_config.get(
-                    "email_address",
-                    ["test@example.com", "user@example.org", "admin@test.com"],
-                )
-            ),
-            "us_phone_number": set(
-                pii_config.get(
-                    "us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"]
-                )
-            ),
-            "us_ssn": set(
-                pii_config.get("us_ssn", ["123-45-6789", "000-00-0000", "999-99-9999"])
-            ),
-            "ip_address": set(
-                pii_config.get("ip_address", ["127.0.0.1", "192.168.1.1"])
-            ),
-        }
+class EntropyAnalyzer:
+    """Handles entropy-based secret detection."""
 
-    def _setup_entropy_detector(self) -> None:
-        """Set up entropy-based secret detection."""
-        entropy_config = self.config.get("secret_detection_settings", {})
+    def __init__(self, config: dict[str, Any]):
+        entropy_config = config.get("secret_detection_settings", {})
         self.min_entropy_threshold = entropy_config.get("min_entropy_threshold", 4.5)
         self.min_string_length = entropy_config.get("min_string_length", 20)
 
@@ -347,86 +206,38 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         entropy = self.calculate_entropy(string)
         return entropy >= self.min_entropy_threshold
 
-    def analyze_file(self, file_path: str) -> list[Finding]:
-        """Analyze file for security vulnerabilities."""
-        findings = []
 
-        try:
-            with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
-                content = f.read()
-        except Exception as e:
-            return [
-                Finding(
-                    rule_id="file-read-error",
-                    category=Category.SECURITY,
-                    severity=Severity.LOW,
-                    message=f"Could not read file: {e}",
-                    file_path=file_path,
-                    line_number=1,
+class PIIAllowlistManager:
+    """Manages PII allowlists."""
+
+    def __init__(self, config: dict[str, Any]):
+        pii_config = config.get("pii_allowlists", {})
+        self.pii_allowlists = {
+            "email_address": set(
+                pii_config.get(
+                    "email_address",
+                    ["test@example.com", "user@example.org", "admin@test.com"],
                 )
-            ]
-
-        # For Python files, use AST analysis
-        if file_path.endswith(".py"):
-            findings.extend(self._analyze_python_ast(file_path, content))
-
-        # For all files, run pattern-based analysis
-        findings.extend(self._analyze_patterns(file_path, content))
-        findings.extend(self._analyze_entropy(file_path, content))
-
-        return findings
-
-    def _analyze_python_ast(self, file_path: str, content: str) -> list[Finding]:
-        """Analyze Python file using AST."""
-        findings = []
-
-        try:
-            tree = ast.parse(content, filename=file_path)
-        except SyntaxError as e:
-            return [
-                Finding(
-                    rule_id="python-syntax-error",
-                    category=Category.SECURITY,
-                    severity=Severity.LOW,
-                    message=f"Syntax error prevents security analysis: {e}",
-                    file_path=file_path,
-                    line_number=getattr(e, "lineno", 1),
+            ),
+            "us_phone_number": set(
+                pii_config.get(
+                    "us_phone_number", ["555-0123", "555-1234", "(555) 123-4567"]
                 )
-            ]
+            ),
+        }
 
-        # Use AST visitor for detailed analysis
-        visitor = SecurityASTVisitor(file_path, self.config)
-        visitor.visit(tree)
-        findings.extend(visitor.findings)
+    def is_pii_allowlisted(self, text: str) -> bool:
+        """Check if PII text is in allowlist."""
+        return any(text in allowlist for allowlist in self.pii_allowlists.values())
 
-        return findings
 
-    def _analyze_patterns(self, file_path: str, content: str) -> list[Finding]:
-        """Analyze file content using regex patterns."""
-        findings = []
-        lines = content.splitlines()
+class PatternMatcher:
+    """Handles pattern matching operations."""
 
-        # Analyze secrets
-        for pattern in self.secret_patterns:
-            findings.extend(
-                self._find_pattern_matches(pattern, lines, file_path, "secret")
-            )
+    def __init__(self, pii_allowlist_manager: PIIAllowlistManager):
+        self.pii_allowlist_manager = pii_allowlist_manager
 
-        # Analyze vulnerabilities
-        for pattern in self.vulnerability_patterns:
-            findings.extend(
-                self._find_pattern_matches(pattern, lines, file_path, "vulnerability")
-            )
-
-        # Analyze PII
-        for pattern in self.pii_patterns:
-            findings.extend(
-                self._find_pattern_matches(pattern, lines, file_path, "pii")
-            )
-
-        return findings
-
-    def _find_pattern_matches(
+    def find_pattern_matches(
         self,
         pattern: SecurityPattern,
         lines: list[str],
@@ -438,117 +249,31 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
 
         for line_num, line in enumerate(lines, 1):
             matches = pattern.pattern.finditer(line)
-
             for match in matches:
                 match_text = match.group()
 
-                # Check PII allowlists
-                if analysis_type == "pii" and self._is_pii_allowlisted(match_text):
+                if self._should_skip_match(match_text, line, analysis_type):
                     continue
 
-                # Skip obvious test/example data
-                if self._is_test_data(line, match_text):
-                    continue
-
-                finding = Finding(
-                    rule_id=f"security-{analysis_type}-{pattern.cwe.lower()}",
-                    category=Category.SECURITY,
-                    severity=pattern.severity,
-                    message=pattern.message,
-                    file_path=file_path,
-                    line_number=line_num,
-                    column_number=match.start() + 1,
-                    context=line.strip(),
-                    cwe=pattern.cwe,
-                    confidence=pattern.confidence,
-                    suggestion=self._get_security_suggestion(pattern.cwe),
+                finding = self._create_pattern_finding(
+                    pattern, match, line, line_num, file_path
                 )
                 findings.append(finding)
 
         return findings
 
-    def _analyze_entropy(self, file_path: str, content: str) -> list[Finding]:
-        """Analyze file for high-entropy strings (potential secrets)."""
-        if not self.config.get("secret_detection_settings", {}).get(
-            "enable_high_entropy_detection", True
+    def _should_skip_match(
+        self, match_text: str, line: str, analysis_type: str
+    ) -> bool:
+        """Check if match should be skipped."""
+        # Check PII allowlists
+        if analysis_type == "pii" and self.pii_allowlist_manager.is_pii_allowlisted(
+            match_text
         ):
-            return []
+            return True
 
-        findings = []
-        lines = content.splitlines()
-
-        # Look for quoted strings and assignment values
-        string_patterns = [
-            r'["\']([^"\']{20,})["\']',  # Quoted strings
-            r"=\s*([A-Za-z0-9+/=]{20,})(?:\s|$)",  # Assignment values
-            r":\s*([A-Za-z0-9+/=]{20,})(?:\s|$|,)",  # JSON-style values
-        ]
-
-        for line_num, line in enumerate(lines, 1):
-            for pattern in string_patterns:
-                matches = re.finditer(pattern, line)
-
-                for match in matches:
-                    candidate_string = match.group(1)
-
-                    # Skip if it looks like a URL or path
-                    if any(
-                        indicator in candidate_string.lower()
-                        for indicator in [
-                            "http",
-                            "www",
-                            "com",
-                            "/",
-                            "\\",
-                            ".org",
-                            ".net",
-                        ]
-                    ):
-                        continue
-
-                    # Check entropy
-                    if self.is_high_entropy_string(candidate_string):
-                        # Additional checks to reduce false positives
-                        if not self._is_likely_secret(candidate_string):
-                            continue
-
-                        entropy_score = self.calculate_entropy(candidate_string)
-
-                        finding = Finding(
-                            rule_id="security-entropy-high",
-                            category=Category.SECURITY,
-                            severity=(
-                                Severity.MEDIUM
-                                if entropy_score < 5.0
-                                else Severity.HIGH
-                            ),
-                            message=(
-                                f"High-entropy string detected (entropy: "
-                                f"{entropy_score:.2f})"
-                            ),
-                            file_path=file_path,
-                            line_number=line_num,
-                            column_number=match.start() + 1,
-                            context=line.strip(),
-                            cwe="CWE-798",
-                            confidence=min(
-                                0.9, entropy_score / 6.0
-                            ),  # Scale confidence with entropy
-                            suggestion=(
-                                "Verify if this is a secret that should be moved to "
-                                "environment variables"
-                            ),
-                        )
-                        findings.append(finding)
-
-        return findings
-
-    def _is_pii_allowlisted(self, text: str) -> bool:
-        """Check if PII text is in allowlist."""
-        for allowlist in self.pii_allowlists.values():
-            if text in allowlist:
-                return True
-        return False
+        # Skip obvious test/example data
+        return self._is_test_data(line, match_text)
 
     @staticmethod
     def _is_test_data(line: str, match_text: str) -> bool:
@@ -568,8 +293,6 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             "todo",
             "fixme",
             "xxx",
-            "lorem",
-            "ipsum",
         ]
 
         return any(
@@ -577,60 +300,196 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
             for indicator in test_indicators
         )
 
-    @staticmethod
-    def _is_likely_secret(string: str) -> bool:
-        """Additional heuristics to determine if high-entropy string is
-        likely a secret."""
-        # Check for common secret characteristics
-        has_mixed_case = any(c.islower() for c in string) and any(
-            c.isupper() for c in string
+    def _create_pattern_finding(
+        self, pattern: SecurityPattern, match, line: str, line_num: int, file_path: str
+    ) -> Finding:
+        """Create a Finding object for pattern detection."""
+        return Finding(
+            rule_id=f"security-pattern-{pattern.cwe.lower()}",
+            category=Category.SECURITY,
+            severity=pattern.severity,
+            message=pattern.message,
+            file_path=file_path,
+            line_number=line_num,
+            column_number=match.start() + 1,
+            context=line.strip(),
+            cwe=pattern.cwe,
+            confidence=pattern.confidence,
         )
-        has_numbers = any(c.isdigit() for c in string)
-        has_special = any(c in "+/=" for c in string)
 
-        # Base64-like strings are more likely to be secrets
-        if has_mixed_case and has_numbers and (has_special or len(string) % 4 == 0):
-            return True
 
-        # Check for common secret prefixes/suffixes
-        secret_indicators = [
-            "key",
-            "token",
-            "secret",
-            "pass",
-            "auth",
-            "api",
-            "client",
-            "id",
-            "signature",
-            "hash",
+class AdvancedSecurityAnalyzer(ASTAnalyzer):
+    """Advanced security analyzer with AST-based detection."""
+
+    def __init__(self, config: dict[str, Any] | None = None):
+        super().__init__(config)
+        self.name = "AdvancedSecurityAnalyzer"
+        self._setup_components()
+
+    def _setup_components(self) -> None:
+        """Setup analyzer components."""
+        self.secret_patterns = SecurityPatternFactory.create_secret_patterns()
+        self.vulnerability_patterns = (
+            SecurityPatternFactory.create_vulnerability_patterns()
+        )
+        self.pii_patterns = SecurityPatternFactory.create_pii_patterns()
+
+        self.pii_allowlist_manager = PIIAllowlistManager(self.config)
+        self.entropy_analyzer = EntropyAnalyzer(self.config)
+        self.pattern_matcher = PatternMatcher(self.pii_allowlist_manager)
+
+    def get_supported_extensions(self) -> set[str]:
+        """Return supported file extensions."""
+        return {
+            ".py",
+            ".js",
+            ".ts",
+            ".jsx",
+            ".tsx",
+            ".vue",
+            ".svelte",
+            ".json",
+            ".yaml",
+            ".yml",
+            ".env",
+            ".cfg",
+            ".ini",
+            ".toml",
+        }
+
+    def analyze_file(self, file_path: str) -> list[Finding]:
+        """Analyze file for security vulnerabilities."""
+        content = self._read_file_safely(file_path)
+        if content is None:
+            return self._create_file_read_error(file_path)
+
+        findings = []
+
+        # For Python files, use AST analysis
+        if file_path.endswith(".py"):
+            findings.extend(self._analyze_python_ast(file_path, content))
+
+        # For all files, run pattern-based analysis
+        findings.extend(self._analyze_patterns(file_path, content))
+        findings.extend(self._analyze_entropy(file_path, content))
+
+        return findings
+
+    def _read_file_safely(self, file_path: str) -> str | None:
+        """Safely read file content."""
+        try:
+            with Path(file_path).open(encoding="utf-8", errors="ignore") as f:
+                return f.read()
+        except Exception:
+            return None
+
+    def _create_file_read_error(self, file_path: str) -> list[Finding]:
+        """Create file read error finding."""
+        return [
+            Finding(
+                rule_id="file-read-error",
+                category=Category.SECURITY,
+                severity=Severity.LOW,
+                message="Could not read file",
+                file_path=file_path,
+                line_number=1,
+            )
         ]
 
-        string_lower = string.lower()
-        return any(indicator in string_lower for indicator in secret_indicators)
+    def _analyze_python_ast(self, file_path: str, content: str) -> list[Finding]:
+        """Analyze Python file using AST."""
+        try:
+            tree = ast.parse(content, filename=file_path)
+        except SyntaxError as e:
+            return [
+                Finding(
+                    rule_id="python-syntax-error",
+                    category=Category.SECURITY,
+                    severity=Severity.LOW,
+                    message=f"Syntax error prevents security analysis: {e}",
+                    file_path=file_path,
+                    line_number=getattr(e, "lineno", 1),
+                )
+            ]
+
+        # Use AST visitor for detailed analysis
+        visitor = SecurityASTVisitor(file_path, self.config)
+        visitor.visit(tree)
+        return visitor.findings
+
+    def _analyze_patterns(self, file_path: str, content: str) -> list[Finding]:
+        """Analyze file content using regex patterns."""
+        findings = []
+        lines = content.splitlines()
+
+        # Analyze different pattern types
+        pattern_types = [
+            (self.secret_patterns, "secret"),
+            (self.vulnerability_patterns, "vulnerability"),
+            (self.pii_patterns, "pii"),
+        ]
+
+        for patterns, analysis_type in pattern_types:
+            for pattern in patterns:
+                findings.extend(
+                    self.pattern_matcher.find_pattern_matches(
+                        pattern, lines, file_path, analysis_type
+                    )
+                )
+
+        return findings
+
+    def _analyze_entropy(self, file_path: str, content: str) -> list[Finding]:
+        """Analyze file for high-entropy strings (potential secrets)."""
+        if not self.config.get("secret_detection_settings", {}).get(
+            "enable_high_entropy_detection", True
+        ):
+            return []
+
+        findings = []
+        lines = content.splitlines()
+        string_patterns = [
+            r'["\']([^"\']{20,})["\']',  # Quoted strings
+            r"=\s*([A-Za-z0-9+/=]{20,})(?:\s|$)",  # Assignment values
+        ]
+
+        for line_num, line in enumerate(lines, 1):
+            for pattern in string_patterns:
+                matches = re.finditer(pattern, line)
+                for match in matches:
+                    candidate_string = match.group(1)
+
+                    if self._should_skip_entropy_candidate(candidate_string):
+                        continue
+
+                    if self.entropy_analyzer.is_high_entropy_string(candidate_string):
+                        entropy_score = self.entropy_analyzer.calculate_entropy(
+                            candidate_string
+                        )
+                        finding = Finding(
+                            rule_id="security-entropy-high",
+                            category=Category.SECURITY,
+                            severity=Severity.MEDIUM
+                            if entropy_score < 5.0
+                            else Severity.HIGH,
+                            message=f"High-entropy string detected (entropy: {entropy_score:.2f})",
+                            file_path=file_path,
+                            line_number=line_num,
+                            column_number=match.start() + 1,
+                            context=line.strip(),
+                            cwe="CWE-798",
+                            confidence=min(0.9, entropy_score / 6.0),
+                        )
+                        findings.append(finding)
+
+        return findings
 
     @staticmethod
-    def _get_security_suggestion(cwe: str) -> str:
-        """Get security remediation suggestion based on CWE."""
-        suggestions = {
-            "CWE-798": (
-                "Move secrets to environment variables or secure key management"
-            ),
-            "CWE-94": (
-                "Avoid dynamic code execution. "
-                "Use safe alternatives or input validation"
-            ),
-            "CWE-78": "Use subprocess with shell=False and validate inputs",
-            "CWE-89": "Use parameterized queries or ORM frameworks",
-            "CWE-22": "Validate file paths and use path.resolve() to prevent traversal",
-            "CWE-502": "Avoid deserializing untrusted data. Use safe formats like JSON",
-            "CWE-327": "Use modern cryptographic algorithms (SHA-256, bcrypt)",
-            "CWE-338": "Use cryptographically secure random generators (secrets module)",
-            "CWE-295": "Always verify SSL certificates in production",
-            "CWE-200": "Avoid storing PII in code. Use data anonymization techniques",
-        }
-        return suggestions.get(
-            cwe, ("Review security implications and apply appropriate mitigations")
+    def _should_skip_entropy_candidate(candidate_string: str) -> bool:
+        """Check if entropy candidate should be skipped."""
+        return any(
+            indicator in candidate_string.lower()
+            for indicator in ["http", "www", "com", "/", "\\", ".org", ".net"]
         )
 
 
@@ -644,56 +503,25 @@ class SecurityASTVisitor(ast.NodeVisitor):
 
     def visit_Call(self, node: ast.Call) -> None:
         """Analyze function calls for security issues."""
-        # Check for dangerous function calls
-        if isinstance(node.func, ast.Name):
-            func_name = node.func.id
-
-            if func_name in ("eval", "exec", "compile"):
-                # Check if argument involves user input (simplified)
-                if self._has_dynamic_input(node.args[0]):
-                    self.findings.append(
-                        Finding(
-                            rule_id=f"python-security-{func_name}",
-                            category=Category.SECURITY,
-                            severity=Severity.CRITICAL,
-                            message=f"Dynamic {func_name}() call with potential user input",
-                            file_path=self.file_path,
-                            line_number=node.lineno,
-                            column_number=node.col_offset,
-                            cwe="CWE-94",
-                            suggestion=(
-                                f"Avoid {func_name}(). Use safe alternatives "
-                                f"for dynamic behavior"
-                            ),
-                        )
-                    )
-
-        elif isinstance(node.func, ast.Attribute):
-            # Check for dangerous method calls
-            if (
-                isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "os"
-                and node.func.attr == "system"
-            ):
-                if node.args and self._has_dynamic_input(node.args[0]):
-                    self.findings.append(
-                        Finding(
-                            rule_id="python-security-os-system",
-                            category=Category.SECURITY,
-                            severity=Severity.CRITICAL,
-                            message="os.system() call with dynamic input",
-                            file_path=self.file_path,
-                            line_number=node.lineno,
-                            column_number=node.col_offset,
-                            cwe="CWE-78",
-                            suggestion=(
-                                "Use subprocess.run() with shell=False and input "
-                                "validation"
-                            ),
-                        )
-                    )
-
+        self._check_dangerous_functions(node)
         self.generic_visit(node)
+
+    def _check_dangerous_functions(self, node: ast.Call) -> None:
+        """Check for dangerous function calls."""
+        if isinstance(node.func, ast.Name) and node.func.id in ("eval", "exec"):
+            if node.args and self._has_dynamic_input(node.args[0]):
+                self.findings.append(
+                    Finding(
+                        rule_id=f"python-security-{node.func.id}",
+                        category=Category.SECURITY,
+                        severity=Severity.CRITICAL,
+                        message=f"Dynamic {node.func.id}() call with potential user input",
+                        file_path=self.file_path,
+                        line_number=node.lineno,
+                        column_number=node.col_offset,
+                        cwe="CWE-94",
+                    )
+                )
 
     def visit_Import(self, node: ast.Import) -> None:
         """Check imports for security concerns."""
@@ -704,60 +532,13 @@ class SecurityASTVisitor(ast.NodeVisitor):
                         rule_id="python-security-pickle-import",
                         category=Category.SECURITY,
                         severity=Severity.MEDIUM,
-                        message=(
-                            f"Import of {alias.name} module "
-                            "(unsafe deserialization risk)"
-                        ),
+                        message=f"Import of {alias.name} module (unsafe deserialization risk)",
                         file_path=self.file_path,
                         line_number=node.lineno,
                         column_number=node.col_offset,
                         cwe="CWE-502",
-                        suggestion="Consider using safe serialization formats like JSON",
                     )
                 )
-
-        self.generic_visit(node)
-
-    def visit_Assign(self, node: ast.Assign) -> None:
-        """Check assignments for hardcoded secrets."""
-        # Look for suspicious variable names
-        for target in node.targets:
-            if isinstance(target, ast.Name):
-                var_name = target.id.lower()
-
-                if any(
-                    secret_word in var_name
-                    for secret_word in ["password", "secret", "key", "token", "api"]
-                ):
-                    # Check if assigned a literal value (potential hardcoded secret)
-                    if isinstance(node.value, (ast.Str, ast.Constant)):
-                        value = (
-                            node.value.s
-                            if isinstance(node.value, ast.Str)
-                            else node.value.value
-                        )
-
-                        if isinstance(value, str) and len(value) > 8:
-                            self.findings.append(
-                                Finding(
-                                    rule_id="python-security-hardcoded-secret",
-                                    category=Category.SECURITY,
-                                    severity=Severity.HIGH,
-                                    message=(
-                                        f"Potential hardcoded secret in "
-                                        f"variable '{target.id}'"
-                                    ),
-                                    file_path=self.file_path,
-                                    line_number=node.lineno,
-                                    column_number=node.col_offset,
-                                    cwe="CWE-798",
-                                    suggestion=(
-                                        "Move secrets to environment "
-                                        "variables or secure configuration"
-                                    ),
-                                )
-                            )
-
         self.generic_visit(node)
 
     @staticmethod
@@ -766,11 +547,9 @@ class SecurityASTVisitor(ast.NodeVisitor):
         if isinstance(node, (ast.BinOp, ast.JoinedStr, ast.FormattedValue)):
             return True
 
-        if isinstance(node, ast.Call):
-            # Check for input(), request data, etc.
-            if isinstance(node.func, ast.Name):
-                if node.func.id in ("input", "raw_input"):
-                    return True
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            if node.func.id in ("input", "raw_input"):
+                return True
 
         return False
 
@@ -780,40 +559,19 @@ def main():
     parser = argparse.ArgumentParser(
         description="DinoScan Advanced Security Analyzer",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  %(prog)s /path/to/project
-  %(prog)s /path/to/project --output-format json --output-file security-report.json
-  %(prog)s /path/to/project --config security-config.json --include-tests
-        """,
     )
 
     parser.add_argument("project_path", help="Path to the project directory to analyze")
-
     parser.add_argument(
         "--output-format",
         choices=["console", "json", "xml", "sarif"],
         default="console",
         help="Output format (default: console)",
     )
-
     parser.add_argument(
         "--output-file", help="Output file path (default: print to stdout)"
     )
-
     parser.add_argument("--config", help="Configuration file path")
-
-    parser.add_argument(
-        "--include-tests", action="store_true", help="Include test files in analysis"
-    )
-
-    parser.add_argument(
-        "--max-file-size",
-        type=int,
-        default=10,
-        help="Maximum file size to analyze in MB (default: 10)",
-    )
-
     parser.add_argument("--verbose", action="store_true", help="Show verbose output")
 
     args = parser.parse_args()
@@ -822,39 +580,23 @@ Examples:
     config_manager = ConfigManager(args.config)
     config = config_manager.get_analyzer_config("security")
 
-    # Override config with command-line arguments
-    if args.include_tests:
-        config["include_test_files"] = True
-
-    config["performance"] = config.get("performance", {})
-    config["performance"]["max_file_size_mb"] = args.max_file_size
-
     # Create analyzer
     analyzer = AdvancedSecurityAnalyzer(config)
 
-    # Analyze project
+    # Run analysis
     try:
-        if args.verbose:
-            print(f"Starting security analysis of {args.project_path}...")
-
         result = analyzer.analyze_project(args.project_path)
 
-        if args.verbose:
-            stats = result.get_summary_stats()
-            print(
-                f"Analysis complete: {stats['total_findings']} findings in "
-                f"{stats['files_analyzed']} files"
-            )
+        # Create reporter
+        reporter = create_reporter(
+            args.output_format,
+            {
+                "use_colors": not args.output_file,
+                "show_context": True,
+            },
+        )
 
-        # Create reporter and output results
-        reporter_config = {
-            "use_colors": not args.output_file,  # Only use colors for console output
-            "show_context": True,
-            "max_findings_per_file": 10,
-        }
-
-        reporter = create_reporter(args.output_format, reporter_config)
-
+        # Output results
         if args.output_file:
             reporter.save_results(result, args.output_file)
             if args.verbose:
@@ -868,18 +610,14 @@ Examples:
         high_count = stats["severity_breakdown"].get("High", 0)
 
         if critical_count > 0:
-            sys.exit(2)  # Critical issues found
+            sys.exit(2)
         elif high_count > 0:
-            sys.exit(1)  # High severity issues found
+            sys.exit(1)
         else:
-            sys.exit(0)  # Success
+            sys.exit(0)
 
     except Exception as e:
         print(f"Error during analysis: {e}", file=sys.stderr)
-        if args.verbose:
-            import traceback
-
-            traceback.print_exc()
         sys.exit(3)
 
 
