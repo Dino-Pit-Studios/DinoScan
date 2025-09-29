@@ -608,8 +608,7 @@ Provides functionality to parse and analyze docstrings in various styles such as
 Google, NumPy, and Sphinx, and to extract relevant sections for validation.
 """
 
-def extract_google_sections(self, lines):
-    return self._extract_google_sections(lines)
+
 
 def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_google_parameters(content, docstring_info)
