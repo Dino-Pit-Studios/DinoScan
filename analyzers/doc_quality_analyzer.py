@@ -706,7 +706,7 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
 
     Populates parameters info in the provided DocstringInfo.
     """
-    return self.parse_google_parameters(content, docstring_info)
+    return self._parse_google_parameters(content, docstring_info)
 
 
 
