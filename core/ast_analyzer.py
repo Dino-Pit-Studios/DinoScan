@@ -428,7 +428,8 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
 
         return findings
 
-    def _regex_based_analysis(self, file_path: str) -> list[Finding]:
+    @staticmethod
+    def _regex_based_analysis(file_path: str) -> list[Finding]:
         """Perform basic regex-based analysis as fallback."""
         findings = []
 
