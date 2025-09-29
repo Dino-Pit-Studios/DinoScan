@@ -491,7 +491,7 @@ Examples:
   %(prog)s /path/to/project
   %(prog)s /path/to/project --output-format json --output-file circular-imports.json
   %(prog)s /path/to/project --include-external --max-depth 5
-        """
+        """,
     )
 
     parser.add_argument("project_path", help="Path to the project directory to analyze")

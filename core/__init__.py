@@ -9,11 +9,11 @@ parsing through esprima, babel, or tree-sitter bindings.
 __version__ = "2.0.0"
 __author__ = "DinoScan Development Team"
 
-from core.ast_analyzer import ASTAnalyzer, PythonASTAnalyzer, JavaScriptASTAnalyzer
-from core.base_analyzer import BaseAnalyzer, AnalysisResult, Finding
+from core.ast_analyzer import ASTAnalyzer, JavaScriptASTAnalyzer, PythonASTAnalyzer
+from core.base_analyzer import AnalysisResult, BaseAnalyzer, Finding
 from core.config_manager import ConfigManager
 from core.file_scanner import FileScanner
-from core.reporter import Reporter, JSONReporter, ConsoleReporter
+from core.reporter import ConsoleReporter, JSONReporter, Reporter
 
 __all__ = [
     "ASTAnalyzer",
