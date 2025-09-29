@@ -685,7 +685,6 @@ def _parse_google_docstring(
         code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
         docstring_info.examples = [block.strip() for block in code_blocks]
 
-    )
 
     parser.add_argument("path", help="Path to analyze (file or directory)")
 
