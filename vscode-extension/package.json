@@ -1,8 +1,8 @@
 {
   "name": "dinoscan-vscode",
   "displayName": "DinoScan Code Analyzer",
-  "description": "Comprehensive AST-based Python code analysis directly in VS Code",
-  "version": "2.0.3",
+  "description": "Enhanced multi-language code analysis with centralized error handling and improved settings",
+  "version": "2.1.0",
   "publisher": "dinoair",
   "icon": "icon.png",
   "repository": {
