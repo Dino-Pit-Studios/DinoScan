@@ -253,7 +253,8 @@ class ConsoleReporter(Reporter):
 class JSONReporter(Reporter):
     """JSON output reporter."""
 
-    def format_results(self, result: AnalysisResult) -> str:
+    @staticmethod
+    def format_results(result: AnalysisResult) -> str:
         """Format results as JSON."""
         return json.dumps(result.to_dict(), indent=2, sort_keys=True, default=str)
 
@@ -261,7 +262,8 @@ class JSONReporter(Reporter):
 class XMLReporter(Reporter):
     """XML output reporter."""
 
-    def format_results(self, result: AnalysisResult) -> str:
+    @staticmethod
+    def format_results(result: AnalysisResult) -> str:
         """Format results as XML."""
         root = ET.Element("DinoScanReport")
 
