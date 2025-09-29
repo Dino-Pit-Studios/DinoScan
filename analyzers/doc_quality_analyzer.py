@@ -21,7 +21,6 @@ Enhanced features over PowerShell version:
 
 import argparse
 import ast
-import inspect
 import re
 import sys
 import traceback
@@ -35,7 +34,10 @@ from core.config_manager import ConfigManager
 from core.reporter import create_reporter
 
 parser = argparse.ArgumentParser(
-    description="DinoScan Documentation Quality Analyzer: Analyze and validate docstrings and documentation quality in Python code.",
+    description=(
+        "DinoScan Documentation Quality Analyzer: Analyze and validate "
+        "docstrings and documentation quality in Python code."
+    ),
     epilog="""Examples:
   %(prog)s /path/to/file.py --style google
   %(prog)s /path/to/project --output-format json --output-file docs.json
@@ -131,78 +133,37 @@ class DocumentationAnalyzer(ASTAnalyzer):
         if self.require_module_docstring:
             module_docstring = (
                 ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
-            )
-            if not module_docstring:
-                findings.append(
-                    Finding(
-                        rule_id="missing-module-docstring",
-                        category=Category.DOCUMENTATION,
-                        severity=Severity.MEDIUM,
-                        message="Missing module docstring",
-                        file_path=file_path,
-                        line_number=1,
-                        column_number=0,
-                        suggestion=(
-                            "Add a module-level docstring describing the "
-                            "module's purpose"
-                        ),
-                        tags={"docstring", "module"},
-                    )
-                )
-            elif len(module_docstring) < self.min_docstring_length:
-                findings.append(
-                    Finding(
-                        rule_id="short-module-docstring",
-                        category=Category.DOCUMENTATION,
-                        severity=Severity.LOW,
-                        message=(
-                            f"Module docstring too short "
-                            f"({len(module_docstring)} chars)"
-                        ),
-                        file_path=file_path,
-                        line_number=1,
-                        column_number=0,
-                        suggestion=(
-                            "Expand docstring to at least "
-                            f"{self.min_docstring_length} "
-                            "characters"
-                        ),
-                        tags={"docstring", "module", "length"},
-                    )
-                )
-
-        # Analyze functions and methods
-        for func_info in visitor.functions:
-            findings.extend(self._analyze_function_docs(func_info, file_path))
-
-        # Analyze classes
-        for class_info in visitor.classes:
-            findings.extend(self._analyze_class_docs(class_info, file_path))
-
-        return findings
-
     def _analyze_function_docs(
         self, func: FunctionInfo, file_path: str
     ) -> list[Finding]:
-        """Analyze documentation for a function."""
         findings: list[Finding] = []
 
-        # Skip private/special methods if not configured
-        if func.is_private and not self.check_private_methods:
-            return findings
-        if (
-            func.name.startswith("__")
-            and func.name.endswith("__")
-            and not self.check_special_methods
-        ):
+        if self._should_skip_function(func):
             return findings
 
-        # Check if docstring is required
-        requires_docstring = self.require_function_docstring or (
+        missing = self._get_missing_docstring_findings(func, file_path)
+        if missing:
+            return missing
+
+        findings.extend(self._get_docstring_length_findings(func, file_path))
+
+        return findings
+
+    def _should_skip_function(self, func: FunctionInfo) -> bool:
+        if func.is_private and not self.check_private_methods:
+            return True
+        if func.name.startswith("__") and func.name.endswith("__") and not self.check_special_methods:
+            return True
+        return False
+
+    def _get_missing_docstring_findings(
+        self, func: FunctionInfo, file_path: str
+    ) -> list[Finding]:
+        findings: list[Finding] = []
+        requires = self.require_function_docstring or (
             func.is_method and self.require_method_docstring
         )
-
-        if not func.docstring and requires_docstring:
+        if not func.docstring and requires:
             severity = Severity.MEDIUM if not func.is_private else Severity.LOW
             findings.append(
                 Finding(
@@ -224,14 +185,32 @@ class DocumentationAnalyzer(ASTAnalyzer):
                     tags={"docstring", "function" if not func.is_method else "method"},
                 )
             )
-            return findings
+        return findings
 
-        if not func.docstring:
-            return findings
-
-        # Check docstring length
-        if len(func.docstring.content) < self.min_docstring_length:
+    def _get_docstring_length_findings(
+        self, func: FunctionInfo, file_path: str
+    ) -> list[Finding]:
+        findings: list[Finding] = []
+        if func.docstring and len(func.docstring.content) < self.min_docstring_length:
             findings.append(
+                Finding(
+                    rule_id="short-function-docstring",
+                    category=Category.DOCUMENTATION,
+                    severity=Severity.LOW,
+                    message=(
+                        f"Function docstring too short ({len(func.docstring.content)} chars)"
+                    ),
+                    file_path=file_path,
+                    line_number=func.line_number,
+                    column_number=0,
+                    suggestion=(
+                        "Expand docstring to at least "
+                        f"{self.min_docstring_length} characters"
+                    ),
+                    tags={"docstring", "function", "length"},
+                )
+            )
+        return findings
                 Finding(
                     rule_id="short-function-docstring",
                     category=Category.DOCUMENTATION,
@@ -570,12 +549,12 @@ class DocStringVisitor(ast.NodeVisitor):
             docstring=docstring_info,
         )
 
-        self.functions.append(func_info)
+    self.functions.append(func_info)
 
-    def visit_ClassDef(self, node: ast.ClassDef) -> None:
-        """Visit class definition."""
-        old_class = self.current_class
-        self.current_class = node.name
+def visit_ClassDef(self, node: ast.ClassDef) -> None:
+    """Visit class definition."""
+    old_class = self.current_class
+    self.current_class = node.name
 
     # Extract class docstring
     docstring_content = ast.get_docstring(node)
@@ -610,56 +589,6 @@ def _detect_docstring_style(content: str) -> str:
 
     return "plain"
 
-
-def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
-    """Parse docstring to extract structured information."""
-    docstring_info = DocstringInfo(content=content, line_number=line_number)
-
-    # Detect docstring style
-    docstring_info.style = self._detect_docstring_style(content)
-
-    # Parse based on style
-    if docstring_info.style == "google":
-        self._parse_google_docstring(content, docstring_info)
-    elif docstring_info.style == "sphinx":
-        self._parse_sphinx_docstring(content, docstring_info)
-    elif docstring_info.style == "numpy":
-        self._parse_numpy_docstring(content, docstring_info)
-
-    return docstring_info
-
-
-@staticmethod
-def _extract_google_sections(lines: list[str]) -> dict[str, list[str]]:
-    """Extract sections from Google-style docstring lines."""
-    header_patterns = {
-        re.compile(r"\s*(Args|Arguments|Parameters):\s*$"): "parameters",
-        re.compile(r"\s*Returns:\s*$"): "returns",
-        re.compile(r"\s*Examples?:\s*$"): "examples",
-    }
-    sections: dict[str, list[str]] = {}
-    current_section = None
-    section_content: list[str] = []
-
-    for line in lines:
-        matched = False
-        for pattern, name in header_patterns.items():
-            if pattern.match(line):
-                if current_section and section_content:
-                    sections[current_section] = section_content
-                current_section = name
-                section_content = []
-                matched = True
-                break
-        if not matched and current_section:
-            section_content.append(line)
-
-    if current_section and section_content:
-        sections[current_section] = section_content
-
-    return sections
-
-
 def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     """Parse Google-style docstring."""
     lines = content.split("\n")
@@ -669,22 +598,28 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
     for name, content_lines in raw_sections.items():
         docstring_info.sections[name] = "\n".join(content_lines)
 
-    # Parse parameters
-    if "parameters" in raw_sections:
-        self._parse_google_parameters(
-            docstring_info.sections["parameters"], docstring_info
-        )
-
-    # Parse returns
-    if "returns" in raw_sections:
+    # Helper functions for section parsing
+    def _handle_returns():
         docstring_info.returns = docstring_info.sections["returns"].strip()
 
-    # Parse examples
-    if "examples" in raw_sections:
+    def _handle_examples():
         example_text = docstring_info.sections["examples"]
-        # Extract code blocks (simplified)
         code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
         docstring_info.examples = [block.strip() for block in code_blocks]
+
+    # Section handlers mapping
+    handlers = {
+        "parameters": lambda: self._parse_google_parameters(
+            docstring_info.sections["parameters"], docstring_info
+        ),
+        "returns": _handle_returns,
+        "examples": _handle_examples,
+    }
+
+    # Invoke handlers for present sections
+    for section, handler in handlers.items():
+        if section in raw_sections:
+            handler()
 
     parser.add_argument("path", help="Path to analyze (file or directory)")
 
@@ -722,6 +657,27 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
     parser.add_argument(
         "--no-examples",
         action="store_true",
+        help="Skip private methods and functions",
+    )
+
+# Public wrappers for protected methods
+def detect_docstring_style(self, content: str) -> str:
+    return self._detect_docstring_style(content)
+
+def extract_google_sections(self, lines) -> dict:
+    return self._extract_google_sections(lines)
+
+def parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+    return self._parse_google_docstring(content, docstring_info)
+
+def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
+    return self._parse_google_parameters(content, docstring_info)
+
+def parse_numpy_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+    return self._parse_numpy_docstring(content, docstring_info)
+
+def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+    return self._parse_sphinx_docstring(content, docstring_info)
         help="Skip example validation",
     )
 
