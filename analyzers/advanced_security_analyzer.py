@@ -377,7 +377,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
 
         return findings
 
-    def _read_file_safely(self, file_path: str) -> str | None:
+    @staticmethod
+    def _read_file_safely(file_path: str) -> str | None:
         """Safely read file content."""
         try:
             with Path(file_path).open(encoding="utf-8", errors="ignore") as f:

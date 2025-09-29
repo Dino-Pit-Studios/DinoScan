@@ -230,7 +230,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
 
         return None
 
-    def _is_local_module(self, module_name: str, project_path: str) -> bool:
+    @staticmethod
+    def _is_local_module(module_name: str, project_path: str) -> bool:
         """Check if module is part of the local project."""
         # Try to find the module file
         module_path = module_name.replace(".", os.sep)
@@ -347,7 +348,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
                     ),
                     file_path=module_info.file_path,
                     line_number=import_line,
-                    context=self._get_import_context(module_info, import_line),
+                    context=CircularImportAnalyzer._get_import_context(module_info, import_line),
                     suggestion=CircularImportAnalyzer._get_circular_import_suggestion(
                         cycle
                     ),
@@ -369,7 +370,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
 
         return 1  # Default to line 1 if not found
 
-    def _get_import_context(self, module_info: ModuleInfo, line_number: int) -> str:
+    @staticmethod
+    def _get_import_context(module_info: ModuleInfo, line_number: int) -> str:
         """Get the context around an import statement."""
 
         # Whitelist of allowed module filenames

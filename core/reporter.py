@@ -176,7 +176,8 @@ class ConsoleReporter(Reporter):
 
         return lines
 
-    def _get_relative_path(self, file_path: str, project_path: str) -> str:
+    @staticmethod
+    def _get_relative_path(file_path: str, project_path: str) -> str:
         """Get relative path for display."""
         try:
             return str(Path(file_path).relative_to(project_path))
