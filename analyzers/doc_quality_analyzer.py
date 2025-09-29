@@ -127,134 +127,154 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         findings = []
         visitor = DocStringVisitor(file_path, self.config)
-        visitor.visit(tree)
+    """Module for analyzing documentation quality in Python source files."""
 
-        # Check module docstring
-        if self.require_module_docstring:
-            module_docstring = (
-                ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
+            visitor.visit(tree)
+
+            # Check module docstring
+            if self.require_module_docstring:
+                module_docstring = (
+                    ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
+                )
+                if not module_docstring:
+                    findings.append(
+                        Finding(
+                            rule_id="DOC001",
+                            category=Category.DOCUMENTATION,
+                            severity=Severity.WARNING,
+                            line_number=1,
+                            message="Module docstring is missing.",
+                            file_path=file_path,
+                        )
+                    )
+
+            return findings
+
+        def _analyze_function_docs(
+            self, func: FunctionInfo, file_path: str
+        ) -> list[Finding]:
+            """Analyze documentation on a per-function basis, returning findings regarding missing or insufficient docstrings."""
+            findings: list[Finding] = []
+
+            if self._should_skip_function(func):
+                return findings
+
+            missing = self._get_missing_docstring_findings(func, file_path)
+            if missing:
+                return missing
+
+            findings.extend(self._get_docstring_length_findings(func, file_path))
+
+            return findings
+
+        def _should_skip_function(self, func: FunctionInfo) -> bool:
+            if func.is_private and not self.check_private_methods:
+                return True
+            if (
+                func.name.startswith("__")
+                and func.name.endswith("__")
+                and not self.check_special_methods
+            ):
+                return True
+            return False
+                return True
+            return False
+
+        def _get_missing_docstring_findings(
+            self, func: FunctionInfo, file_path: str
+        ) -> list[Finding]:
+            (
+                "Identify functions or methods missing a docstring and return "
+                "corresponding findings."
             )
-            if not module_docstring:
+            findings: list[Finding] = []
+            requires = self.require_function_docstring or (
+                func.is_method and self.require_method_docstring
+            )
+            if not func.docstring and requires:
+                severity = Severity.MEDIUM if not func.is_private else Severity.LOW
                 findings.append(
                     Finding(
-                        rule_id="DOC001",
+                        rule_id="missing-function-docstring",
                         category=Category.DOCUMENTATION,
-                        severity=Severity.WARNING,
-                        line_number=1,
-                        message="Module docstring is missing.",
+                        severity=severity,
+                        message=(
+                            f"Missing docstring for "
+                            f"{ 'method' if func.is_method else 'function' } "
+                            f"'{func.name}'"
+                        ),
                         file_path=file_path,
+                        line_number=func.line_number,
+                        column_number=0,
+                        suggestion=(
+                            "Add docstring describing the "
+                            f"{ 'method' if func.is_method else 'function' }"
+                            "'s purpose"
+                        ),
+                        tags={
+                            "docstring",
+                            "function" if not func.is_method else "method",
+                        },
+                    )
+                )
+            return findings
+
+        def _get_docstring_length_findings(
+            self, func: FunctionInfo, file_path: str
+        ) -> list[Finding]:
+            """
+            Check that existing function docstrings meet the minimum
+            requirement and report findings if they are too short.
+            """
+            findings: list[Finding] = []
+            if func.docstring and len(func.docstring.content) < self.min_docstring_length:
+                findings.append(
+                    Finding(
+                        rule_id="short-function-docstring",
+                        category=Category.DOCUMENTATION,
+                        severity=Severity.LOW,
+                        message=(
+                            f"Function docstring too short ({len(func.docstring.content)} chars)"
+                        ),
+                        file_path=file_path,
+                        line_number=func.line_number,
+                        column_number=0,
+                        suggestion=(
+                            "Expand docstring to at least "
+                            f"{self.min_docstring_length} characters"
+                        ),
+                        tags={"docstring", "function", "length"},
                     )
                 )
 
-    def _analyze_function_docs(
-        self, func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
-        findings: list[Finding] = []
+            # Check docstring style
+            if self.enforce_style and func.docstring.style != self.preferred_style:
+                findings.append(
+                    Finding(
+                        rule_id="docstring-style-mismatch",
+                        category=Category.DOCUMENTATION,
+                        severity=Severity.LOW,
+                        message=(
+                            f"Docstring style '{func.docstring.style}' "
+                            f"doesn't match preferred '{self.preferred_style}'"
+                        ),
+                        file_path=file_path,
+                        line_number=func.docstring.line_number,
+                        column_number=0,
+                        suggestion=f"Convert docstring to {self.preferred_style} style",
+                        tags={"docstring", "style"},
+                    )
+                )
 
-        if self._should_skip_function(func):
+            # Check parameter documentation
+            if self.require_parameter_docs:
+                findings.extend(self._check_parameter_docs(func, file_path))
+
+            # Check return documentation
+            if self.require_return_docs and func.return_type != "None":
+                findings.extend(self._check_return_docs(func, file_path))
+
             return findings
-
-        missing = self._get_missing_docstring_findings(func, file_path)
-        if missing:
-            return missing
-
-        findings.extend(self._get_docstring_length_findings(func, file_path))
-
-        return findings
-
-    def _should_skip_function(self, func: FunctionInfo) -> bool:
-        if func.is_private and not self.check_private_methods:
-            return True
-        if (
-            func.name.startswith("__")
-            and func.name.endswith("__")
-            and not self.check_special_methods
-        ):
-            return True
-        return False
-
-    def _get_missing_docstring_findings(
-        self, func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
-        findings: list[Finding] = []
-        requires = self.require_function_docstring or (
-            func.is_method and self.require_method_docstring
-        )
-        if not func.docstring and requires:
-            severity = Severity.MEDIUM if not func.is_private else Severity.LOW
-            findings.append(
-                Finding(
-                    rule_id="missing-function-docstring",
-                    category=Category.DOCUMENTATION,
-                    severity=severity,
-                    message=(
-                        f"Missing docstring for {'method' if func.is_method else 'function'} "
-                        f"'{func.name}'"
-                    ),
-                    file_path=file_path,
-                    line_number=func.line_number,
-                    column_number=0,
-                    suggestion=(
-                        "Add docstring describing the "
-                        f"{'method' if func.is_method else 'function'}"
-                        "'s purpose"
-                    ),
-                    tags={"docstring", "function" if not func.is_method else "method"},
-                )
-            )
-        return findings
-
-    def _get_docstring_length_findings(
-        self, func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
-        findings: list[Finding] = []
-        if func.docstring and len(func.docstring.content) < self.min_docstring_length:
-            findings.append(
-                Finding(
-                    rule_id="short-function-docstring",
-                    category=Category.DOCUMENTATION,
-                    severity=Severity.LOW,
-                    message=(
-                        f"Function docstring too short ({len(func.docstring.content)} chars)"
-                    ),
-                    file_path=file_path,
-                    line_number=func.line_number,
-                    column_number=0,
-                    suggestion=(
-                        "Expand docstring to at least "
-                        f"{self.min_docstring_length} characters"
-                    ),
-                    tags={"docstring", "function", "length"},
-                )
-            )
-        return findings
-
-        # Check docstring style
-        if self.enforce_style and func.docstring.style != self.preferred_style:
-            findings.append(
-                Finding(
-                    rule_id="docstring-style-mismatch",
-                    category=Category.DOCUMENTATION,
-                    severity=Severity.LOW,
-                    message=(
-                        f"Docstring style '{func.docstring.style}' "
-                        f"doesn't match preferred '{self.preferred_style}'"
-                    ),
-                    file_path=file_path,
-                    line_number=func.docstring.line_number,
-                    column_number=0,
-                    suggestion=f"Convert docstring to {self.preferred_style} style",
-                    tags={"docstring", "style"},
-                )
-            )
-
-        # Check parameter documentation
-        if self.require_parameter_docs:
-            findings.extend(self._check_parameter_docs(func, file_path))
-
-        # Check return documentation
-        if self.require_return_docs and func.return_type != "None":
-            findings.extend(self._check_return_docs(func, file_path))
 
         # Check type consistency
         if self.check_type_consistency:
@@ -539,15 +559,12 @@ class DocStringVisitor(ast.NodeVisitor):
             parameters=parameters,
             parameter_types=parameter_types,
             return_type=return_type,
-            is_private=node.name.startswith("_"),
+            decorators=decorators,
             is_method=is_method,
             is_property=is_property,
-            decorators=decorators,
-            line_number=node.lineno,
-            docstring=docstring_info,
+            docstring=docstring_info
         )
-
-    self.functions.append(func_info)
+        self.functions.append(func_info)
 
 
 def visit_ClassDef(self, node: ast.ClassDef) -> None:
@@ -589,10 +606,22 @@ def _detect_docstring_style(content: str) -> str:
     return "plain"
 
 
+"""Documentation quality analyzer module.
+
+Provides functionality to parse and analyze docstrings in various styles such as
+Google, NumPy, and Sphinx, and to extract relevant sections for validation.
+"""
+
+def extract_google_sections(self, lines):
+    return self._extract_google_sections(lines)
+
+def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
+    return self._parse_google_parameters(content, docstring_info)
+
 def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     """Parse Google-style docstring."""
     lines = content.split("\n")
-    raw_sections = self._extract_google_sections(lines)
+    raw_sections = self.extract_google_sections(lines)
 
     # Assign joined section content to docstring_info.sections
     for name, content_lines in raw_sections.items():
@@ -600,16 +629,18 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
 
     # Helper functions for section parsing
     def _handle_returns():
+        """Extract and assign the 'returns' section from parsed Google docstring to docstring_info."""
         docstring_info.returns = docstring_info.sections["returns"].strip()
 
     def _handle_examples():
+        """Extract and assign the 'examples' section code blocks from parsed Google docstring to docstring_info."""
         example_text = docstring_info.sections["examples"]
         code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
         docstring_info.examples = [block.strip() for block in code_blocks]
 
     # Section handlers mapping
     handlers = {
-        "parameters": lambda: self._parse_google_parameters(
+        "parameters": lambda: self.parse_google_parameters(
             docstring_info.sections["parameters"], docstring_info
         ),
         "returns": _handle_returns,
@@ -662,110 +693,55 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
 
 
 # Public wrappers for protected methods
-def detect_docstring_style(self, content: str) -> str:
+ def detect_docstring_style(self, content: str) -> str:
+    """Determine the style of the provided docstring content.
+
+    Returns the detected style as a string.
+    """
     return self._detect_docstring_style(content)
 
+ def extract_google_sections(self, lines) -> dict:
+    """Extract sections from Google-style docstring lines.
 
-def extract_google_sections(self, lines) -> dict:
+    Returns a dict mapping section names to their content lines.
+    """
     return self._extract_google_sections(lines)
 
+ def parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+    """Public wrapper to parse Google-style docstring.
 
-def parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+    Populates the provided DocstringInfo object with parsed sections.
+    """
     return self._parse_google_docstring(content, docstring_info)
 
+ def detect_docstring_style(self, content: str) -> DocstringStyle:
+    """Public wrapper to detect the style of a docstring."""
+    return self._detect_docstring_style(content)
 
-def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
-    return self._parse_google_parameters(content, docstring_info)
+ def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
+    """Public wrapper to parse 'parameters' section of Google-style docstring.
 
+    Populates parameters info in the provided DocstringInfo.
+    """
+    return self.parse_google_parameters(content, docstring_info)
 
-def parse_numpy_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
-    return self._parse_numpy_docstring(content, docstring_info)
+    Populates the provided DocstringInfo with parsed NumPy docstring sections.
+    """
+    return self.parse_numpy_docstring(content, docstring_info)
 
+ def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
+     """Public wrapper to parse Sphinx-style docstring.
 
-def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
-    return self._parse_sphinx_docstring(content, docstring_info)
+     Populates the provided DocstringInfo with parsed Sphinx docstring sections.
+     """
+     return self._parse_sphinx_docstring(content, docstring_info)
 
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show verbose output",
-    )
+ def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
+     """Public wrapper to parse Google-style docstring.
 
-    args = parser.parse_args()
-
-    # Load configuration
-    config_manager = ConfigManager(args.config)
-    config = config_manager.get_analyzer_config("documentation")
-
-    # Override config with command-line arguments
-    if args.style:
-        config["preferred_style"] = args.style
-    if args.enforce_style:
-        config["enforce_style"] = True
-    if args.no_private:
-        config["check_private_methods"] = False
-    if args.no_examples:
-        config["validate_examples"] = False
-
-    # Create analyzer
-    analyzer = DocumentationAnalyzer(config)
-
-    try:
-        if args.verbose:
-            sys.stderr.write(f"Starting documentation analysis of {args.path}...\n")
-
-        # Analyze file or project
-        if Path(args.path).is_file():
-            findings = analyzer.analyze_file(args.path)
-            result = AnalysisResult(
-                analyzer_name=analyzer.name,
-                version=analyzer.version,
-                timestamp=datetime.now().isoformat(),
-                project_path=str(Path(args.path).parent),
-            )
-            result.findings = findings
-            result.files_analyzed = [args.path]
-        else:
-            result = analyzer.analyze_project(args.path)
-
-        if args.verbose:
-            stats = result.get_summary_stats()
-            sys.stderr.write(
-                f"Analysis complete: {stats['total_findings']} "
-                "documentation issues found\n"
-            )
-
-        # Create reporter and output results
-        reporter_config = {
-            "use_colors": not args.output_file,
-            "show_context": True,
-            "max_findings_per_file": 20,
-        }
-
-        reporter = create_reporter(args.output_format, reporter_config)
-
-        if args.output_file:
-            reporter.save_results(result, args.output_file)
-            if args.verbose:
-                sys.stderr.write(f"Results saved to {args.output_file}\n")
-        else:
-            reporter.print_results(result)
-
-        # Exit with appropriate code
-        stats = result.get_summary_stats()
-        if stats["high_severity"] > 0:
-            sys.exit(2)
-        elif stats["medium_severity"] > 0:
-            sys.exit(1)
-        else:
-            sys.exit(0)
-
-    except Exception as e:
-        sys.stderr.write(f"Error during analysis: {e}\n")
-        if args.verbose:
-            traceback.print_exc()
-        sys.exit(1)
-
+     Populates the provided DocstringInfo with parsed Google docstring sections.
+     """
+     return self._parse_google_parameters(content, docstring_info)
 
 if __name__ == "__main__":
     main()
