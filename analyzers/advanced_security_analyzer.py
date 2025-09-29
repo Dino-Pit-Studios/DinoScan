@@ -469,9 +469,11 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                         finding = Finding(
                             rule_id="security-entropy-high",
                             category=Category.SECURITY,
-                            severity=Severity.MEDIUM
-                            if entropy_score < 5.0
-                            else Severity.HIGH,
+                            severity=(
+                                Severity.MEDIUM
+                                if entropy_score < 5.0
+                                else Severity.HIGH
+                            ),
                             message=f"High-entropy string detected (entropy: {entropy_score:.2f})",
                             file_path=file_path,
                             line_number=line_num,
