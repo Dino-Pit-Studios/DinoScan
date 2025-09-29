@@ -6,10 +6,11 @@ for integration with different tools and workflows.
 """
 
 import json
-import xml.etree.ElementTree as ET
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+
+from defusedxml.ElementTree import parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
 

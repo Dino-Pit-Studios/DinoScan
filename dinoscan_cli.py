@@ -141,8 +141,9 @@ For more information, visit: https://github.com/DinoAir/DinoScan
                 files_analyzed.extend(result.files_analyzed)
 
         # Create reporter and output results
-        from core.base_analyzer import AnalysisResult
         from datetime import datetime
+
+        from core.base_analyzer import AnalysisResult
 
         # Create an AnalysisResult object for the reporter
         result = AnalysisResult(
