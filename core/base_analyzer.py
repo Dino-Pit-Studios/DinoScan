@@ -562,8 +562,8 @@ class ASTAnalyzer(BaseAnalyzer):
         """Get the name of an AST node if it has one."""
         if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef)):
             return node.name
-        elif isinstance(node, ast.Name):
+        if isinstance(node, ast.Name):
             return node.id
-        elif isinstance(node, ast.arg):
+        if isinstance(node, ast.arg):
             return node.arg
         return ""
