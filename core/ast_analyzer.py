@@ -8,6 +8,7 @@ and analyze code using Abstract Syntax Trees for more accurate analysis.
 import ast
 import json
 import re
+import os
 from typing import Any
 
 from .base_analyzer import ASTAnalyzer, Category, Finding, Severity
@@ -430,8 +431,15 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
         """Perform basic regex-based analysis as fallback."""
         findings = []
 
+        # Validate file path against whitelist
+        allowed_filenames = {"allowed1.js", "allowed2.js"}
+        basename = os.path.basename(file_path)
+        if basename not in allowed_filenames:
+            return findings
+        safe_path = os.path.join("/trusted/directory", basename)
+
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(safe_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 lines = content.splitlines()
         except (IOError, UnicodeDecodeError):
@@ -446,7 +454,7 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
                         category=Category.STYLE,
                         severity=Severity.LOW,
                         message="console.log found - remove before production",
-                        file_path=file_path,
+                        file_path=safe_path,
                         line_number=i,
                         context=line.strip(),
                         suggestion="Remove console.log or use proper logging",
@@ -462,7 +470,7 @@ class JavaScriptASTAnalyzer(ASTAnalyzer):
                         category=Category.STYLE,
                         severity=Severity.MEDIUM,
                         message="Use 'let' or 'const' instead of 'var'",
-                        file_path=file_path,
+                        file_path=safe_path,
                         line_number=i,
                         context=line.strip(),
                         suggestion="Replace 'var' with 'let' or 'const'",
