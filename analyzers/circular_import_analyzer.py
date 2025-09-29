@@ -19,13 +19,13 @@ Enhanced features over PowerShell version:
 
 import argparse
 import ast
+import logging
 import os
 import sys
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-import logging
 
 from core.base_analyzer import ASTAnalyzer, Category, Finding, Severity
 from core.config_manager import ConfigManager
@@ -383,7 +383,12 @@ class CircularImportAnalyzer(ASTAnalyzer):
                 if 1 <= line_number <= len(lines):
                     return lines[line_number - 1].strip()
         except Exception as e:
-            logging.warning("Failed to get import context from '%s' (line %d): %s", module_info.file_path, line_number, e)
+            logging.warning(
+                "Failed to get import context from '%s' (line %d): %s",
+                module_info.file_path,
+                line_number,
+                e,
+            )
 
         return ""
 
