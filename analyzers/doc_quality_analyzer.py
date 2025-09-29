@@ -137,11 +137,12 @@ class DocumentationAnalyzer(ASTAnalyzer):
             if not module_docstring:
                 findings.append(
                     Finding(
+                        rule_id="DOC001",
                         category=Category.DOCUMENTATION,
                         severity=Severity.WARNING,
-                        line=1,
+                        line_number=1,
                         message="Module docstring is missing.",
-                        file=file_path,
+                        file_path=file_path,
                     )
                 )
 
