@@ -689,12 +689,14 @@ Examples:
                     f"issues found\n"
                 )
 
+
             # Create reporter and output results
             reporter_config = {
                 "use_colors": not args.output_file,
                 "show_context": True,
                 "max_findings_per_file": 25,
             }
+
 
             reporter = create_reporter(args.output_format, reporter_config)
 
@@ -720,4 +722,5 @@ Examples:
 
 
 if __name__ == "__main__":
+
     DuplicateCodeAnalyzer.main(sys.argv)
