@@ -4,3 +4,11 @@
 .github\instructions\codacy.instructions.md
 codacy-fixes.txt.applied
 
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+

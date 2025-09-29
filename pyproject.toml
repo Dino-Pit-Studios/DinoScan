@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dinoscan"
-version = "2.0.1"
+version = "2.0.2"
 description = "Comprehensive AST-based Python code analysis toolkit"
 authors = ["DinoScan Development Team <dev@dinoair.com>"]
 license = "MIT"
