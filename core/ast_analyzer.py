@@ -7,8 +7,8 @@ and analyze code using Abstract Syntax Trees for more accurate analysis.
 
 import ast
 import json
-import re
 import os
+import re
 from typing import Any
 
 from .base_analyzer import ASTAnalyzer, Category, Finding, Severity

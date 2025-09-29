@@ -369,6 +369,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
     def _get_import_context(self, module_info: ModuleInfo, line_number: int) -> str:
         """Get the context around an import statement."""
         import os
+
         # Whitelist of allowed module filenames
         allowed_filenames = {"module1.py", "module2.py", "module3.py"}
         filename = os.path.basename(module_info.file_path)
