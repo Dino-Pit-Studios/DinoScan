@@ -34,7 +34,6 @@ from core.base_analyzer import AnalysisResult, ASTAnalyzer, Category, Finding, S
 from core.config_manager import ConfigManager
 from core.reporter import create_reporter
 
-
 parser = argparse.ArgumentParser(
     description="DinoScan Documentation Quality Analyzer: Analyze and validate docstrings and documentation quality in Python code.",
     epilog="""Examples:
