@@ -604,11 +604,6 @@ def _detect_docstring_style(content: str) -> str:
     return "plain"
 
 
-"""Documentation quality analyzer module.
-
-Provides functionality to parse and analyze docstrings in various styles such as
-Google, NumPy, and Sphinx, and to extract relevant sections for validation.
-"""
 
 
 
