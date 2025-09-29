@@ -133,9 +133,21 @@ class DocumentationAnalyzer(ASTAnalyzer):
         if self.require_module_docstring:
             module_docstring = (
                 ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
-    def _analyze_function_docs(
-        self, func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
+            )
+            if not module_docstring:
+                findings.append(
+                    Finding(
+                        category=Category.DOCUMENTATION,
+                        severity=Severity.WARNING,
+                        line=1,
+                        message="Module docstring is missing.",
+                        file=file_path,
+                    )
+                )
+
+        def _analyze_function_docs(
+            self, func: FunctionInfo, file_path: str
+        ) -> list[Finding]:
         findings: list[Finding] = []
 
         if self._should_skip_function(func):
