@@ -80,7 +80,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: ${{ hashFiles('**/package-lock.json') != '' && 'npm' || '' }}
 
       # Install Python dependencies for better analysis
       - name: Install Python dependencies
