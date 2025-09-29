@@ -339,7 +339,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         self.entropy_analyzer = EntropyAnalyzer(self.config)
         self.pattern_matcher = PatternMatcher(self.pii_allowlist_manager)
 
-    def get_supported_extensions(self) -> set[str]:
+    @staticmethod
+    def get_supported_extensions() -> set[str]:
         """Return supported file extensions."""
         return {
             ".py",
