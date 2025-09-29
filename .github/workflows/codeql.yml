@@ -7,7 +7,7 @@
 
 name: "CodeQL"
 
-on:
+"on":
   push:
     branches: [ "main", "master", "develop" ]
   pull_request:
@@ -61,16 +61,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: 'vscode-extension/package-lock.json'
 
-    # Install dependencies and build TypeScript
-    - name: Install dependencies and build
+    # Install dependencies (CodeQL can analyze source files without compilation)
+    - name: Install dependencies
       if: matrix.language == 'javascript'
       run: |
         cd vscode-extension
         npm ci
-        npm run compile
 
     # No build step needed for Python - CodeQL will analyze source directly
 
