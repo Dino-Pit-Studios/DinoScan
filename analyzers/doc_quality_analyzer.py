@@ -41,6 +41,8 @@ parser = argparse.ArgumentParser(
   %(prog)s /path/to/project --output-format json --output-file docs.json
 """,
 )
+
+
 class DocstringInfo:
     """Information about a docstring."""
 
@@ -314,9 +316,7 @@ class DocumentationAnalyzer(ASTAnalyzer):
         return findings
 
     @staticmethod
-    def _check_parameter_docs(
-        func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
+    def _check_parameter_docs(func: FunctionInfo, file_path: str) -> list[Finding]:
         """Check parameter documentation completeness."""
         findings: list[Finding] = []
 
@@ -374,9 +374,7 @@ class DocumentationAnalyzer(ASTAnalyzer):
         return findings
 
     @staticmethod
-    def _check_return_docs(
-        func: FunctionInfo, file_path: str
-    ) -> list[Finding]:
+    def _check_return_docs(func: FunctionInfo, file_path: str) -> list[Finding]:
         """Check return value documentation."""
         findings: list[Finding] = []
 
@@ -440,7 +438,8 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
     @staticmethod
     def _validate_examples(
-        func: FunctionInfo, file_path: str,
+        func: FunctionInfo,
+        file_path: str,
     ) -> list[Finding]:
         """Validate code examples in docstring."""
         findings: list[Finding] = []
@@ -593,6 +592,7 @@ class DocStringVisitor(ast.NodeVisitor):
     self.generic_visit(node)
     self.current_class = old_class
 
+
 @staticmethod
 def _detect_docstring_style(content: str) -> str:
     """Detect the docstring style."""
@@ -610,6 +610,7 @@ def _detect_docstring_style(content: str) -> str:
 
     return "plain"
 
+
 def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
     """Parse docstring to extract structured information."""
     docstring_info = DocstringInfo(content=content, line_number=line_number)
@@ -626,6 +627,7 @@ def _parse_docstring(self, content: str, line_number: int) -> DocstringInfo:
         self._parse_numpy_docstring(content, docstring_info)
 
     return docstring_info
+
 
 @staticmethod
 def _extract_google_sections(lines: list[str]) -> dict[str, list[str]]:
@@ -657,9 +659,8 @@ def _extract_google_sections(lines: list[str]) -> dict[str, list[str]]:
 
     return sections
 
-def _parse_google_docstring(
-    self, content: str, docstring_info: DocstringInfo
-) -> None:
+
+def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     """Parse Google-style docstring."""
     lines = content.split("\n")
     raw_sections = self._extract_google_sections(lines)
@@ -684,7 +685,6 @@ def _parse_google_docstring(
         # Extract code blocks (simplified)
         code_blocks = re.findall(r">>> (.+?)(?=>>>|\Z)", example_text, re.DOTALL)
         docstring_info.examples = [block.strip() for block in code_blocks]
-
 
     parser.add_argument("path", help="Path to analyze (file or directory)")
 
