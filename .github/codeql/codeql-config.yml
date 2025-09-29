@@ -1,0 +1,152 @@
+# CodeQL Configuration for DinoScan
+# This file configures what CodeQL analyzes and excludes
+
+name: "DinoScan CodeQL Configuration"
+
+# Disable default queries that might be too noisy
+disable-default-queries: false
+
+# Custom query packs (optional - can be added later)
+packs:
+  - codeql/python-queries
+  - codeql/javascript-queries
+
+# Paths to exclude from analysis
+paths-ignore:
+  # Virtual environments and package managers
+  - ".venv/**"
+  - "**/venv/**"
+  - "**/env/**"
+  - "**/node_modules/**"
+  - "**/__pycache__/**"
+  - "**/.pytest_cache/**"
+  - "**/.mypy_cache/**"
+  - "**/.tox/**"
+  - "**/.nox/**"
+
+  # Build outputs and distributions
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/out/**"
+  - "**/*.egg-info/**"
+  - "**/wheels/**"
+  - "**/eggs/**"
+  - "**/.eggs/**"
+
+  # Binary and compiled files
+  - "**/*.pyc"
+  - "**/*.pyo"
+  - "**/*.pyd"
+  - "**/*.so"
+  - "**/*.dll"
+  - "**/*.exe"
+  - "**/*.whl"
+  - "**/*.vsix"
+
+  # IDE and editor files
+  - ".vscode/**"
+  - ".idea/**"
+  - "**/*.code-workspace"
+  - "**/*.swp"
+  - "**/*.swo"
+
+  # Version control
+  - ".git/**"
+  - "**/.git/**"
+
+  # Cache and temporary files
+  - "**/*.tmp"
+  - "**/*.temp"
+  - "**/tmp/**"
+  - "**/temp/**"
+  - "**/*.log"
+  - "**/*.cache"
+  - "**/.coverage"
+  - "**/htmlcov/**"
+  - "**/cover/**"
+
+  # Configuration and meta directories
+  - ".codacy/**"
+  - ".qodo/**"
+  - ".deepsource.toml"
+  - "static-analysis.datadog.yml"
+  - "codacy-fixes.txt.applied"
+
+  # OS generated files
+  - "**/.DS_Store"
+  - "**/Thumbs.db"
+  - "**/*.DS_Store?"
+  - "**/.Spotlight-V100"
+  - "**/.Trashes"
+  - "**/ehthumbs.db"
+
+  # Test files that are intentionally broken
+  - "**/test_broken.py"
+  - "**/broken_*.py"
+  - "**/*_broken.*"
+  - "**/test_data/**"
+  - "**/fixtures/**"
+
+  # Documentation files (may contain code snippets that confuse analysis)
+  - "**/*.md"
+  - "**/docs/**"
+  - "**/documentation/**"
+  - "**/*.rst"
+  - "**/*.txt"
+
+  # Media and binary assets
+  - "**/*.png"
+  - "**/*.jpg"
+  - "**/*.jpeg"
+  - "**/*.gif"
+  - "**/*.ico"
+  - "**/*.svg"
+  - "**/*.pdf"
+  - "**/*.bmp"
+  - "**/*.tiff"
+
+  # Package manager files with potential security issues
+  - "**/package-lock.json"
+  - "**/yarn.lock"
+  - "**/Pipfile.lock"
+  - "**/poetry.lock"
+
+  # Shell scripts (platform-specific, may cause issues)
+  - "**/*.sh"
+  - "**/*.bat"
+  - "**/*.cmd"
+  - "**/*.ps1"
+
+  # Jupyter notebooks (can be problematic for analysis)
+  - "**/*.ipynb"
+
+  # Docker and container files
+  - "**/Dockerfile*"
+  - "**/.dockerignore"
+  - "**/docker-compose*.yml"
+
+# Paths to explicitly include (override exclusions if needed)
+paths:
+  # Main Python source code
+  - "analyzers/**/*.py"
+  - "core/**/*.py"
+  - "*.py"
+
+  # VS Code extension TypeScript/JavaScript source
+  - "vscode-extension/src/**/*.ts"
+  - "vscode-extension/src/**/*.js"
+
+  # Configuration files we want to analyze
+  - "pyproject.toml"
+  - "package.json"
+  - "tsconfig.json"
+
+# Query filters to reduce false positives
+query-filters:
+  # Exclude queries that are too noisy for this project
+  - exclude:
+      id: py/clear-text-logging-sensitive-data
+  - exclude:
+      id: py/hardcoded-credentials
+      # Only for test files
+      files: "**/test_*.py"
