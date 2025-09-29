@@ -347,7 +347,9 @@ class CircularImportAnalyzer(ASTAnalyzer):
                     file_path=module_info.file_path,
                     line_number=import_line,
                     context=self._get_import_context(module_info, import_line),
-                    suggestion=CircularImportAnalyzer._get_circular_import_suggestion(cycle),
+                    suggestion=CircularImportAnalyzer._get_circular_import_suggestion(
+                        cycle
+                    ),
                     tags={"circular-import", f"cycle-length-{len(cycle)}"},
                 )
                 findings.append(finding)
