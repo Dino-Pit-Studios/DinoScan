@@ -268,7 +268,7 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         normalized = re.sub(r'"[^"]*"', "STR", normalized)
         normalized = re.sub(r"'[^']*'", "STR", normalized)
 
-        return hashlib.md5(normalized.encode()).hexdigest()
+        return hashlib.sha256(normalized.encode()).hexdigest()
 
     def _find_duplicates_in_blocks(
         self, blocks: list[CodeBlock], within_file: bool
