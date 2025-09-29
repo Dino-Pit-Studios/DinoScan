@@ -558,7 +558,9 @@ class DocStringVisitor(ast.NodeVisitor):
             decorators=decorators,
             is_method=is_method,
             is_property=is_property,
-            docstring=docstring_info
+            docstring=docstring_info,
+            is_private=node.name.startswith("_"),
+            line_number=node.lineno
         )
         self.functions.append(func_info)
 
