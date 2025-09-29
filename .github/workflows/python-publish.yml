@@ -11,6 +11,25 @@ name: Upload Python Package
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (leave empty to use current pyproject.toml version)"
+        required: false
+        type: string
+      environment:
+        description: "Target environment"
+        required: true
+        default: "pypi"
+        type: choice
+        options:
+          - pypi
+          - testpypi
+      force_publish:
+        description: "Force publish even if version already exists"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -25,6 +44,40 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+
+      - name: Display trigger information
+        run: |
+          echo "Triggered by: ${{ github.event_name }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "Manual dispatch with inputs:"
+            echo "  Version: ${{ github.event.inputs.version || 'Using pyproject.toml version' }}"
+            echo "  Environment: ${{ github.event.inputs.environment }}"
+            echo "  Force publish: ${{ github.event.inputs.force_publish }}"
+          else
+            echo "Release: ${{ github.event.release.tag_name }}"
+          fi
+
+      - name: Update version if specified
+        if: github.event.inputs.version != ''
+        run: |
+          echo "Updating version to: ${{ github.event.inputs.version }}"
+          python -c "
+          import re
+          with open('pyproject.toml', 'r') as f:
+              content = f.read()
+          content = re.sub(r'version = \"[^\"]*\"', 'version = \"${{ github.event.inputs.version }}\"', content)
+          with open('pyproject.toml', 'w') as f:
+              f.write(content)
+          "
+
+      - name: Display current version
+        run: |
+          python -c "
+          import tomllib
+          with open('pyproject.toml', 'rb') as f:
+              data = tomllib.load(f)
+          print(f'Building version: {data[\"tool\"][\"poetry\"][\"version\"]}')
+          "
 
       - name: Build release distributions
         run: |
@@ -49,13 +102,9 @@ jobs:
     # Dedicated environments with protections for publishing are strongly recommended.
     # For more information, see: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-protection-rules
     environment:
-      name: pypi
-      # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
-      url: https://pypi.org/project/${{ github.event.release.name }}/
-      #
-      # ALTERNATIVE: if your GitHub Release name is the PyPI project version string
-      # ALTERNATIVE: exactly, uncomment the following line instead:
-      # url: https://pypi.org/project/YOURPROJECT/${{ github.event.release.name }}
+      name: ${{ github.event.inputs.environment || 'pypi' }}
+      # Dynamic URL based on environment and project name
+      url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/project/dinoscan/' || 'https://pypi.org/project/dinoscan/' }}
 
     steps:
       - name: Retrieve release distributions
@@ -64,7 +113,16 @@ jobs:
           name: release-dists
           path: dist/
 
+      - name: Display publishing information
+        run: |
+          echo "Publishing to: ${{ github.event.inputs.environment || 'pypi' }}"
+          echo "Force publish: ${{ github.event.inputs.force_publish || 'false' }}"
+          echo "Files to publish:"
+          ls -la dist/
+
       - name: Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          repository-url: ${{ github.event.inputs.environment == 'testpypi' && 'https://test.pypi.org/legacy/' || '' }}
+          skip-existing: ${{ github.event.inputs.force_publish != 'true' }}
