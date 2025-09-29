@@ -177,8 +177,6 @@ class DocumentationAnalyzer(ASTAnalyzer):
             ):
                 return True
             return False
-                return True
-            return False
 
         def _get_missing_docstring_findings(
             self, func: FunctionInfo, file_path: str
