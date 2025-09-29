@@ -714,9 +714,9 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
      return self._parse_sphinx_docstring(content, docstring_info)
 
  def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
-     """Public wrapper to parse Google-style docstring.
+     """Public wrapper to parse Google-style parameters section.
 
-     Populates the provided DocstringInfo with parsed Google docstring sections.
+     Populates parameters info in the provided DocstringInfo.
      """
      return self._parse_google_parameters(content, docstring_info)
 
