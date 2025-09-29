@@ -699,7 +699,7 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
 
  def detect_docstring_style(self, content: str) -> DocstringStyle:
     """Public wrapper to detect the style of a docstring."""
-    return self._detect_docstring_style(content)
+ def detect_docstring_style(self, content: str) -> str:
 
 
 
