@@ -133,6 +133,19 @@ class DocumentationAnalyzer(ASTAnalyzer):
         if self.require_module_docstring:
             module_docstring = (
                 ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
+            )
+            if not module_docstring:
+                findings.append(
+                    Finding(
+                        rule_id="DOC001",
+                        category=Category.DOCUMENTATION,
+                        severity=Severity.WARNING,
+                        line_number=1,
+                        message="Module docstring is missing.",
+                        file_path=file_path,
+                    )
+                )
+
     def _analyze_function_docs(
         self, func: FunctionInfo, file_path: str
     ) -> list[Finding]:
@@ -211,25 +224,6 @@ class DocumentationAnalyzer(ASTAnalyzer):
                 )
             )
         return findings
-                Finding(
-                    rule_id="short-function-docstring",
-                    category=Category.DOCUMENTATION,
-                    severity=Severity.LOW,
-                    message=(
-                        f"Docstring too short for '{func.name}' "
-                        f"({len(func.docstring.content)} chars)"
-                    ),
-                    file_path=file_path,
-                    line_number=func.docstring.line_number,
-                    column_number=0,
-                    suggestion=(
-                        "Expand docstring to at least "
-                        f"{self.min_docstring_length} "
-                        "characters"
-                    ),
-                    tags={"docstring", "function", "length"},
-                )
-            )
 
         # Check docstring style
         if self.enforce_style and func.docstring.style != self.preferred_style:
