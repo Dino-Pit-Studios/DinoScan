@@ -6,11 +6,12 @@ for integration with different tools and workflows.
 """
 
 import json
-from defusedxml.ElementTree import parse
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
 from typing import Any, TextIO
+
+from defusedxml.ElementTree import parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
 
