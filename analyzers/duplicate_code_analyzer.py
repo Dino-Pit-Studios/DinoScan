@@ -324,10 +324,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         findings: list[Finding] = []
 
         # Create findings for all pairs
-        for i in range(len(duplicate_blocks)):
-            for j in range(i + 1, len(duplicate_blocks)):
-                block1, block2 = duplicate_blocks[i], duplicate_blocks[j]
-
+        for i, block1 in enumerate(duplicate_blocks):
+            for j, block2 in enumerate(duplicate_blocks[i + 1 :], start=i + 1):
                 # Skip duplicates in the same file at same location
                 if (
                     block1.file_path == block2.file_path
@@ -385,10 +383,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         """Find similar blocks using fingerprint comparison."""
         findings: list[Finding] = []
 
-        for i in range(len(blocks)):
-            for j in range(i + 1, len(blocks)):
-                block1, block2 = blocks[i], blocks[j]
-
+        for i, block1 in enumerate(blocks):
+            for j, block2 in enumerate(blocks[i + 1 :], start=i + 1):
                 # Skip if same file and within-file analysis is disabled
                 if not within_file and block1.file_path == block2.file_path:
                     continue
@@ -454,7 +450,8 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         # Combine similarities with weights
         return 0.7 * jaccard_similarity + 0.3 * token_similarity
 
-    def _get_context_preview(self, block: CodeBlock) -> str:
+    @staticmethod
+    def _get_context_preview(block: CodeBlock) -> str:
         """Get a preview of the code block for context."""
         lines = block.content.split("\n")[:3]  # First 3 lines
         preview = "\n".join(lines)
@@ -723,6 +720,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    import sys
-
     DuplicateCodeAnalyzer.main(sys.argv)
