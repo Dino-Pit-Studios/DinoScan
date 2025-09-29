@@ -33,7 +33,6 @@ from pathlib import Path
 from typing import Any
 
 from core.base_analyzer import AnalysisResult, ASTAnalyzer, Category, Finding, Severity
-from core.code_tokenizer import CodeTokenizer
 from core.config_manager import ConfigManager
 from core.reporter import create_reporter
 
@@ -62,6 +61,31 @@ class DuplicateMatch:
     similarity_score: float
     match_type: str  # 'exact', 'structural', 'partial'
     line_count: int
+
+
+class CodeTokenizer(ast.NodeVisitor):
+    """AST visitor to extract tokens for similarity analysis."""
+
+    def __init__(self) -> None:
+        """Initialize the CodeTokenizer instance."""
+        self.tokens: list[str] = []
+
+    def visit(self, node: ast.AST) -> None:
+        """Visit AST node and extract tokens."""
+        # Add node type as token
+        self.tokens.append(type(node).__name__)
+
+        # Add specific tokens based on node type
+        if isinstance(node, ast.Name):
+            self.tokens.append("NAME")  # Normalize variable names
+        elif isinstance(node, (ast.Constant, ast.Str, ast.Num)):
+            self.tokens.append("LITERAL")  # Normalize literals
+        elif isinstance(node, ast.operator):
+            self.tokens.append(type(node).__name__)
+        elif isinstance(node, ast.keyword):
+            self.tokens.append("KEYWORD")
+
+        self.generic_visit(node)
 
 
 class DuplicateCodeAnalyzer(ASTAnalyzer):
@@ -565,30 +589,6 @@ class CodeBlockExtractor(ast.NodeVisitor):
         except (IndexError, ValueError):
             return ""
 
-    class CodeTokenizer(ast.NodeVisitor):
-        """AST visitor to extract tokens for similarity analysis."""
-
-        def __init__(self) -> None:
-            """Initialize the CodeTokenizer instance."""
-            self.tokens: list[str] = []
-
-        def visit(self, node: ast.AST) -> None:
-            """Visit AST node and extract tokens."""
-            # Add node type as token
-            self.tokens.append(type(node).__name__)
-
-            # Add specific tokens based on node type
-            if isinstance(node, ast.Name):
-                self.tokens.append("NAME")  # Normalize variable names
-            elif isinstance(node, (ast.Constant, ast.Str, ast.Num)):
-                self.tokens.append("LITERAL")  # Normalize literals
-            elif isinstance(node, ast.operator):
-                self.tokens.append(type(node).__name__)
-            elif isinstance(node, ast.keyword):
-                self.tokens.append("KEYWORD")
-
-            self.generic_visit(node)
-
     @staticmethod
     def main(argv: list) -> None:
         """Main entry point for the duplicate code analyzer."""
@@ -646,86 +646,83 @@ Examples:
             help="Show verbose output",
         )
 
-    args = parser.parse_args()
+        args = parser.parse_args()
 
-    # Load configuration
-    config_manager = ConfigManager(args.config)
-    config = config_manager.get_analyzer_config("duplicate_code")
+        # Load configuration
+        config_manager = ConfigManager(args.config)
+        config = config_manager.get_analyzer_config("duplicate_code")
 
-    # Override config with command-line arguments
-    if args.threshold:
-        config["similarity_threshold"] = args.threshold
-    if args.min_lines:
-        config["min_lines"] = args.min_lines
-    if args.no_structural:
-        config["detect_structural"] = False
-    if args.enable_partial:
-        config["detect_partial"] = True
+        # Override config with command-line arguments
+        if args.threshold:
+            config["similarity_threshold"] = args.threshold
+        if args.min_lines:
+            config["min_lines"] = args.min_lines
+        if args.no_structural:
+            config["detect_structural"] = False
+        if args.enable_partial:
+            config["detect_partial"] = True
 
-    # Create analyzer
-    analyzer = DuplicateCodeAnalyzer(config)
+        # Create analyzer
+        analyzer = DuplicateCodeAnalyzer(config)
 
-    try:
-        if args.verbose:
-            sys.stderr.write(f"Starting duplicate code analysis of {args.path}...\n")
-
-        # Analyze file or project
-        if Path(args.path).is_file():
-            findings = analyzer.analyze_file(args.path)
-            result = AnalysisResult(
-                analyzer_name=analyzer.name,
-                version=analyzer.version,
-                timestamp=datetime.now().isoformat(),
-                project_path=str(Path(args.path).parent),
-            )
-            result.findings = findings
-            result.files_analyzed = [args.path]
-        else:
-            result = analyzer.analyze_project(args.path)
-
-        if args.verbose:
-            stats = result.get_summary_stats()
-            sys.stderr.write(
-                f"Analysis complete: {stats['total_findings']} duplicate code "
-                f"issues found\n"
-            )
-
-        # Create reporter and output results
-        reporter_config = {
-            "use_colors": not args.output_file,
-            "show_context": True,
-            "max_findings_per_file": 25,
-        }
-
-        reporter = create_reporter(args.output_format, reporter_config)
-
-        if args.output_file:
-            reporter.save_results(result, args.output_file)
+        try:
             if args.verbose:
-                sys.stderr.write(f"Results saved to {args.output_file}\n")
-        else:
-            reporter.print_results(result)
+                sys.stderr.write(
+                    f"Starting duplicate code analysis of {args.path}...\n"
+                )
 
-        # Exit with appropriate code
-        stats = result.get_summary_stats()
-        if stats["medium_severity"] > 5:  # Many duplicates
+            # Analyze file or project
+            if Path(args.path).is_file():
+                findings = analyzer.analyze_file(args.path)
+                result = AnalysisResult(
+                    analyzer_name=analyzer.name,
+                    version=analyzer.version,
+                    timestamp=datetime.now().isoformat(),
+                    project_path=str(Path(args.path).parent),
+                )
+                result.findings = findings
+                result.files_analyzed = [args.path]
+            else:
+                result = analyzer.analyze_project(args.path)
+
+            if args.verbose:
+                stats = result.get_summary_stats()
+                sys.stderr.write(
+                    f"Analysis complete: {stats['total_findings']} duplicate code "
+                    f"issues found\n"
+                )
+
+            # Create reporter and output results
+            reporter_config = {
+                "use_colors": not args.output_file,
+                "show_context": True,
+                "max_findings_per_file": 25,
+            }
+
+            reporter = create_reporter(args.output_format, reporter_config)
+
+            if args.output_file:
+                reporter.save_results(result, args.output_file)
+                if args.verbose:
+                    sys.stderr.write(f"Results saved to {args.output_file}\n")
+            else:
+                reporter.print_results(result)
+
+            # Exit with appropriate code
+            stats = result.get_summary_stats()
+            if stats["medium_severity"] > 5:  # Many duplicates
+                sys.exit(1)
+            else:
+                sys.exit(0)
+
+        except Exception as e:
+            sys.stderr.write(f"Error during analysis: {e}\n")
+            if args.verbose:
+                traceback.print_exc()
             sys.exit(1)
-        else:
-            sys.exit(0)
-
-    except Exception as e:
-        sys.stderr.write(f"Error during analysis: {e}\n")
-        if args.verbose:
-            traceback.print_exc()
-        sys.exit(1)
 
 
 if __name__ == "__main__":
+    import sys
 
-    def main():
-        """
-        Main entry point for the duplicate code analyzer.
-        Parses command-line arguments, performs the duplicate code analysis,
-        and outputs or saves the results based on provided options.
-        """
-        raise NotImplementedError()
+    DuplicateCodeAnalyzer.main(sys.argv)
