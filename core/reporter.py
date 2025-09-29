@@ -69,7 +69,7 @@ class ConsoleReporter(Reporter):
     def format_results(self, result: AnalysisResult) -> str:
         """Format results for console output."""
         lines = []
-        
+
         # Build report sections
         lines.extend(self._format_header(result))
         lines.extend(self._format_summary(result))
@@ -77,7 +77,7 @@ class ConsoleReporter(Reporter):
         lines.extend(self._format_category_breakdown(result))
         lines.extend(self._format_detailed_findings(result))
         lines.extend(self._format_footer(result))
-        
+
         return "\n".join(lines)
 
     def _format_header(self, result: AnalysisResult) -> list[str]:
@@ -86,7 +86,7 @@ class ConsoleReporter(Reporter):
             "=" * 80,
             f"DinoScan Analysis Report - {result.analyzer_name}",
             "=" * 80,
-            ""
+            "",
         ]
 
     def _format_summary(self, result: AnalysisResult) -> list[str]:
@@ -97,7 +97,7 @@ class ConsoleReporter(Reporter):
             f"   Files analyzed: {stats['files_analyzed']}",
             f"   Total findings: {stats['total_findings']}",
             f"   Analysis time: {result.analysis_duration:.2f} seconds",
-            ""
+            "",
         ]
 
     def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
@@ -105,7 +105,7 @@ class ConsoleReporter(Reporter):
         stats = result.get_summary_stats()
         if not stats["severity_breakdown"]:
             return []
-        
+
         lines = ["⚠️  Severity Breakdown:"]
         for severity, count in stats["severity_breakdown"].items():
             severity_enum = Severity(severity)
@@ -119,7 +119,7 @@ class ConsoleReporter(Reporter):
         stats = result.get_summary_stats()
         if not stats["category_breakdown"]:
             return []
-            
+
         lines = ["🔍 Category Breakdown:"]
         for category, count in stats["category_breakdown"].items():
             lines.append(f"   {category}: {count}")
@@ -130,19 +130,21 @@ class ConsoleReporter(Reporter):
         """Format the detailed findings section."""
         if not result.findings:
             return []
-            
+
         lines = ["🐛 Detailed Findings:", ""]
         findings_by_file = self._group_findings_by_file(result.findings)
-        
+
         for file_path in sorted(findings_by_file.keys()):
             file_lines = self._format_file_findings(
                 file_path, findings_by_file[file_path], result.project_path
             )
             lines.extend(file_lines)
-            
+
         return lines
 
-    def _group_findings_by_file(self, findings: list[Finding]) -> dict[str, list[Finding]]:
+    def _group_findings_by_file(
+        self, findings: list[Finding]
+    ) -> dict[str, list[Finding]]:
         """Group findings by file path."""
         findings_by_file = {}
         for finding in findings:
@@ -151,25 +153,24 @@ class ConsoleReporter(Reporter):
             findings_by_file[finding.file_path].append(finding)
         return findings_by_file
 
-    def _format_file_findings(self, file_path: str, file_findings: list[Finding], project_path: str) -> list[str]:
+    def _format_file_findings(
+        self, file_path: str, file_findings: list[Finding], project_path: str
+    ) -> list[str]:
         """Format findings for a specific file."""
         # Show relative path
         rel_path = self._get_relative_path(file_path, project_path)
-        
-        lines = [
-            f"📄 {rel_path}",
-            "-" * len(rel_path)
-        ]
-        
+
+        lines = [f"📄 {rel_path}", "-" * len(rel_path)]
+
         # Sort and limit findings
         sorted_findings = self._sort_and_limit_findings(file_findings)
-        
+
         for finding in sorted_findings:
             lines.extend(self._format_single_finding(finding))
-            
+
         # Show remaining count if truncated
         lines.extend(self._format_remaining_count(file_findings))
-        
+
         return lines
 
     def _get_relative_path(self, file_path: str, project_path: str) -> str:
@@ -196,26 +197,26 @@ class ConsoleReporter(Reporter):
     def _format_single_finding(self, finding: Finding) -> list[str]:
         """Format a single finding with all its details."""
         lines = []
-        
+
         # Main finding line
         location = self._format_location(finding)
         finding_line = f"  {location}: [{finding.severity.value}] {finding.message}"
         colored_line = self._colorize(finding_line, finding.severity)
         lines.append(colored_line)
-        
+
         # Context if enabled
         if self.show_context and finding.context:
             lines.append(f"    Context: {finding.context}")
-            
+
         # Suggestion if available
         if finding.suggestion:
             lines.append(f"    💡 Suggestion: {finding.suggestion}")
-            
+
         # Rule ID and CWE
         details = self._format_finding_details(finding)
         if details:
             lines.append(f"    ℹ️  {details}")
-            
+
         lines.append("")
         return lines
 
@@ -233,26 +234,19 @@ class ConsoleReporter(Reporter):
             details.append(f"Rule: {finding.rule_id}")
         if finding.cwe:
             details.append(f"CWE: {finding.cwe}")
-        return ' | '.join(details)
+        return " | ".join(details)
 
     def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
         """Format remaining findings count if truncated."""
         if len(file_findings) <= self.max_findings_per_file:
             return []
-            
+
         remaining = len(file_findings) - self.max_findings_per_file
-        return [
-            f"  ... and {remaining} more findings in this file",
-            ""
-        ]
+        return [f"  ... and {remaining} more findings in this file", ""]
 
     def _format_footer(self, result: AnalysisResult) -> list[str]:
         """Format the report footer."""
-        return [
-            "=" * 80,
-            f"Analysis completed at {result.timestamp}",
-            "=" * 80
-        ]
+        return ["=" * 80, f"Analysis completed at {result.timestamp}", "=" * 80]
 
 
 class JSONReporter(Reporter):
