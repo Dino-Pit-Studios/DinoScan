@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
+import defusedxml.ElementTree as ET
 from defusedxml.ElementTree import parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
@@ -34,9 +35,9 @@ class Reporter(ABC):
             f.write(formatted_output)
 
     @staticmethod
-    def print_results(result: AnalysisResult) -> None:
+    def print_results(reporter, result: AnalysisResult) -> None:
         """Print results to console."""
-        print(self.format_results(result))
+        print(reporter.format_results(result))
 
 
 class ConsoleReporter(Reporter):
