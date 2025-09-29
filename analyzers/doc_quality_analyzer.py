@@ -607,8 +607,6 @@ def _detect_docstring_style(content: str) -> str:
 
 
 
-def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
-    return self._parse_google_parameters(content, docstring_info)
 
 def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     """Parse Google-style docstring."""
