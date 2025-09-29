@@ -13,9 +13,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from .error_handler import ErrorHandler
-from .file_types import FileTypeManager
-from .settings_manager import SettingsManager
+from core.error_handler import ErrorHandler
+from core.file_types import FileTypeManager
+from core.settings_manager import SettingsManager
 
 
 class Severity(Enum):

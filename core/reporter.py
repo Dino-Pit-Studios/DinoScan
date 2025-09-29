@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, TextIO
 
-from .base_analyzer import AnalysisResult, Finding, Severity
+from core.base_analyzer import AnalysisResult, Finding, Severity
 
 
 class Reporter(ABC):

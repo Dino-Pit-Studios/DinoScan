@@ -94,15 +94,13 @@ For more information, visit: https://github.com/DinoAir/DinoScan
     
     try:
         # Import analyzers here to avoid import issues during setup
-        from dinoscan.analyzers import (
-            AdvancedSecurityAnalyzer,
-            CircularImportAnalyzer, 
-            DeadCodeAnalyzer,
-            DocumentationAnalyzer,
-            DuplicateCodeAnalyzer
-        )
-        from dinoscan.core.config_manager import ConfigManager
-        from dinoscan.core.reporter import create_reporter
+        from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
+        from analyzers.circular_import_analyzer import CircularImportAnalyzer
+        from analyzers.dead_code_analyzer import DeadCodeAnalyzer
+        from analyzers.doc_quality_analyzer import DocumentationAnalyzer
+        from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
+        from core.config_manager import ConfigManager
+        from core.reporter import create_reporter
         
         # Initialize configuration
         config_manager = ConfigManager(args.config or Path("config.json"))

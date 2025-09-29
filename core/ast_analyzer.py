@@ -11,7 +11,7 @@ import os
 import re
 from typing import Any
 
-from .base_analyzer import ASTAnalyzer, Category, Finding, Severity
+from core.base_analyzer import ASTAnalyzer, Category, Finding, Severity
 
 
 class PythonASTAnalyzer(ASTAnalyzer):

@@ -10,19 +10,19 @@ __author__ = "DinoScan Development Team"
 __email__ = "dev@dinoair.com"
 __license__ = "MIT"
 
-from .analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
-from .analyzers.circular_import_analyzer import CircularImportAnalyzer  
-from .analyzers.dead_code_analyzer import DeadCodeAnalyzer
-from .analyzers.doc_quality_analyzer import DocumentationAnalyzer
-from .analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
-from .core.base_analyzer import AnalysisResult, Finding, Severity, Category
-from .core.config_manager import ConfigManager
-from .core.reporter import create_reporter
+from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
+from analyzers.circular_import_analyzer import CircularImportAnalyzer
+from analyzers.dead_code_analyzer import DeadCodeAnalyzer
+from analyzers.doc_quality_analyzer import DocumentationAnalyzer
+from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
+from core.base_analyzer import AnalysisResult, Finding, Severity, Category
+from core.config_manager import ConfigManager
+from core.reporter import create_reporter
 
 __all__ = [
     # Core classes
     "AnalysisResult",
-    "Finding", 
+    "Finding",
     "Severity",
     "Category",
     "ConfigManager",
@@ -30,7 +30,7 @@ __all__ = [
     # Analyzers
     "AdvancedSecurityAnalyzer",
     "CircularImportAnalyzer",
-    "DeadCodeAnalyzer", 
+    "DeadCodeAnalyzer",
     "DocumentationAnalyzer",
     "DuplicateCodeAnalyzer",
     # Metadata

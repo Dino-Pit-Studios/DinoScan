@@ -15,14 +15,14 @@ from typing import Any
 
 # Import from package structure
 try:
-    from .analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
-    from .analyzers.circular_import_analyzer import CircularImportAnalyzer
-    from .analyzers.dead_code_analyzer import DeadCodeAnalyzer
-    from .analyzers.doc_quality_analyzer import DocumentationAnalyzer
-    from .analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
-    from .core.base_analyzer import AnalysisResult, Finding, Severity
-    from .core.config_manager import ConfigManager
-    from .core.reporter import create_reporter
+    from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
+    from analyzers.circular_import_analyzer import CircularImportAnalyzer
+    from analyzers.dead_code_analyzer import DeadCodeAnalyzer
+    from analyzers.doc_quality_analyzer import DocumentationAnalyzer
+    from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
+    from core.base_analyzer import AnalysisResult, Finding, Severity
+    from core.config_manager import ConfigManager
+    from core.reporter import create_reporter
 except ImportError:
     # Fallback for direct execution
     from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
