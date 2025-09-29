@@ -382,7 +382,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
         except Exception:
             pass
 
-        return """
+        return ""
 
     def _get_circular_import_suggestion(self, cycle: list[str]) -> str:
         """Get suggestion for resolving circular import."""
@@ -491,7 +491,7 @@ Examples:
   %(prog)s /path/to/project
   %(prog)s /path/to/project --output-format json --output-file circular-imports.json
   %(prog)s /path/to/project --include-external --max-depth 5
-        """,
+        """
     )
 
     parser.add_argument("project_path", help="Path to the project directory to analyze")
