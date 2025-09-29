@@ -6,7 +6,7 @@ for integration with different tools and workflows.
 """
 
 import json
-import xml.etree.ElementTree as ET
+from defusedxml.ElementTree import parse
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
