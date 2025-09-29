@@ -438,8 +438,6 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
                         pattern, lines, file_path, analysis_type
                     )
                 )
-                    )
-                )
 
         return findings
 
