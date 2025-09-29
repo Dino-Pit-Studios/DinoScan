@@ -1,29 +1,5 @@
 # For most projects, this workflow file will not need changing; you simply need
-# to commit it to       # Install Node.js dependencies for better analysis
-      - name: Install Node.js dependencies
-        if: matrix.language == 'javascript-typescript' && hashFiles('**/package.json') != ''
-        run: |
-          # Install root dependencies if package.json exists
-          if [ -f package.json ]; then
-            if [ -f package-lock.json ]; then
-              npm ci
-            else
-              npm install
-            fi
-          fi
-          
-          # Install vscode-extension dependencies if they exist
-          if [ -f vscode-extension/package.json ]; then
-            cd vscode-extension
-            if [ -f package-lock.json ]; then
-              npm ci
-            elif [ -f yarn.lock ]; then
-              npm install -g yarn && yarn install --frozen-lockfile
-            else
-              npm install
-            fi
-            cd ..
-          fitory.
+# to commit it to your repository.
 #
 # You may wish to alter this file to override the set of languages analyzed,
 # or to provide custom queries or build logic.
@@ -104,11 +80,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          # Only enable cache if any package-lock.json exists (root or vscode-extension)
           cache: ${{ hashFiles('**/package-lock.json') != '' && 'npm' || '' }}
-          cache-dependency-path: |
-            package-lock.json
-            vscode-extension/package-lock.json
 
       # Install Python dependencies for better analysis
       - name: Install Python dependencies
@@ -125,12 +97,26 @@ jobs:
       - name: Install Node.js dependencies
         if: matrix.language == 'javascript-typescript' && hashFiles('**/package.json') != ''
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          elif [ -f yarn.lock ]; then
-            npm install -g yarn && yarn install --frozen-lockfile
-          elif [ -f package.json ]; then
-            npm install
+          # Install root dependencies if package.json exists
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then
+              npm ci
+            else
+              npm install
+            fi
+          fi
+          
+          # Install vscode-extension dependencies if they exist
+          if [ -f vscode-extension/package.json ]; then
+            cd vscode-extension
+            if [ -f package-lock.json ]; then
+              npm ci
+            elif [ -f yarn.lock ]; then
+              npm install -g yarn && yarn install --frozen-lockfile
+            else
+              npm install
+            fi
+            cd ..
           fi
 
       # Initializes the CodeQL tools for scanning.
@@ -156,10 +142,11 @@ jobs:
               - "**/build/**"
               - "**/dist/**"
 
-            # Include standard query packs (security-queries pack doesn't exist)
+            # Include additional query packs
             packs:
               - codeql/python-queries
               - codeql/javascript-queries
+              - codeql/security-queries
 
       # If the analyze step fails for one of the languages you are analyzing with
       # "We were unable to automatically build your code", modify the matrix above
