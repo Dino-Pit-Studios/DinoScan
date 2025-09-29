@@ -35,9 +35,9 @@ class Reporter(ABC):
             f.write(formatted_output)
 
     @staticmethod
-    def print_results(self, result: AnalysisResult) -> None:
+    def print_results(reporter, result: AnalysisResult) -> None:
         """Print results to console."""
-        print(self.format_results(result))
+        print(reporter.format_results(result))
 
 
 class ConsoleReporter(Reporter):
