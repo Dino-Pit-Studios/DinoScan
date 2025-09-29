@@ -127,59 +127,57 @@ class DocumentationAnalyzer(ASTAnalyzer):
 
         findings = []
         visitor = DocStringVisitor(file_path, self.config)
-    """Module for analyzing documentation quality in Python source files."""
+        visitor.visit(tree)
 
-            visitor.visit(tree)
-
-            # Check module docstring
-            if self.require_module_docstring:
-                module_docstring = (
-                    ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
-                )
-                if not module_docstring:
-                    findings.append(
-                        Finding(
-                            rule_id="DOC001",
-                            category=Category.DOCUMENTATION,
-                            severity=Severity.WARNING,
-                            line_number=1,
-                            message="Module docstring is missing.",
-                            file_path=file_path,
-                        )
+        # Check module docstring
+        if self.require_module_docstring:
+            module_docstring = (
+                ast.get_docstring(tree) if isinstance(tree, ast.Module) else None
+            )
+            if not module_docstring:
+                findings.append(
+                    Finding(
+                        rule_id="DOC001",
+                        category=Category.DOCUMENTATION,
+                        severity=Severity.WARNING,
+                        line_number=1,
+                        message="Module docstring is missing.",
+                        file_path=file_path,
                     )
+                )
 
+        return findings
+
+    def _analyze_function_docs(
+        self, func: FunctionInfo, file_path: str
+    ) -> list[Finding]:
+        """Analyze documentation on a per-function basis, returning findings regarding missing or insufficient docstrings."""
+        findings: list[Finding] = []
+
+        if self._should_skip_function(func):
             return findings
 
-        def _analyze_function_docs(
-            self, func: FunctionInfo, file_path: str
-        ) -> list[Finding]:
-            """Analyze documentation on a per-function basis, returning findings regarding missing or insufficient docstrings."""
-            findings: list[Finding] = []
+        missing = self._get_missing_docstring_findings(func, file_path)
+        if missing:
+            return missing
 
-            if self._should_skip_function(func):
-                return findings
+        findings.extend(self._get_docstring_length_findings(func, file_path))
 
-            missing = self._get_missing_docstring_findings(func, file_path)
-            if missing:
-                return missing
+        return findings
 
-            findings.extend(self._get_docstring_length_findings(func, file_path))
+    def _should_skip_function(self, func: FunctionInfo) -> bool:
+        if func.is_private and not self.check_private_methods:
+            return True
+        if (
+            func.name.startswith("__")
+            and func.name.endswith("__")
+            and not self.check_special_methods
+        ):
+            return True
+        return False
 
-            return findings
-
-        def _should_skip_function(self, func: FunctionInfo) -> bool:
-            if func.is_private and not self.check_private_methods:
-                return True
-            if (
-                func.name.startswith("__")
-                and func.name.endswith("__")
-                and not self.check_special_methods
-            ):
-                return True
-            return False
-
-        def _get_missing_docstring_findings(
-            self, func: FunctionInfo, file_path: str
+    def _get_missing_docstring_findings(
+        self, func: FunctionInfo, file_path: str
         ) -> list[Finding]:
             (
                 "Identify functions or methods missing a docstring and return "
