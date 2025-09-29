@@ -672,7 +672,7 @@ def parse_numpy_docstring(self, content: str, docstring_info: DocstringInfo) -> 
 
 def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_sphinx_docstring(content, docstring_info)
-        help="Skip example validation",
+
 
     parser.add_argument(
         "--verbose",
