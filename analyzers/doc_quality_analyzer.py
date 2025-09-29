@@ -165,7 +165,11 @@ class DocumentationAnalyzer(ASTAnalyzer):
     def _should_skip_function(self, func: FunctionInfo) -> bool:
         if func.is_private and not self.check_private_methods:
             return True
-        if func.name.startswith("__") and func.name.endswith("__") and not self.check_special_methods:
+        if (
+            func.name.startswith("__")
+            and func.name.endswith("__")
+            and not self.check_special_methods
+        ):
             return True
         return False
 
@@ -545,6 +549,7 @@ class DocStringVisitor(ast.NodeVisitor):
 
     self.functions.append(func_info)
 
+
 def visit_ClassDef(self, node: ast.ClassDef) -> None:
     """Visit class definition."""
     old_class = self.current_class
@@ -582,6 +587,7 @@ def _detect_docstring_style(content: str) -> str:
         return "numpy"
 
     return "plain"
+
 
 def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     """Parse Google-style docstring."""
@@ -654,25 +660,30 @@ def _parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -
         help="Skip private methods and functions",
     )
 
+
 # Public wrappers for protected methods
 def detect_docstring_style(self, content: str) -> str:
     return self._detect_docstring_style(content)
 
+
 def extract_google_sections(self, lines) -> dict:
     return self._extract_google_sections(lines)
+
 
 def parse_google_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_google_docstring(content, docstring_info)
 
+
 def parse_google_parameters(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_google_parameters(content, docstring_info)
+
 
 def parse_numpy_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_numpy_docstring(content, docstring_info)
 
+
 def parse_sphinx_docstring(self, content: str, docstring_info: DocstringInfo) -> None:
     return self._parse_sphinx_docstring(content, docstring_info)
-
 
     parser.add_argument(
         "--verbose",
