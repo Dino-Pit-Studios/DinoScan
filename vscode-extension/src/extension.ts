@@ -256,7 +256,7 @@ async function analyzeDocument(
   diagnosticProvider: DinoscanDiagnosticProvider,
   statusBar: DinoscanStatusBar,
   output: vscode.OutputChannel,
-  showProgress: boolean = true
+  showProgress = true
 ): Promise<number | null> {
   const config = vscode.workspace.getConfiguration('dinoscan');
   const maxFileSize = config.get<number>('maxFileSize', 1048576); // 1MB default
