@@ -10,9 +10,7 @@ import sys
 from pathlib import Path
 
 
-def main():
-    """Main entry point for DinoScan CLI."""
-
+def create_parser():
     parser = argparse.ArgumentParser(
         description="DinoScan - Comprehensive Python static analysis toolkit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -61,6 +59,17 @@ For more information, visit: https://github.com/DinoAir/DinoScan
 
     parser.add_argument(
         "--exclude",
+    )
+
+    return parser
+
+
+def main():
+    """Main entry point for DinoScan CLI."""
+
+    parser = create_parser()
+    args = parser.parse_args()
+    # Remaining CLI logic follows
         action="append",
         help="Exclude pattern (can be used multiple times)",
     )
