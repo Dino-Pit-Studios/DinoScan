@@ -6,9 +6,6 @@
  */
 
 import { spawn, spawnSync } from "child_process";
-import * as fs from "fs";
-import * as path from "path";
-import * as vscode from "vscode";
 import type { ExtensionContext } from "vscode";
 import type { DinoscanFinding } from "./diagnosticProvider";
 import { DinoscanDiagnosticProvider } from "./diagnosticProvider";

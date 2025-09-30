@@ -5,17 +5,27 @@
  * including webview panels and output channels.
  */
 
-import * as vscode from "vscode";
-import * as path from "path";
+import { ExtensionContext, OutputChannel, WebviewPanel, window, ViewColumn, Uri } from "vscode";
+import { join } from "path";
 
+/**
+ * DinoscanReporter class.
+ *
+ * Responsible for generating and displaying DinoScan analysis reports
+ * in webview panels and output channels.
+ */
 export class DinoscanReporter {
-  private readonly context: vscode.ExtensionContext;
-  private readonly outputChannel: vscode.OutputChannel;
-  private reportPanel: vscode.WebviewPanel | undefined;
+  private readonly context: ExtensionContext;
+  private readonly outputChannel: OutputChannel;
+  private reportPanel: WebviewPanel | undefined;
 
-  constructor(context: vscode.ExtensionContext) {
+  /**
+   * Creates a new instance of DinoscanReporter.
+   * @param context ExtensionContext from the VSCode extension.
+   */
+  constructor(context: ExtensionContext) {
     this.context = context;
-    this.outputChannel = vscode.window.createOutputChannel("DinoScan");
+    this.outputChannel = window.createOutputChannel("DinoScan");
   }
 
   /**
@@ -27,14 +37,14 @@ export class DinoscanReporter {
       return;
     }
 
-    this.reportPanel = vscode.window.createWebviewPanel(
+    this.reportPanel = window.createWebviewPanel(
       "dinoscanReport",
       "DinoScan Analysis Report",
-      vscode.ViewColumn.Two,
+      ViewColumn.Two,
       {
         enableScripts: true,
         localResourceRoots: [
-          vscode.Uri.file(path.join(this.context.extensionPath, "media")),
+          Uri.file(join(this.context.extensionPath, "media")),
         ],
       },
     );
@@ -286,11 +296,10 @@ export class DinoscanReporter {
         </html>
         `;
   }
-
   /**
    * Escape HTML special characters to prevent injection in the webview
    */
-  private escapeHtml(input: string): string {
+  private static escapeHtml(input: string): string {
     return input
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -302,7 +311,7 @@ export class DinoscanReporter {
   /**
    * Map severity string to CSS class suffix used in the template
    */
-  private getSeverityClass(severity: string): string {
+  private static getSeverityClass(severity: string): string {
     switch (severity) {
       case "Error":
         return "error";
@@ -330,13 +339,18 @@ export class DinoscanReporter {
     };
 
     diagnostics.forEach((diagnostic) => {
-      counts[this.toSeverityKey(diagnostic.severity)]++;
+      counts[Reporter.toSeverityKey(diagnostic.severity)]++;
     });
 
     return counts;
   }
 
-  private toSeverityKey(
+  /**
+   * Converts a severity string to a corresponding severity key.
+   * @param severity - The severity string ("Error", "Warning", "Information", or "Hint").
+   * @returns The lowercase severity key ("error", "warning", "information", or "hint").
+   */
+  private static toSeverityKey(
     severity: string,
   ): "error" | "warning" | "information" | "hint" {
     switch (severity) {
@@ -356,7 +370,7 @@ export class DinoscanReporter {
   /**
    * Map VS Code diagnostic severity to string
    */
-  private mapSeverityToString(severity: vscode.DiagnosticSeverity): string {
+  private static mapSeverityToString(severity: vscode.DiagnosticSeverity): string {
     switch (severity) {
       case vscode.DiagnosticSeverity.Error:
         return "Error";
@@ -383,7 +397,7 @@ export class DinoscanReporter {
   /**
    * Normalize diagnostic code to string safely
    */
-  private normalizeDiagnosticCode(code: vscode.Diagnostic["code"]): string {
+  private static normalizeDiagnosticCode(code: vscode.Diagnostic["code"]): string {
     if (code === undefined || code === null) {
       return "Unknown";
     }
