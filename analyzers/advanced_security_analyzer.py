@@ -386,7 +386,8 @@ class AdvancedSecurityAnalyzer(ASTAnalyzer):
         except Exception:
             return None
 
-    def _create_file_read_error(self, file_path: str) -> list[Finding]:
+    @staticmethod
+    def _create_file_read_error(file_path: str) -> list[Finding]:
         """Create file read error finding."""
         return [
             Finding(
