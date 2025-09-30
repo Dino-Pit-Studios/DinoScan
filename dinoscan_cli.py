@@ -90,7 +90,6 @@ For more information, visit: https://github.com/DinoAir/DinoScan
         from core.reporter import create_reporter
 
         # Initialize configuration
-
         # Select analyzers to run
         analyzers_to_run = []
         if args.analyzer == "all":
