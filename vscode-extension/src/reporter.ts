@@ -334,7 +334,7 @@ export class DinoscanReporter {
   /**
    * Get counts of findings by severity
    */
-  private getSeverityCounts(
+  private static getSeverityCounts(
     diagnostics: DiagnosticInfo[],
   ): Record<string, number> {
     const counts: Record<string, number> = {
