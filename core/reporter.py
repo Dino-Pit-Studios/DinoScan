@@ -83,7 +83,8 @@ class ConsoleReporter(Reporter):
 
         return "\n".join(lines)
 
-    def _format_header(self, result: AnalysisResult) -> list[str]:
+    @staticmethod
+    def _format_header(result: AnalysisResult) -> list[str]:
         """Format the report header."""
         return [
             "=" * 80,
