@@ -9,8 +9,8 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
-
 from xml.etree.ElementTree import Element, SubElement
+
 from defusedxml.ElementTree import parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
