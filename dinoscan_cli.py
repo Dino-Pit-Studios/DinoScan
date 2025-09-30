@@ -11,6 +11,11 @@ from pathlib import Path
 
 
 def create_parser():
+    """Create and configure the argument parser for the DinoScan CLI.
+
+    Returns:
+        argparse.ArgumentParser: Configured argument parser for command-line interface.
+    """
     parser = argparse.ArgumentParser(
         description="DinoScan - Comprehensive Python static analysis toolkit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -64,6 +69,38 @@ For more information, visit: https://github.com/DinoAir/DinoScan
     return parser
 
 
+def validate_path(path):
+    if not path.exists():
+        print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
+        return False
+    return True
+
+
+def load_analyzers(analyzer_name):
+    from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
+    from analyzers.circular_import_analyzer import CircularImportAnalyzer
+    from analyzers.dead_code_analyzer import DeadCodeAnalyzer
+    from analyzers.doc_quality_analyzer import DocumentationAnalyzer
+    from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
+
+    if analyzer_name == "all":
+        return [
+            AdvancedSecurityAnalyzer(),
+            CircularImportAnalyzer(),
+            DeadCodeAnalyzer(),
+            DocumentationAnalyzer(),
+            DuplicateCodeAnalyzer(),
+        ]
+    analyzer_map = {
+        "security": AdvancedSecurityAnalyzer,
+        "circular": CircularImportAnalyzer,
+        "dead-code": DeadCodeAnalyzer,
+        "docs": DocumentationAnalyzer,
+        "duplicates": DuplicateCodeAnalyzer,
+    }
+    return [analyzer_map[analyzer_name]()]  
+
+
 def main():
     """Main entry point for DinoScan CLI."""
 
@@ -80,40 +117,14 @@ def main():
 
     args = parser.parse_args()
 
-    # Validate path exists
-    if not args.path.exists():
-        print(f"Error: Path '{args.path}' does not exist.", file=sys.stderr)
+    if not validate_path(args.path):
         return 1
 
     try:
         # Import analyzers here to avoid import issues during setup
-        from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
-        from analyzers.circular_import_analyzer import CircularImportAnalyzer
-        from analyzers.dead_code_analyzer import DeadCodeAnalyzer
-        from analyzers.doc_quality_analyzer import DocumentationAnalyzer
-        from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
         from core.reporter import create_reporter
 
-        # Initialize configuration
-        # Select analyzers to run
-        analyzers_to_run = []
-        if args.analyzer == "all":
-            analyzers_to_run = [
-                AdvancedSecurityAnalyzer(),
-                CircularImportAnalyzer(),
-                DeadCodeAnalyzer(),
-                DocumentationAnalyzer(),
-                DuplicateCodeAnalyzer(),
-            ]
-        else:
-            analyzer_map = {
-                "security": AdvancedSecurityAnalyzer,
-                "circular": CircularImportAnalyzer,
-                "dead-code": DeadCodeAnalyzer,
-                "docs": DocumentationAnalyzer,
-                "duplicates": DuplicateCodeAnalyzer,
-            }
-            analyzers_to_run = [analyzer_map[args.analyzer]()]
+        analyzers_to_run = load_analyzers(args.analyzer)
 
         # Run analysis
         if not args.quiet:
