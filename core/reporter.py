@@ -275,9 +275,7 @@ class XMLReporter(Reporter):
         SubElement(metadata, "version").text = result.version
         SubElement(metadata, "timestamp").text = result.timestamp
         SubElement(metadata, "project_path").text = result.project_path
-        SubElement(metadata, "analysis_duration").text = str(
-            result.analysis_duration
-        )
+        SubElement(metadata, "analysis_duration").text = str(result.analysis_duration)
 
         # Statistics
         stats = result.get_summary_stats()
@@ -304,9 +302,7 @@ class XMLReporter(Reporter):
             SubElement(finding_elem, "message").text = finding.message
             SubElement(finding_elem, "file_path").text = finding.file_path
             SubElement(finding_elem, "line_number").text = str(finding.line_number)
-            SubElement(finding_elem, "column_number").text = str(
-                finding.column_number
-            )
+            SubElement(finding_elem, "column_number").text = str(finding.column_number)
 
             if finding.context:
                 SubElement(finding_elem, "context").text = finding.context
