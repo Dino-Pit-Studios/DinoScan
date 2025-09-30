@@ -312,7 +312,7 @@ class XMLReporter(Reporter):
             if finding.cwe:
                 SubElement(finding_elem, "cwe").text = finding.cwe
 
-        return ET.tostring(root, encoding="unicode", xml_declaration=True)
+        return ET.tostring(root, encoding="utf-8", xml_declaration=True)
 
 
 class SARIFReporter(Reporter):
