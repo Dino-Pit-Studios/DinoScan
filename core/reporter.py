@@ -34,7 +34,6 @@ class Reporter(ABC):
         with Path(output_path).open("w", encoding="utf-8") as f:
             f.write(formatted_output)
 
-
     @staticmethod
     def print_results(reporter, result: AnalysisResult) -> None:
         """Print results to console."""
