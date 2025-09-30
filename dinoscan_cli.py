@@ -111,9 +111,7 @@ def load_analyzers(analyzer_name):
 def print_run_info(path, analyzers, profile, quiet):
     if not quiet:
         print(f"Running DinoScan analysis on: {path}")
-        print(
-            f"Analyzers: {', '.join(a.__class__.__name__ for a in analyzers)}"
-        )
+        print(f"Analyzers: {', '.join(a.__class__.__name__ for a in analyzers)}")
         print(f"Profile: {profile}")
         print()
 
