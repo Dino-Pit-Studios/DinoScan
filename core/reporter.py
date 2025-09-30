@@ -93,7 +93,8 @@ class ConsoleReporter(Reporter):
             "",
         ]
 
-    def _format_summary(self, result: AnalysisResult) -> list[str]:
+    @staticmethod
+    def _format_summary(result: AnalysisResult) -> list[str]:
         """Format the analysis summary section."""
         stats = result.get_summary_stats()
         return [
