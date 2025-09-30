@@ -13,7 +13,9 @@ import {
   ViewColumn,
   Uri,
 } from "vscode";
+import * as vscode from "vscode";
 import { join } from "path";
+import * as path from "path";
 
 /**
  * DinoscanReporter class.
@@ -53,7 +55,7 @@ export class DinoscanReporter {
         localResourceRoots: [
           Uri.file(join(this.context.extensionPath, "media")),
         ],
-      },
+      }
     );
 
     this.reportPanel.onDidDispose(() => {
@@ -88,7 +90,7 @@ export class DinoscanReporter {
       .forEach(
         ([uri, fileDiagnostics]: [
           vscode.Uri,
-          readonly vscode.Diagnostic[],
+          readonly vscode.Diagnostic[]
         ]) => {
           fileDiagnostics
             .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
@@ -98,11 +100,13 @@ export class DinoscanReporter {
                 line: diagnostic.range.start.line + 1,
                 column: diagnostic.range.start.character + 1,
                 message: diagnostic.message,
-                severity: this.mapSeverityToString(diagnostic.severity),
-                code: this.normalizeDiagnosticCode(diagnostic.code),
+                severity: DinoscanReporter.mapSeverityToString(
+                  diagnostic.severity
+                ),
+                code: DinoscanReporter.normalizeDiagnosticCode(diagnostic.code),
               });
             });
-        },
+        }
       );
 
     return diagnostics.sort((a, b) => {
@@ -113,8 +117,8 @@ export class DinoscanReporter {
         information: 2,
         hint: 3,
       } as const;
-      const aKey = this.toSeverityKey(a.severity);
-      const bKey = this.toSeverityKey(b.severity);
+      const aKey = DinoscanReporter.toSeverityKey(a.severity);
+      const bKey = DinoscanReporter.toSeverityKey(b.severity);
       const severityDiff = severityOrder[aKey] - severityOrder[bKey];
       if (severityDiff !== 0) {
         return severityDiff;
@@ -130,7 +134,7 @@ export class DinoscanReporter {
   // eslint-disable-next-line max-lines-per-function
   private generateReportHTML(diagnostics: DiagnosticInfo[]): string {
     const totalFindings = diagnostics.length;
-    const severityCounts = this.getSeverityCounts(diagnostics);
+    const severityCounts = DinoscanReporter.getSeverityCounts(diagnostics);
 
     return `
         <!DOCTYPE html>
@@ -274,25 +278,27 @@ export class DinoscanReporter {
                         (finding) => `<div class="finding-item">
                             <div class="finding-header">
                                 <div>
-                                    <div class="finding-file">${this.escapeHtml(
-                                      path.basename(finding.file),
+                                    <div class="finding-file">${DinoscanReporter.escapeHtml(
+                                      path.basename(finding.file)
                                     )}</div>
                                     <div class="finding-location">Line ${
                                       finding.line
                                     }, Column ${finding.column}</div>
                                 </div>
-                                <div class="finding-severity severity-${this.getSeverityClass(
-                                  finding.severity,
-                                )}">${this.escapeHtml(finding.severity)}</div>
+                                <div class="finding-severity severity-${DinoscanReporter.getSeverityClass(
+                                  finding.severity
+                                )}">${DinoscanReporter.escapeHtml(
+                          finding.severity
+                        )}</div>
                             </div>
-                            <div class="finding-message">${this.escapeHtml(
-                              finding.message,
+                            <div class="finding-message">${DinoscanReporter.escapeHtml(
+                              finding.message
                             )}</div>
-                            <div class="finding-code">Rule: ${this.escapeHtml(
-                              finding.code,
+                            <div class="finding-code">Rule: ${DinoscanReporter.escapeHtml(
+                              finding.code
                             )}</div>
                         </div>
-                        `,
+                        `
                       )
                       .join("")}
                 </div>
@@ -335,7 +341,7 @@ export class DinoscanReporter {
    * Get counts of findings by severity
    */
   private static getSeverityCounts(
-    diagnostics: DiagnosticInfo[],
+    diagnostics: DiagnosticInfo[]
   ): Record<string, number> {
     const counts: Record<string, number> = {
       error: 0,
@@ -357,7 +363,7 @@ export class DinoscanReporter {
    * @returns The lowercase severity key ("error", "warning", "information", or "hint").
    */
   private static toSeverityKey(
-    severity: string,
+    severity: string
   ): "error" | "warning" | "information" | "hint" {
     switch (severity) {
       case "Error":
@@ -377,7 +383,7 @@ export class DinoscanReporter {
    * Map VS Code diagnostic severity to string
    */
   private static mapSeverityToString(
-    severity: vscode.DiagnosticSeverity,
+    severity: vscode.DiagnosticSeverity
   ): string {
     switch (severity) {
       case vscode.DiagnosticSeverity.Error:
@@ -398,7 +404,7 @@ export class DinoscanReporter {
    */
   public log(message: string): void {
     this.outputChannel.appendLine(
-      `[${new Date().toLocaleTimeString()}] ${message}`,
+      `[${new Date().toLocaleTimeString()}] ${message}`
     );
   }
 
@@ -406,7 +412,7 @@ export class DinoscanReporter {
    * Normalize diagnostic code to string safely
    */
   private static normalizeDiagnosticCode(
-    code: vscode.Diagnostic["code"],
+    code: vscode.Diagnostic["code"]
   ): string {
     if (code === undefined || code === null) {
       return "Unknown";
