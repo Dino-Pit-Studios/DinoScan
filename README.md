@@ -1,28 +1,20 @@
 # DinoScan# DinoScan Static Code Analyzer
 
-
-
 DinoScan is a comprehensive Python code analysis toolkit that leverages AST (Abstract Syntax Tree) parsing for precise, semantic analysis of your codebase. Built with modern Python 3.9+ features, it provides enhanced accuracy over traditional regex-based tools.A comprehensive static code analysis toolkit for Python and JavaScript/TypeScript projects.
 
-
-
 ## 🚀 Features## Tools Included
-
-
 
 ### **AST-Based Analyzers**### 1. Duplicate Code Finder (`duplicate-finder.ps1`)
 
 - **Security Analysis**: Detect vulnerabilities using AST parsing and entropy analysis for secretsDetects duplicate and similar code patterns using multiple approaches:
 
-- **Circular Import Detection**: Find dependency cycles using Tarjan's strongly connected components algorithm  - Function signature duplicates
+- **Circular Import Detection**: Find dependency cycles using Tarjan's strongly connected components algorithm - Function signature duplicates
 
 - **Dead Code Detection**: Identify unused code with cross-file usage analysis and framework-aware patterns- Code block similarities
 
 - **Documentation Quality**: Validate docstrings with multi-style support (Google, Sphinx, NumPy)- Import pattern repetitions
 
 - **Duplicate Code Detection**: Find duplicates using winnowing algorithms and structural similarity- Naming duplicates
-
-
 
 ### **Modern Python Architecture**### 2. Circular Import Finder (`circular-import-finder.ps1`)
 
@@ -52,7 +44,7 @@ Advanced security analysis to detect critical vulnerabilities:
 
 ### Setup- **Hardcoded secrets**: API keys, passwords, tokens
 
-```bash- **Injection flaws**: SQL injection, command injection, XSS
+````bash- **Injection flaws**: SQL injection, command injection, XSS
 
 # Clone the repository- **Cryptographic issues**: Weak algorithms, insecure random generation
 
@@ -112,7 +104,7 @@ python doc_quality_analyzer.py /path/to/project.\security-analyzer.ps1
 
 python duplicate_code_analyzer.py /path/to/project.\dead-code-detector.ps1
 
-```
+````
 
 # Run comprehensive analysis with custom configuration
 
@@ -120,7 +112,7 @@ python duplicate_code_analyzer.py /path/to/project.\dead-code-detector.ps1
 
 .\security-analyzer.ps1 -ConfigFile "security-config.json" -ExportResults
 
-```bash.\dead-code-detector.ps1 -Types "functions", "imports" -ExportResults
+````bash.\dead-code-detector.ps1 -Types "functions", "imports" -ExportResults
 
 # Use custom configuration```
 
@@ -240,21 +232,17 @@ DinoScan uses a single `config.json` file for all analyzers:  "settings": {
 
 }.\dead-code-detector.ps1
 
-```
+````
 
 # Check only specific types
 
 ## 📊 Analyzers Overview.\dead-code-detector.ps1 -Types "functions", "imports"
 
-
-
 ### 1. Advanced Security Analyzer (`advanced_security_analyzer.py`)# Aggressive detection (higher sensitivity)
 
 **AST-based security vulnerability detection with entropy analysis**.\dead-code-detector.ps1 -Aggressive
 
-
-
-```bash# Exclude potential public API functions
+```````bash# Exclude potential public API functions
 
 # Basic security scan.\dead-code-detector.ps1 -ExcludePublicAPI
 
@@ -290,7 +278,7 @@ python advanced_security_analyzer.py /path/to/project --config security-config.j
 
 .\style-lint-analyzer.ps1 -Rules "python-style", "python-naming"
 
-### 2. Circular Import Analyzer (`circular_import_analyzer.py`)  
+### 2. Circular Import Analyzer (`circular_import_analyzer.py`)
 
 **Graph-based circular dependency detection using Tarjan's algorithm**# Filter by severity
 
@@ -314,15 +302,13 @@ python circular_import_analyzer.py /path/to/project --include-tests --verbose.\s
 
 python circular_import_analyzer.py /path/to/project --output-format sarif --output-file imports.sarif.\style-lint-analyzer.ps1 -ExportResults -OutputFile "my-results.json"
 
-``````
-
-
+```````
 
 **Key Features:**### Circular Import Finder
 
 - Tarjan's strongly connected components algorithm
 
-- AST-based import parsing (handles complex import patterns)  ```powershell
+- AST-based import parsing (handles complex import patterns) ```powershell
 
 - Cross-file dependency analysis# Basic analysis
 
@@ -338,7 +324,7 @@ python circular_import_analyzer.py /path/to/project --output-format sarif --outp
 
 # Add extra search paths
 
-```bash.\circular-import-analyzer.ps1 -ExtraPath "lib", "vendor"
+````bash.\circular-import-analyzer.ps1 -ExtraPath "lib", "vendor"
 
 # Find unused code
 
@@ -398,7 +384,7 @@ python doc_quality_analyzer.py /path/to/project --style google --enforce-style- 
 
 python doc_quality_analyzer.py /path/to/project --no-private --verbose- Skips legitimate polymorphic patterns in duplicate detection
 
-```
+````
 
 ### Comprehensive Reporting
 
@@ -438,9 +424,9 @@ python duplicate_code_analyzer.py /path/to/project --threshold 0.9 --no-structur
 
 # Minimum size and enable partial matchingif ($LASTEXITCODE -eq 1) {
 
-python duplicate_code_analyzer.py /path/to/project --min-lines 10 --enable-partial    Write-Host "Critical security issues found. Build blocked." -ForegroundColor Red
+python duplicate_code_analyzer.py /path/to/project --min-lines 10 --enable-partial Write-Host "Critical security issues found. Build blocked." -ForegroundColor Red
 
-```    exit 1
+````exit 1
 
 }
 
@@ -476,13 +462,13 @@ advanced_security_analyzer.py /path/to/project.\dead-code-detector.ps1 -Types "i
 
 ```.\dead-code-detector.ps1 -Types "functions" -ExcludePublicAPI  # Then functions
 
-```
+````
 
-### JSON  
+### JSON
 
 Machine-readable format for tooling integration:## Architecture
 
-```bash
+````bash
 
 python dead_code_analyzer.py /path/to/project --output-format json --output-file results.jsonThe DinoScan toolkit follows consistent patterns:
 
@@ -498,7 +484,7 @@ Industry standard for CI/CD integration:- Consistent output formatting
 
 python duplicate_code_analyzer.py /path/to/project --output-format sarif --output-file duplicates.sarif- Export capabilities for integration
 
-```
+````
 
 Each tool is self-contained but follows the same architectural patterns for consistency and maintainability.
 
@@ -506,7 +492,7 @@ Each tool is self-contained but follows the same architectural patterns for cons
 
 Structured format for enterprise tools:## Supported File Types
 
-```bash
+````bash
 
 python doc_quality_analyzer.py /path/to/project --output-format xml --output-file docs.xml### Python
 
@@ -589,20 +575,22 @@ fi
 # Check for circular imports
 python circular_import_analyzer.py .
 if [ $? -ne 0 ]; then
-    echo "Circular imports detected. Commit blocked."  
+    echo "Circular imports detected. Commit blocked."
     exit 1
 fi
-```
+````
 
 ## 🎯 Best Practices
 
 ### 1. **Security-First Workflow**
+
 ```bash
 # Always run security analysis first
 python advanced_security_analyzer.py /path/to/project --min-severity medium
 ```
 
-### 2. **Incremental Analysis**  
+### 2. **Incremental Analysis**
+
 ```bash
 # Focus on specific areas during development
 python dead_code_analyzer.py /path/to/specific/module
@@ -610,16 +598,19 @@ python doc_quality_analyzer.py /path/to/new/feature --style google
 ```
 
 ### 3. **Configuration Management**
+
 - Use project-specific `config.json` files
 - Version control your configuration
 - Start with default settings and customize gradually
 
 ### 4. **Performance Optimization**
+
 - Exclude unnecessary directories in configuration
 - Use specific analyzers rather than running all tools
 - Cache results when possible (built-in AST caching)
 
-### 5. **Integration Strategy**  
+### 5. **Integration Strategy**
+
 - Start with security and circular import analysis (critical issues)
 - Add documentation quality checks for new code
 - Use dead code analysis for cleanup phases
@@ -628,13 +619,15 @@ python doc_quality_analyzer.py /path/to/new/feature --style google
 ## 🏗️ Architecture
 
 ### Core Framework (`core/` directory)
+
 - **base_analyzer.py**: Abstract base classes and common interfaces
-- **ast_analyzer.py**: AST parsing utilities and visitor patterns  
+- **ast_analyzer.py**: AST parsing utilities and visitor patterns
 - **config_manager.py**: Hierarchical configuration management
 - **file_scanner.py**: Intelligent file discovery and filtering
 - **reporter.py**: Multi-format output generation
 
 ### Modern Python Features
+
 - **Type hints** with Python 3.9+ union syntax (`str | None`)
 - **Dataclasses** for clean data structures
 - **Pathlib** for cross-platform file handling
@@ -642,6 +635,7 @@ python doc_quality_analyzer.py /path/to/new/feature --style google
 - **Enum classes** for better categorization
 
 ### Performance Optimizations
+
 - **AST caching** to avoid reparsing files
 - **Efficient algorithms** (Tarjan's, winnowing) for complex analysis
 - **Parallel processing** support for large codebases
@@ -650,13 +644,15 @@ python doc_quality_analyzer.py /path/to/new/feature --style google
 ## 🤝 Contributing
 
 DinoScan follows modern Python development practices:
+
 - **Type hints** throughout the codebase
-- **Comprehensive docstrings** with parameter documentation  
+- **Comprehensive docstrings** with parameter documentation
 - **Modular architecture** for easy extension
 - **Unit testing** with pytest
 - **Linting** with the tools it analyzes
 
 To add a new analyzer:
+
 1. Extend `ASTAnalyzer` from `core.base_analyzer`
 2. Implement the `analyze_file()` method
 3. Add configuration schema to `config.json`
@@ -665,24 +661,28 @@ To add a new analyzer:
 ## 📈 Advantages Over PowerShell Version
 
 ### **Accuracy Improvements**
+
 - **AST-based analysis** vs. regex patterns (90%+ reduction in false positives)
 - **Semantic understanding** of code structure and relationships
 - **Cross-file analysis** for accurate dependency tracking
 - **Framework-aware patterns** reduce irrelevant findings
 
-### **Performance Enhancements**  
+### **Performance Enhancements**
+
 - **AST caching** for repeated analysis
 - **Efficient algorithms** (Tarjan's O(V+E), winnowing O(n))
 - **Parallel processing** support for large codebases
 - **Memory optimization** for handling large files
 
 ### **Integration Benefits**
+
 - **SARIF output** for modern CI/CD platforms
-- **JSON/XML export** for tooling integration  
+- **JSON/XML export** for tooling integration
 - **Exit codes** for automated workflows
 - **Configurable output** for different use cases
 
 ### **Maintainability**
+
 - **Modern Python architecture** with type hints and dataclasses
 - **Comprehensive configuration system** with validation
 - **Modular design** for easy extension and testing
@@ -693,6 +693,5 @@ To add a new analyzer:
 - **[JFrog/Frogbot Setup Guide](JFROG_SETUP.md)** - Configuration guide for JFrog Frogbot integration
 - **[Installation Guide](INSTALLATION.md)** - Detailed installation and usage instructions
 - **[Development Guide](DSguide.md)** - DinoScan development roadmap and architecture
-
 
 The new Python-based DinoScan provides enterprise-grade static analysis capabilities with the accuracy and performance needed for modern development workflows.

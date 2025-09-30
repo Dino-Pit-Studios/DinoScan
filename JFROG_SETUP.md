@@ -1,6 +1,7 @@
 # JFrog Frogbot Configuration Guide
 
 This guide provides step-by-step instructions for configuring JFrog Frogbot in the DinoScan repository to resolve the error:
+
 ```
 Error: 6 [Error] JF_USER and JF_PASSWORD or JF_ACCESS_TOKEN environment variables are missing
 ```
@@ -10,10 +11,12 @@ Error: 6 [Error] JF_USER and JF_PASSWORD or JF_ACCESS_TOKEN environment variable
 The Frogbot workflow (`.github/workflows/frogbot-scan-and-fix.yml`) requires JFrog credentials to scan your project for vulnerabilities using JFrog Xray. You need **one** of the following authentication methods:
 
 ### Option 1: Access Token (Recommended)
+
 - **JF_URL**: Your JFrog platform URL
 - **JF_ACCESS_TOKEN**: JFrog access token with 'read' permissions on Xray service
 
 ### Option 2: Username/Password
+
 - **JF_URL**: Your JFrog platform URL
 - **JF_USER**: JFrog username with 'read' permissions for Xray
 - **JF_PASSWORD**: JFrog password
@@ -90,17 +93,19 @@ If you're using Username/Password authentication instead of Access Token:
 
 1. Edit `.github/workflows/frogbot-scan-and-fix.yml`
 2. Uncomment lines 45-46 and 48-49:
+
    ```yaml
    # Change from:
    # JF_USER: ${{ secrets.JF_USER }}
    # To:
    JF_USER: ${{ secrets.JF_USER }}
-   
+
    # Change from:
    # JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
    # To:
    JF_PASSWORD: ${{ secrets.JF_PASSWORD }}
    ```
+
 3. Comment out line 41 (or leave it if you want to use both methods):
    ```yaml
    # JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
@@ -122,6 +127,7 @@ If you're using Username/Password authentication instead of Access Token:
 If you don't want to use JFrog Frogbot scanning, you can disable the workflow:
 
 ### Option 1: Delete the workflow file
+
 ```bash
 rm .github/workflows/frogbot-scan-and-fix.yml
 git commit -m "Remove JFrog Frogbot workflow"
@@ -129,6 +135,7 @@ git push
 ```
 
 ### Option 2: Rename the file to disable it
+
 ```bash
 mv .github/workflows/frogbot-scan-and-fix.yml .github/workflows/frogbot-scan-and-fix.yml.disabled
 git commit -m "Disable JFrog Frogbot workflow"
@@ -136,14 +143,16 @@ git push
 ```
 
 ### Option 3: Add a workflow condition to skip it
+
 Edit `.github/workflows/frogbot-scan-and-fix.yml` and add a condition:
+
 ```yaml
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   # Disable workflow by adding impossible condition
   workflow_dispatch:
-    
+
 jobs:
   create-fix-pull-requests:
     # Add this line to disable the workflow
@@ -158,6 +167,7 @@ jobs:
 **Cause**: GitHub secrets are not configured or named incorrectly.
 
 **Solution**:
+
 1. Verify secrets exist at: https://github.com/Dino-Pit-Studios/DinoScan/settings/secrets/actions
 2. Check that secret names match exactly (case-sensitive):
    - `JF_URL` (not `JF_Url` or `jf_url`)
@@ -170,6 +180,7 @@ jobs:
 **Cause**: The JF_URL secret is empty or malformed.
 
 **Solution**:
+
 1. Ensure JF_URL includes the protocol: `https://yourcompany.jfrog.io`
 2. Don't include trailing slashes or paths
 
@@ -178,6 +189,7 @@ jobs:
 **Cause**: Invalid credentials or insufficient permissions.
 
 **Solution**:
+
 1. Verify your access token hasn't expired
 2. Ensure the token/user has "read" permissions for Xray
 3. Try generating a new access token
@@ -188,6 +200,7 @@ jobs:
 **Cause**: Workflow only triggers on push to `main` branch.
 
 **Solution**:
+
 1. Ensure you're pushing to the `main` branch
 2. Or manually trigger from Actions tab: https://github.com/Dino-Pit-Studios/DinoScan/actions/workflows/frogbot-scan-and-fix.yml
 
@@ -220,7 +233,8 @@ Before the workflow can run successfully, ensure:
 
 ---
 
-**Need more help?** 
+**Need more help?**
+
 - Check existing issues: https://github.com/Dino-Pit-Studios/DinoScan/issues
 - Create a new issue: https://github.com/Dino-Pit-Studios/DinoScan/issues/new
 - Review Frogbot documentation: https://docs.jfrog-applications.jfrog.io/jfrog-applications/frogbot
