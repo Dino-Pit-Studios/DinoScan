@@ -19,11 +19,6 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description="DinoScan - Comprehensive Python static analysis toolkit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-"""
-Command-line interface for DinoScan.
-Provides functions to create argument parser, validate paths, and load analyzers for the CLI.
-"""
-
         epilog="""
 Examples:
   dinoscan security myproject/                  # Security analysis
