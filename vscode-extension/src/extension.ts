@@ -548,9 +548,9 @@ function executeDinoscanInvocation(
       } ${args.join(" ")} (cwd=${workspaceRoot ?? "default"})`,
     );
 
-    // Allowlist validation to prevent shell metacharacters in executable path (cross-platform: supports Windows and Unix paths, allows ~, (), and env vars like $HOME)
-    // Disallows shell metacharacters: | & ; > < ` ' "
-    const isSafeExecutable = /^[\w\s.\-/:\\~()$]+$/.test(invocation.command);
+    // Allowlist validation to prevent shell metacharacters in executable path (cross-platform: supports Windows and Unix paths, allows ~ and ())
+    // Disallows shell metacharacters: | & ; > < ` ' " and environment variable expansion ($)
+    const isSafeExecutable = /^[\w\s.\-/:\\~()]+$/.test(invocation.command);
     if (!isSafeExecutable) {
       const msg = `Unsafe executable path rejected: ${invocation.command}`;
       output.appendLine(`[DinoScan] ${msg}`);
