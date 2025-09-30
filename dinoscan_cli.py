@@ -68,7 +68,6 @@ def main():
     """Main entry point for DinoScan CLI."""
 
     parser = create_parser()
-    args = parser.parse_args()
     # Remaining CLI logic follows
 
     parser.add_argument(
