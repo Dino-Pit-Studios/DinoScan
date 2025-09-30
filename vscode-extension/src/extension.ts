@@ -6,9 +6,6 @@
  */
 
 import { spawn, spawnSync } from "child_process";
-import * as fs from "fs";
-import * as path from "path";
-import { window } from "vscode";
 import type { ExtensionContext } from "vscode";
 import type { DinoscanFinding } from "./diagnosticProvider";
 import { DinoscanDiagnosticProvider } from "./diagnosticProvider";
@@ -60,14 +57,17 @@ export function activate(context: ExtensionContext) {
   const diagnosticProvider = new DinoscanDiagnosticProvider();
   const statusBar = new DinoscanStatusBar();
   const reporter = new DinoscanReporter(context);
-  const output = window.createOutputChannel("DinoScan");
+  const output = vscode.window.createOutputChannel("DinoScan");
   context.subscriptions.push(output);
 
   const findingsTreeProvider = new DinoscanFindingsTreeProvider(context);
-  const findingsTreeView = window.createTreeView("dinoscanFindingsView", {
-    treeDataProvider: findingsTreeProvider,
-    showCollapseAll: true,
-  });
+  const findingsTreeView = vscode.window.createTreeView(
+    "dinoscanFindingsView",
+    {
+      treeDataProvider: findingsTreeProvider,
+      showCollapseAll: true,
+    },
+  );
   context.subscriptions.push(findingsTreeView);
 
   statusBar.updateVisibility();
@@ -220,10 +220,12 @@ async function analyzeCurrentFile(
   if (findingsCount !== null) {
     const message =
       findingsCount > 0
-        ? `DinoScan found ${findingsCount} issue${findingsCount === 1 ? "" : "s"} in ${path.basename(
+        ? `DinoScan found ${findingsCount} issue${
+            findingsCount === 1 ? "" : "s"
+          } in ${path.basename(activeEditor.document.fileName)}`
+        : `DinoScan found no issues in ${path.basename(
             activeEditor.document.fileName,
-          )}`
-        : `DinoScan found no issues in ${path.basename(activeEditor.document.fileName)}`;
+          )}`;
     vscode.window.showInformationMessage(message);
   }
 }
@@ -279,7 +281,9 @@ async function analyzeWorkspace(
           const fileUri = pythonFiles[i];
           progress.report({
             increment,
-            message: `Analyzing ${path.basename(fileUri.fsPath)} (${i + 1}/${pythonFiles.length})`,
+            message: `Analyzing ${path.basename(fileUri.fsPath)} (${i + 1}/${
+              pythonFiles.length
+            })`,
           });
 
           const document = await vscode.workspace.openTextDocument(fileUri);
@@ -322,7 +326,9 @@ async function analyzeDocument(
 
   // Skip large files
   if (document.getText().length > maxFileSize) {
-    const message = `Skipping large file: ${document.fileName} (${document.getText().length} bytes)`;
+    const message = `Skipping large file: ${document.fileName} (${
+      document.getText().length
+    } bytes)`;
     console.log(message);
     output.appendLine(`[DinoScan] ${message}`);
     return null;
@@ -449,7 +455,9 @@ async function runDinoscanAnalysis(
     );
 
     results.forEach((result) => {
-      const key = `${result.file}:${result.line}:${result.column}:${result.rule_id ?? ""}:${result.message}`;
+      const key = `${result.file}:${result.line}:${result.column}:${
+        result.rule_id ?? ""
+      }:${result.message}`;
       if (!seenKeys.has(key)) {
         seenKeys.add(key);
         aggregatedResults.push(result);
@@ -504,11 +512,26 @@ function executeDinoscanInvocation(
     });
 
     output.appendLine(
-      `[DinoScan] Running analyzer '${analyzer}': ${invocation.command} ${args.join(" ")} (cwd=${workspaceRoot ?? "default"})`,
+      `[DinoScan] Running analyzer '${analyzer}': ${
+        invocation.command
+      } ${args.join(" ")} (cwd=${workspaceRoot ?? "default"})`,
     );
+
+    // Basic allowlist validation to prevent shell metacharacters in executable path
+    // Allow Unicode, word chars, spaces, dots, dashes, underscores, slashes, backslashes, colon, and parentheses
+    // Disallow shell metacharacters like `|`, `&`, `;`, `>`, `<`, `$`, `` ` ``, and quotes
+    const isSafeExecutable = /^[^|&;><$'"`]+$/u.test(invocation.command);
+    if (!isSafeExecutable) {
+      const msg = `Unsafe executable path rejected: ${invocation.command}`;
+      output.appendLine(`[DinoScan] ${msg}`);
+      reject(new Error(msg));
+      return;
+    }
 
     const child = spawn(invocation.command, args, {
       cwd: workspaceRoot,
+      shell: false,
+      windowsVerbatimArguments: false,
     });
 
     let stdout = "";
@@ -530,7 +553,9 @@ function executeDinoscanInvocation(
 
       if (code !== 0) {
         output.appendLine(
-          `[DinoScan] Analyzer '${analyzer}' exited with code ${code}. stderr: ${stderr.trim() || "<empty>"}`,
+          `[DinoScan] Analyzer '${analyzer}' exited with code ${code}. stderr: ${
+            stderr.trim() || "<empty>"
+          }`,
         );
         reject(new Error(stderr.trim() || `DinoScan exited with code ${code}`));
         return;
@@ -543,7 +568,9 @@ function executeDinoscanInvocation(
         }
 
         output.appendLine(
-          `[DinoScan] Analyzer '${analyzer}' returned ${stdout.trim().length} bytes of JSON results.`,
+          `[DinoScan] Analyzer '${analyzer}' returned ${
+            stdout.trim().length
+          } bytes of JSON results.`,
         );
         const results = JSON.parse(stdout) as DinoscanFinding[];
         resolve(results);
@@ -688,12 +715,23 @@ function isInvocationUsable(
   output: vscode.OutputChannel,
 ): boolean {
   try {
+    // Validate executable path to avoid unexpected shell metacharacters
+    const isSafeExecutable = /^[\w\s.\-/:\\]+$/.test(invocation.command);
+    if (!isSafeExecutable) {
+      output.appendLine(
+        `[DinoScan] Unsafe executable path rejected during probe: ${invocation.command}`,
+      );
+      return false;
+    }
+
     const testArgs = [...invocation.args, "--help"];
     const result = spawnSync(invocation.command, testArgs, {
       cwd,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
       maxBuffer: 1024 * 1024,
+      shell: false,
+      windowsVerbatimArguments: false,
     });
 
     if (result.error) {
