@@ -271,8 +271,7 @@ export class DinoscanReporter {
                     <h3>Findings (${totalFindings})</h3>
                     ${diagnostics
                       .map(
-                        (finding) => `
-                        <div class="finding-item">
+                        (finding) => `<div class="finding-item">
                             <div class="finding-header">
                                 <div>
                                     <div class="finding-file">${this.escapeHtml(
