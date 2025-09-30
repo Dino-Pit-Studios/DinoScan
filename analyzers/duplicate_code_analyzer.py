@@ -325,7 +325,7 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
 
         # Create findings for all pairs
         for i, block1 in enumerate(duplicate_blocks):
-            for j, block2 in enumerate(duplicate_blocks[i + 1 :], start=i + 1):
+            for _, block2 in enumerate(duplicate_blocks[i + 1 :], start=i + 1):
                 # Skip duplicates in the same file at same location
                 if (
                     block1.file_path == block2.file_path
@@ -384,7 +384,7 @@ class DuplicateCodeAnalyzer(ASTAnalyzer):
         findings: list[Finding] = []
 
         for i, block1 in enumerate(blocks):
-            for j, block2 in enumerate(blocks[i + 1 :], start=i + 1):
+            for _, block2 in enumerate(blocks[i + 1 :], start=i + 1):
                 # Skip if same file and within-file analysis is disabled
                 if not within_file and block1.file_path == block2.file_path:
                     continue

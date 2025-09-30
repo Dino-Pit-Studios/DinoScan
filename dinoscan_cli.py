@@ -10,9 +10,12 @@ import sys
 from pathlib import Path
 
 
-def main():
-    """Main entry point for DinoScan CLI."""
+def create_parser():
+    """Create and configure the argument parser for the DinoScan CLI.
 
+    Returns:
+        argparse.ArgumentParser: Configured argument parser for command-line interface.
+    """
     parser = argparse.ArgumentParser(
         description="DinoScan - Comprehensive Python static analysis toolkit",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -56,14 +59,81 @@ For more information, visit: https://github.com/DinoAir/DinoScan
         default="standard",
         help="Analysis profile (default: standard)",
     )
-
     parser.add_argument("--config", "-c", type=Path, help="Configuration file path")
 
     parser.add_argument(
         "--exclude",
-        action="append",
-        help="Exclude pattern (can be used multiple times)",
     )
+
+    return parser
+
+
+def validate_path(path):
+    """
+    Validate that the given path exists.
+    Prints an error to stderr and returns False if it does not; returns True otherwise.
+    """
+    if not path.exists():
+        print(f"Error: Path '{path}' does not exist.", file=sys.stderr)
+        return False
+    return True
+
+
+def load_analyzers(analyzer_name):
+    """
+    Load and return a list of analyzer instances based on the specified analyzer name.
+    Supports individual analyzers and 'all' for all analyzers.
+    """
+    from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
+    from analyzers.circular_import_analyzer import CircularImportAnalyzer
+    from analyzers.dead_code_analyzer import DeadCodeAnalyzer
+    from analyzers.doc_quality_analyzer import DocumentationAnalyzer
+    from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
+
+    if analyzer_name == "all":
+        return [
+            AdvancedSecurityAnalyzer(),
+            CircularImportAnalyzer(),
+            DeadCodeAnalyzer(),
+            DocumentationAnalyzer(),
+            DuplicateCodeAnalyzer(),
+        ]
+    analyzer_map = {
+        "security": AdvancedSecurityAnalyzer,
+        "circular": CircularImportAnalyzer,
+        "dead-code": DeadCodeAnalyzer,
+        "docs": DocumentationAnalyzer,
+        "duplicates": DuplicateCodeAnalyzer,
+    }
+    return [analyzer_map[analyzer_name]()]
+
+
+def print_run_info(path, analyzers, profile, quiet):
+    if not quiet:
+        print(f"Running DinoScan analysis on: {path}")
+        print(f"Analyzers: {', '.join(a.__class__.__name__ for a in analyzers)}")
+        print(f"Profile: {profile}")
+        print()
+
+
+def process_analyzer(analyzer, path, verbose):
+    if verbose:
+        print(f"Running {analyzer.__class__.__name__}...")
+    if path.is_file():
+        findings = analyzer.analyze_file(str(path))
+        files = [str(path)]
+    else:
+        result = analyzer.analyze_project(str(path))
+        findings = result.findings
+        files = result.files_analyzed
+    return findings, files
+
+
+def main():
+    """Main entry point for DinoScan CLI."""
+
+    parser = create_parser()
+    # Remaining CLI logic follows
 
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable verbose output"
@@ -75,70 +145,24 @@ For more information, visit: https://github.com/DinoAir/DinoScan
 
     args = parser.parse_args()
 
-    # Validate path exists
-    if not args.path.exists():
-        print(f"Error: Path '{args.path}' does not exist.", file=sys.stderr)
+    if not validate_path(args.path):
         return 1
 
     try:
         # Import analyzers here to avoid import issues during setup
-        from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer
-        from analyzers.circular_import_analyzer import CircularImportAnalyzer
-        from analyzers.dead_code_analyzer import DeadCodeAnalyzer
-        from analyzers.doc_quality_analyzer import DocumentationAnalyzer
-        from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
-        from core.config_manager import ConfigManager
         from core.reporter import create_reporter
 
-        # Initialize configuration
-        config_manager = ConfigManager(args.config or Path("config.json"))
+        analyzers_to_run = load_analyzers(args.analyzer)
 
-        # Select analyzers to run
-        analyzers_to_run = []
-        if args.analyzer == "all":
-            analyzers_to_run = [
-                AdvancedSecurityAnalyzer(),
-                CircularImportAnalyzer(),
-                DeadCodeAnalyzer(),
-                DocumentationAnalyzer(),
-                DuplicateCodeAnalyzer(),
-            ]
-        else:
-            analyzer_map = {
-                "security": AdvancedSecurityAnalyzer,
-                "circular": CircularImportAnalyzer,
-                "dead-code": DeadCodeAnalyzer,
-                "docs": DocumentationAnalyzer,
-                "duplicates": DuplicateCodeAnalyzer,
-            }
-            analyzers_to_run = [analyzer_map[args.analyzer]()]
-
-        # Run analysis
-        if not args.quiet:
-            print(f"Running DinoScan analysis on: {args.path}")
-            print(
-                f"Analyzers: {', '.join(a.__class__.__name__ for a in analyzers_to_run)}"
-            )
-            print(f"Profile: {args.profile}")
-            print()
+        print_run_info(args.path, analyzers_to_run, args.profile, args.quiet)
 
         all_findings = []
         files_analyzed = []
 
         for analyzer in analyzers_to_run:
-            if args.verbose:
-                print(f"Running {analyzer.__class__.__name__}...")
-
-            if args.path.is_file():
-                # Analyze single file
-                findings = analyzer.analyze_file(str(args.path))
-                all_findings.extend(findings)
-                files_analyzed.append(str(args.path))
-            else:
-                # Analyze project/directory
-                result = analyzer.analyze_project(str(args.path))
-                all_findings.extend(result.findings)
-                files_analyzed.extend(result.files_analyzed)
+            findings, files = process_analyzer(analyzer, args.path, args.verbose)
+            all_findings.extend(findings)
+            files_analyzed.extend(files)
 
         # Create reporter and output results
         from datetime import datetime
