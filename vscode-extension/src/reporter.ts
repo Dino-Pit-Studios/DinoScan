@@ -5,7 +5,14 @@
  * including webview panels and output channels.
  */
 
-import { ExtensionContext, OutputChannel, WebviewPanel, window, ViewColumn, Uri } from "vscode";
+import {
+  ExtensionContext,
+  OutputChannel,
+  WebviewPanel,
+  window,
+  ViewColumn,
+  Uri,
+} from "vscode";
 import { join } from "path";
 
 /**
@@ -370,7 +377,9 @@ export class DinoscanReporter {
   /**
    * Map VS Code diagnostic severity to string
    */
-  private static mapSeverityToString(severity: vscode.DiagnosticSeverity): string {
+  private static mapSeverityToString(
+    severity: vscode.DiagnosticSeverity,
+  ): string {
     switch (severity) {
       case vscode.DiagnosticSeverity.Error:
         return "Error";
@@ -397,7 +406,9 @@ export class DinoscanReporter {
   /**
    * Normalize diagnostic code to string safely
    */
-  private static normalizeDiagnosticCode(code: vscode.Diagnostic["code"]): string {
+  private static normalizeDiagnosticCode(
+    code: vscode.Diagnostic["code"],
+  ): string {
     if (code === undefined || code === null) {
       return "Unknown";
     }
