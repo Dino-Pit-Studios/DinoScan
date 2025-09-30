@@ -36,7 +36,7 @@ export class DinoscanReporter {
         localResourceRoots: [
           vscode.Uri.file(path.join(this.context.extensionPath, "media")),
         ],
-      }
+      },
     );
 
     this.reportPanel.onDidDispose(() => {
@@ -71,7 +71,7 @@ export class DinoscanReporter {
       .forEach(
         ([uri, fileDiagnostics]: [
           vscode.Uri,
-          readonly vscode.Diagnostic[]
+          readonly vscode.Diagnostic[],
         ]) => {
           fileDiagnostics
             .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
@@ -85,7 +85,7 @@ export class DinoscanReporter {
                 code: this.normalizeDiagnosticCode(diagnostic.code),
               });
             });
-        }
+        },
       );
 
     return diagnostics.sort((a, b) => {
@@ -259,24 +259,24 @@ export class DinoscanReporter {
                             <div class="finding-header">
                                 <div>
                                     <div class="finding-file">${this.escapeHtml(
-                                      path.basename(finding.file)
+                                      path.basename(finding.file),
                                     )}</div>
                                     <div class="finding-location">Line ${
                                       finding.line
                                     }, Column ${finding.column}</div>
                                 </div>
                                 <div class="finding-severity severity-${this.getSeverityClass(
-                                  finding.severity
+                                  finding.severity,
                                 )}">${this.escapeHtml(finding.severity)}</div>
                             </div>
                             <div class="finding-message">${this.escapeHtml(
-                              finding.message
+                              finding.message,
                             )}</div>
                             <div class="finding-code">Rule: ${this.escapeHtml(
-                              finding.code
+                              finding.code,
                             )}</div>
                         </div>
-                        `
+                        `,
                       )
                       .join("")}
                 </div>
@@ -320,7 +320,7 @@ export class DinoscanReporter {
    * Get counts of findings by severity
    */
   private getSeverityCounts(
-    diagnostics: DiagnosticInfo[]
+    diagnostics: DiagnosticInfo[],
   ): Record<string, number> {
     const counts: Record<string, number> = {
       error: 0,
@@ -337,7 +337,7 @@ export class DinoscanReporter {
   }
 
   private toSeverityKey(
-    severity: string
+    severity: string,
   ): "error" | "warning" | "information" | "hint" {
     switch (severity) {
       case "Error":
@@ -376,7 +376,7 @@ export class DinoscanReporter {
    */
   public log(message: string): void {
     this.outputChannel.appendLine(
-      `[${new Date().toLocaleTimeString()}] ${message}`
+      `[${new Date().toLocaleTimeString()}] ${message}`,
     );
   }
 
