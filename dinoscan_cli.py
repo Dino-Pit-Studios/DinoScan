@@ -87,11 +87,9 @@ For more information, visit: https://github.com/DinoAir/DinoScan
         from analyzers.dead_code_analyzer import DeadCodeAnalyzer
         from analyzers.doc_quality_analyzer import DocumentationAnalyzer
         from analyzers.duplicate_code_analyzer import DuplicateCodeAnalyzer
-        from core.config_manager import ConfigManager
         from core.reporter import create_reporter
 
         # Initialize configuration
-        config_manager = ConfigManager(args.config or Path("config.json"))
 
         # Select analyzers to run
         analyzers_to_run = []
