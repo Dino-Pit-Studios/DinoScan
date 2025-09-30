@@ -345,7 +345,7 @@ export class DinoscanReporter {
     };
 
     diagnostics.forEach((diagnostic) => {
-      counts[Reporter.toSeverityKey(diagnostic.severity)]++;
+      counts[DinoscanReporter.toSeverityKey(diagnostic.severity)]++;
     });
 
     return counts;
