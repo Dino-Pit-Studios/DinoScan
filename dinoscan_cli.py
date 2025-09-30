@@ -98,7 +98,7 @@ def load_analyzers(analyzer_name):
         "docs": DocumentationAnalyzer,
         "duplicates": DuplicateCodeAnalyzer,
     }
-    return [analyzer_map[analyzer_name]()]  
+    return [analyzer_map[analyzer_name]()]
 
 
 def main():
