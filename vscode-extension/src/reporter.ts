@@ -13,6 +13,7 @@ import {
   ViewColumn,
   Uri,
 } from "vscode";
+import * as vscode from "vscode";
 import { join } from "path";
 
 /**
@@ -98,8 +99,10 @@ export class DinoscanReporter {
                 line: diagnostic.range.start.line + 1,
                 column: diagnostic.range.start.character + 1,
                 message: diagnostic.message,
-                severity: this.mapSeverityToString(diagnostic.severity),
-                code: this.normalizeDiagnosticCode(diagnostic.code),
+                severity: DinoscanReporter.mapSeverityToString(
+                  diagnostic.severity,
+                ),
+                code: DinoscanReporter.normalizeDiagnosticCode(diagnostic.code),
               });
             });
         },
@@ -113,8 +116,8 @@ export class DinoscanReporter {
         information: 2,
         hint: 3,
       } as const;
-      const aKey = this.toSeverityKey(a.severity);
-      const bKey = this.toSeverityKey(b.severity);
+      const aKey = DinoscanReporter.toSeverityKey(a.severity);
+      const bKey = DinoscanReporter.toSeverityKey(b.severity);
       const severityDiff = severityOrder[aKey] - severityOrder[bKey];
       if (severityDiff !== 0) {
         return severityDiff;
@@ -130,7 +133,7 @@ export class DinoscanReporter {
   // eslint-disable-next-line max-lines-per-function
   private generateReportHTML(diagnostics: DiagnosticInfo[]): string {
     const totalFindings = diagnostics.length;
-    const severityCounts = this.getSeverityCounts(diagnostics);
+    const severityCounts = DinoscanReporter.getSeverityCounts(diagnostics);
 
     return `
         <!DOCTYPE html>
@@ -274,21 +277,23 @@ export class DinoscanReporter {
                         (finding) => `<div class="finding-item">
                             <div class="finding-header">
                                 <div>
-                                    <div class="finding-file">${this.escapeHtml(
+                                    <div class="finding-file">${DinoscanReporter.escapeHtml(
                                       path.basename(finding.file),
                                     )}</div>
                                     <div class="finding-location">Line ${
                                       finding.line
                                     }, Column ${finding.column}</div>
                                 </div>
-                                <div class="finding-severity severity-${this.getSeverityClass(
+                                <div class="finding-severity severity-${DinoscanReporter.getSeverityClass(
                                   finding.severity,
-                                )}">${this.escapeHtml(finding.severity)}</div>
+                                )}">${DinoscanReporter.escapeHtml(
+                                  finding.severity,
+                                )}</div>
                             </div>
-                            <div class="finding-message">${this.escapeHtml(
+                            <div class="finding-message">${DinoscanReporter.escapeHtml(
                               finding.message,
                             )}</div>
-                            <div class="finding-code">Rule: ${this.escapeHtml(
+                            <div class="finding-code">Rule: ${DinoscanReporter.escapeHtml(
                               finding.code,
                             )}</div>
                         </div>

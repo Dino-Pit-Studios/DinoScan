@@ -9,8 +9,8 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+from xml.etree.ElementTree import Element, SubElement
 
-import defusedxml.ElementTree as ET
 from defusedxml.ElementTree import parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
@@ -257,8 +257,7 @@ class ConsoleReporter(Reporter):
 class JSONReporter(Reporter):
     """JSON output reporter."""
 
-    @staticmethod
-    def format_results(result: AnalysisResult) -> str:
+    def format_results(self, result: AnalysisResult) -> str:
         """Format results as JSON."""
         return json.dumps(result.to_dict(), indent=2, sort_keys=True, default=str)
 
@@ -266,56 +265,53 @@ class JSONReporter(Reporter):
 class XMLReporter(Reporter):
     """XML output reporter."""
 
-    @staticmethod
-    def format_results(result: AnalysisResult) -> str:
+    def format_results(self, result: AnalysisResult) -> str:
         """Format results as XML."""
-        root = ET.Element("DinoScanReport")
+        import defusedxml.ElementTree as ET
+
+        root = Element("DinoScanReport")
 
         # Metadata
-        metadata = ET.SubElement(root, "metadata")
-        ET.SubElement(metadata, "analyzer_name").text = result.analyzer_name
-        ET.SubElement(metadata, "version").text = result.version
-        ET.SubElement(metadata, "timestamp").text = result.timestamp
-        ET.SubElement(metadata, "project_path").text = result.project_path
-        ET.SubElement(metadata, "analysis_duration").text = str(
-            result.analysis_duration
-        )
+        metadata = SubElement(root, "metadata")
+        SubElement(metadata, "analyzer_name").text = result.analyzer_name
+        SubElement(metadata, "version").text = result.version
+        SubElement(metadata, "timestamp").text = result.timestamp
+        SubElement(metadata, "project_path").text = result.project_path
+        SubElement(metadata, "analysis_duration").text = str(result.analysis_duration)
 
         # Statistics
         stats = result.get_summary_stats()
-        statistics = ET.SubElement(root, "statistics")
-        ET.SubElement(statistics, "total_findings").text = str(stats["total_findings"])
-        ET.SubElement(statistics, "files_analyzed").text = str(stats["files_analyzed"])
-        ET.SubElement(statistics, "files_skipped").text = str(stats["files_skipped"])
+        statistics = SubElement(root, "statistics")
+        SubElement(statistics, "total_findings").text = str(stats["total_findings"])
+        SubElement(statistics, "files_analyzed").text = str(stats["files_analyzed"])
+        SubElement(statistics, "files_skipped").text = str(stats["files_skipped"])
 
         # Severity breakdown
-        severity_elem = ET.SubElement(statistics, "severity_breakdown")
+        severity_elem = SubElement(statistics, "severity_breakdown")
         for severity, count in stats["severity_breakdown"].items():
-            severity_item = ET.SubElement(severity_elem, "severity")
+            severity_item = SubElement(severity_elem, "severity")
             severity_item.set("level", severity)
             severity_item.text = str(count)
 
         # Findings
-        findings_elem = ET.SubElement(root, "findings")
+        findings_elem = SubElement(root, "findings")
         for finding in result.findings:
-            finding_elem = ET.SubElement(findings_elem, "finding")
+            finding_elem = SubElement(findings_elem, "finding")
             finding_elem.set("id", finding.rule_id)
             finding_elem.set("severity", finding.severity.value)
             finding_elem.set("category", finding.category.value)
 
-            ET.SubElement(finding_elem, "message").text = finding.message
-            ET.SubElement(finding_elem, "file_path").text = finding.file_path
-            ET.SubElement(finding_elem, "line_number").text = str(finding.line_number)
-            ET.SubElement(finding_elem, "column_number").text = str(
-                finding.column_number
-            )
+            SubElement(finding_elem, "message").text = finding.message
+            SubElement(finding_elem, "file_path").text = finding.file_path
+            SubElement(finding_elem, "line_number").text = str(finding.line_number)
+            SubElement(finding_elem, "column_number").text = str(finding.column_number)
 
             if finding.context:
-                ET.SubElement(finding_elem, "context").text = finding.context
+                SubElement(finding_elem, "context").text = finding.context
             if finding.suggestion:
-                ET.SubElement(finding_elem, "suggestion").text = finding.suggestion
+                SubElement(finding_elem, "suggestion").text = finding.suggestion
             if finding.cwe:
-                ET.SubElement(finding_elem, "cwe").text = finding.cwe
+                SubElement(finding_elem, "cwe").text = finding.cwe
 
         return ET.tostring(root, encoding="unicode", xml_declaration=True)
 

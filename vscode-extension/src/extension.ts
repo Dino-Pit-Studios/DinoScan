@@ -6,7 +6,9 @@
  */
 
 import { spawn, spawnSync } from "child_process";
-import type { ExtensionContext } from "vscode";
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
 import type { DinoscanFinding } from "./diagnosticProvider";
 import { DinoscanDiagnosticProvider } from "./diagnosticProvider";
 import { DinoscanFindingsTreeProvider } from "./findingsView";
@@ -50,7 +52,7 @@ function normalizeAnalyzerName(
  * Initializes diagnostic providers, status bar, reporter, views, and registers commands.
  * @param context The extension context provided by VS Code.
  */
-export function activate(context: ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
   console.log("DinoScan extension is now active!");
 
   // Initialize providers
@@ -189,6 +191,35 @@ export function activate(context: ExtensionContext) {
  */
 export function deactivate() {
   console.log("DinoScan extension is now deactivated!");
+}
+
+/**
+ * Returns true if the string contains ASCII control characters (0x00-0x1F or 0x7F).
+ */
+function containsControlCharacters(s: string): boolean {
+  for (let i = 0; i < s.length; i++) {
+    const code = s.charCodeAt(i);
+    if (code <= 0x1f || code === 0x7f) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Validates that all args are strings, reasonably sized, and have no control characters.
+ */
+function areArgsSafe(args: Array<string | number | boolean>): boolean {
+  return args.every((a) => {
+    if (typeof a !== "string") {
+      // Non-string args (numbers/booleans) are safe by construction when shell=false
+      return true;
+    }
+    if (a.length > 4096) {
+      return false;
+    }
+    return !containsControlCharacters(a);
+  });
 }
 
 /**
@@ -517,12 +548,20 @@ function executeDinoscanInvocation(
       } ${args.join(" ")} (cwd=${workspaceRoot ?? "default"})`,
     );
 
-    // Basic allowlist validation to prevent shell metacharacters in executable path
-    // Allow Unicode, word chars, spaces, dots, dashes, underscores, slashes, backslashes, colon, and parentheses
-    // Disallow shell metacharacters like `|`, `&`, `;`, `>`, `<`, `$`, `` ` ``, and quotes
-    const isSafeExecutable = /^[^|&;><$'"`]+$/u.test(invocation.command);
+    // Allowlist validation to prevent shell metacharacters in executable path (cross-platform: supports Windows and Unix paths, allows ~ and ())
+    // Disallows shell metacharacters: | & ; > < ` ' " and environment variable expansion ($)
+    const isSafeExecutable = /^[\w\s.\-/:\\~()]+$/.test(invocation.command);
     if (!isSafeExecutable) {
       const msg = `Unsafe executable path rejected: ${invocation.command}`;
+      output.appendLine(`[DinoScan] ${msg}`);
+      reject(new Error(msg));
+      return;
+    }
+
+    // Validate individual arguments: disallow control characters and excessively long args
+    if (!areArgsSafe(args)) {
+      const msg =
+        "Unsafe analyzer arguments detected (control characters or overlong).";
       output.appendLine(`[DinoScan] ${msg}`);
       reject(new Error(msg));
       return;
@@ -725,6 +764,14 @@ function isInvocationUsable(
     }
 
     const testArgs = [...invocation.args, "--help"];
+    // Validate probe arguments as well
+    if (!areArgsSafe(testArgs)) {
+      output.appendLine(
+        `[DinoScan] Unsafe probe arguments detected for ${invocation.command}.`,
+      );
+      return false;
+    }
+
     const result = spawnSync(invocation.command, testArgs, {
       cwd,
       encoding: "utf8",
