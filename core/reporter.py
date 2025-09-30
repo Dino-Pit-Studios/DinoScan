@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import Any
 from xml.etree.ElementTree import Element, SubElement
 
-import defusedxml.ElementTree as ET
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
 
