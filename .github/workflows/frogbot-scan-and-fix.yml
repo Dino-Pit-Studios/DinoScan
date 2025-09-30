@@ -7,6 +7,10 @@
 # Uses JFrog Xray to scan the project.
 # Read more about Frogbot here - https://docs.jfrog-applications.jfrog.io/jfrog-applications/frogbot
 
+# ⚠️ SETUP REQUIRED: This workflow requires JFrog credentials to be configured.
+# If you're seeing authentication errors, see JFROG_SETUP.md for detailed setup instructions.
+# You need to configure GitHub secrets for JF_URL and either JF_ACCESS_TOKEN or (JF_USER + JF_PASSWORD).
+
 # Some projects require creating a frogbot-config.yml file. Read more about it here - https://docs.jfrog-applications.jfrog.io/jfrog-applications/frogbot/setup-frogbot/frogbot-configuration
 
 name: "Frogbot Scan and Fix"

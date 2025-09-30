@@ -688,4 +688,11 @@ To add a new analyzer:
 - **Modular design** for easy extension and testing
 - **Self-documenting code** with extensive docstrings
 
+## 📚 Additional Documentation
+
+- **[JFrog/Frogbot Setup Guide](JFROG_SETUP.md)** - Configuration guide for JFrog Frogbot integration
+- **[Installation Guide](INSTALLATION.md)** - Detailed installation and usage instructions
+- **[Development Guide](DSguide.md)** - DinoScan development roadmap and architecture
+
+
 The new Python-based DinoScan provides enterprise-grade static analysis capabilities with the accuracy and performance needed for modern development workflows.
