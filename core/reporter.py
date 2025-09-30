@@ -9,6 +9,7 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+
 from defusedxml.ElementTree import Element, SubElement, parse
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
@@ -266,6 +267,7 @@ class XMLReporter(Reporter):
     def format_results(self, result: AnalysisResult) -> str:
         """Format results as XML."""
         import defusedxml.ElementTree as ET
+
         root = Element("DinoScanReport")
 
         # Metadata
