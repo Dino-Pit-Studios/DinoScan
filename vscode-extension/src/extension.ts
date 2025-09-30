@@ -518,8 +518,9 @@ function executeDinoscanInvocation(
     );
 
     // Basic allowlist validation to prevent shell metacharacters in executable path
-    // We only allow word chars, spaces, dots, dashes, underscores, slashes, backslashes and colon (for Windows drives)
-    const isSafeExecutable = /^[\w\s.\-/:\\]+$/.test(invocation.command);
+    // Allow Unicode, word chars, spaces, dots, dashes, underscores, slashes, backslashes, colon, and parentheses
+    // Disallow shell metacharacters like `|`, `&`, `;`, `>`, `<`, `$`, `` ` ``, and quotes
+    const isSafeExecutable = /^[^|&;><$'"`]+$/u.test(invocation.command);
     if (!isSafeExecutable) {
       const msg = `Unsafe executable path rejected: ${invocation.command}`;
       output.appendLine(`[DinoScan] ${msg}`);
