@@ -55,7 +55,7 @@ export class DinoscanReporter {
         localResourceRoots: [
           Uri.file(join(this.context.extensionPath, "media")),
         ],
-      }
+      },
     );
 
     this.reportPanel.onDidDispose(() => {
@@ -90,7 +90,7 @@ export class DinoscanReporter {
       .forEach(
         ([uri, fileDiagnostics]: [
           vscode.Uri,
-          readonly vscode.Diagnostic[]
+          readonly vscode.Diagnostic[],
         ]) => {
           fileDiagnostics
             .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
@@ -101,12 +101,12 @@ export class DinoscanReporter {
                 column: diagnostic.range.start.character + 1,
                 message: diagnostic.message,
                 severity: DinoscanReporter.mapSeverityToString(
-                  diagnostic.severity
+                  diagnostic.severity,
                 ),
                 code: DinoscanReporter.normalizeDiagnosticCode(diagnostic.code),
               });
             });
-        }
+        },
       );
 
     return diagnostics.sort((a, b) => {
@@ -279,26 +279,26 @@ export class DinoscanReporter {
                             <div class="finding-header">
                                 <div>
                                     <div class="finding-file">${DinoscanReporter.escapeHtml(
-                                      path.basename(finding.file)
+                                      path.basename(finding.file),
                                     )}</div>
                                     <div class="finding-location">Line ${
                                       finding.line
                                     }, Column ${finding.column}</div>
                                 </div>
                                 <div class="finding-severity severity-${DinoscanReporter.getSeverityClass(
-                                  finding.severity
+                                  finding.severity,
                                 )}">${DinoscanReporter.escapeHtml(
-                          finding.severity
-                        )}</div>
+                                  finding.severity,
+                                )}</div>
                             </div>
                             <div class="finding-message">${DinoscanReporter.escapeHtml(
-                              finding.message
+                              finding.message,
                             )}</div>
                             <div class="finding-code">Rule: ${DinoscanReporter.escapeHtml(
-                              finding.code
+                              finding.code,
                             )}</div>
                         </div>
-                        `
+                        `,
                       )
                       .join("")}
                 </div>
@@ -341,7 +341,7 @@ export class DinoscanReporter {
    * Get counts of findings by severity
    */
   private static getSeverityCounts(
-    diagnostics: DiagnosticInfo[]
+    diagnostics: DiagnosticInfo[],
   ): Record<string, number> {
     const counts: Record<string, number> = {
       error: 0,
@@ -363,7 +363,7 @@ export class DinoscanReporter {
    * @returns The lowercase severity key ("error", "warning", "information", or "hint").
    */
   private static toSeverityKey(
-    severity: string
+    severity: string,
   ): "error" | "warning" | "information" | "hint" {
     switch (severity) {
       case "Error":
@@ -383,7 +383,7 @@ export class DinoscanReporter {
    * Map VS Code diagnostic severity to string
    */
   private static mapSeverityToString(
-    severity: vscode.DiagnosticSeverity
+    severity: vscode.DiagnosticSeverity,
   ): string {
     switch (severity) {
       case vscode.DiagnosticSeverity.Error:
@@ -404,7 +404,7 @@ export class DinoscanReporter {
    */
   public log(message: string): void {
     this.outputChannel.appendLine(
-      `[${new Date().toLocaleTimeString()}] ${message}`
+      `[${new Date().toLocaleTimeString()}] ${message}`,
     );
   }
 
@@ -412,7 +412,7 @@ export class DinoscanReporter {
    * Normalize diagnostic code to string safely
    */
   private static normalizeDiagnosticCode(
-    code: vscode.Diagnostic["code"]
+    code: vscode.Diagnostic["code"],
   ): string {
     if (code === undefined || code === null) {
       return "Unknown";
