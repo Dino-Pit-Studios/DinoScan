@@ -70,9 +70,6 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     # Remaining CLI logic follows
-        action="append",
-        help="Exclude pattern (can be used multiple times)",
-    )
 
     parser.add_argument(
         "--verbose", "-v", action="store_true", help="Enable verbose output"
