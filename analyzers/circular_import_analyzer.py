@@ -207,9 +207,8 @@ class CircularImportAnalyzer(ASTAnalyzer):
         )
 
         # Add the imported module if specified
-        if import_info.module_name:
-            if import_info.module_name != ".":
-                target_parts.extend(import_info.module_name.split("."))
+        if import_info.module_name and import_info.module_name != ".":
+            target_parts.extend(import_info.module_name.split("."))
 
         return ".".join(target_parts) if target_parts else None
 
@@ -432,13 +431,13 @@ class ImportVisitor(ast.NodeVisitor):
         """Track TYPE_CHECKING blocks and conditional imports."""
         # Check for TYPE_CHECKING block
         is_type_checking = False
-        if isinstance(node.test, ast.Attribute):
-            if (
-                isinstance(node.test.value, ast.Name)
-                and node.test.value.id == "typing"
-                and node.test.attr == "TYPE_CHECKING"
-            ):
-                is_type_checking = True
+        if (
+            isinstance(node.test, ast.Attribute)
+            and isinstance(node.test.value, ast.Name)
+            and node.test.value.id == "typing"
+            and node.test.attr == "TYPE_CHECKING"
+        ):
+            is_type_checking = True
 
         old_type_checking = self.in_type_checking
         old_conditional_level = self.conditional_level
