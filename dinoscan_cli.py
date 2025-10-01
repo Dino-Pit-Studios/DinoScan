@@ -109,6 +109,10 @@ def load_analyzers(analyzer_name):
 
 
 def print_run_info(path, analyzers, profile, quiet):
+    """
+    Print information about the current run including path, selected analyzers, and profile.
+    Does nothing if quiet mode is enabled.
+    """
     if not quiet:
         print(f"Running DinoScan analysis on: {path}")
         print(f"Analyzers: {', '.join(a.__class__.__name__ for a in analyzers)}")
@@ -117,6 +121,11 @@ def print_run_info(path, analyzers, profile, quiet):
 
 
 def process_analyzer(analyzer, path, verbose):
+    """
+    Execute the given analyzer against the specified path.
+    If verbose is True, prints the analyzer's name before execution.
+    Returns a tuple of (findings, list of files analyzed).
+    """
     if verbose:
         print(f"Running {analyzer.__class__.__name__}...")
     if path.is_file():
