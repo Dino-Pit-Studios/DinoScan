@@ -22,7 +22,7 @@ import ast
 import logging
 import os
 import sys
-from collections import defaultdict, deque
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -91,7 +91,6 @@ class CircularImportAnalyzer(ASTAnalyzer):
         findings = self._detect_circular_imports()
 
         # Create analysis result
-        import time
         from datetime import datetime
 
         from core.base_analyzer import AnalysisResult

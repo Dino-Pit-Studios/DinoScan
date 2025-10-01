@@ -6,7 +6,6 @@ and analyze code using Abstract Syntax Trees for more accurate analysis.
 """
 
 import ast
-import json
 import os
 import re
 from typing import Any
