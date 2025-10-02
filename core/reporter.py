@@ -9,6 +9,7 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+
 from defusedxml.ElementTree import Element, SubElement
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
