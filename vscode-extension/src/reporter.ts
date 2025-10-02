@@ -80,62 +80,62 @@ export class DinoscanReporter {
   /**
    * Collect all DinoScan diagnostics from all open documents
    */
-    private static async collectAllDiagnostics(): Promise<DiagnosticInfo[]> {
-      const diagnostics: DiagnosticInfo[] = [];
+  private static async collectAllDiagnostics(): Promise<DiagnosticInfo[]> {
+    const diagnostics: DiagnosticInfo[] = [];
 
-      // Get all diagnostics from the collection
-      vscode.languages
-        .getDiagnostics()
-        .forEach(
-          ([uri, fileDiagnostics]: [
-            vscode.Uri,
-            readonly vscode.Diagnostic[],
-          ]) => {
-            fileDiagnostics
-              .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
-              .forEach((diagnostic: vscode.Diagnostic) => {
-                diagnostics.push({
-                  file: uri.fsPath,
-                  line: diagnostic.range.start.line + 1,
-                  column: diagnostic.range.start.character + 1,
-                  message: diagnostic.message,
-                  severity: DinoscanReporter.mapSeverityToString(
-                    diagnostic.severity,
-                  ),
-                  code: DinoscanReporter.normalizeDiagnosticCode(diagnostic.code),
-                });
+    // Get all diagnostics from the collection
+    vscode.languages
+      .getDiagnostics()
+      .forEach(
+        ([uri, fileDiagnostics]: [
+          vscode.Uri,
+          readonly vscode.Diagnostic[],
+        ]) => {
+          fileDiagnostics
+            .filter((d: vscode.Diagnostic) => d.source === "DinoScan")
+            .forEach((diagnostic: vscode.Diagnostic) => {
+              diagnostics.push({
+                file: uri.fsPath,
+                line: diagnostic.range.start.line + 1,
+                column: diagnostic.range.start.character + 1,
+                message: diagnostic.message,
+                severity: DinoscanReporter.mapSeverityToString(
+                  diagnostic.severity,
+                ),
+                code: DinoscanReporter.normalizeDiagnosticCode(diagnostic.code),
               });
-          },
-        );
+            });
+        },
+      );
 
-      return diagnostics.sort((a, b) => {
-        // Sort by severity, then by file
-        const severityOrder = {
-          error: 0,
-          warning: 1,
-          information: 2,
-          hint: 3,
-        } as const;
-        const aKey = DinoscanReporter.toSeverityKey(a.severity);
-        const bKey = DinoscanReporter.toSeverityKey(b.severity);
-        const severityDiff = severityOrder[aKey] - severityOrder[bKey];
-        if (severityDiff !== 0) {
-          return severityDiff;
-        }
+    return diagnostics.sort((a, b) => {
+      // Sort by severity, then by file
+      const severityOrder = {
+        error: 0,
+        warning: 1,
+        information: 2,
+        hint: 3,
+      } as const;
+      const aKey = DinoscanReporter.toSeverityKey(a.severity);
+      const bKey = DinoscanReporter.toSeverityKey(b.severity);
+      const severityDiff = severityOrder[aKey] - severityOrder[bKey];
+      if (severityDiff !== 0) {
+        return severityDiff;
+      }
 
-        return a.file.localeCompare(b.file);
-      });
-    }
+      return a.file.localeCompare(b.file);
+    });
+  }
 
-    /**
-     * Generate HTML content for the report
-     */
-    // eslint-disable-next-line max-lines-per-function
-    private static generateReportHTML(diagnostics: DiagnosticInfo[]): string {
-      const totalFindings = diagnostics.length;
-      const severityCounts = DinoscanReporter.getSeverityCounts(diagnostics);
+  /**
+   * Generate HTML content for the report
+   */
+  // eslint-disable-next-line max-lines-per-function
+  private static generateReportHTML(diagnostics: DiagnosticInfo[]): string {
+    const totalFindings = diagnostics.length;
+    const severityCounts = DinoscanReporter.getSeverityCounts(diagnostics);
 
-      return `
+    return `
           <!DOCTYPE html>
           <html lang="en">
           <head>
