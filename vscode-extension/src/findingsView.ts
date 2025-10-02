@@ -8,6 +8,10 @@ interface FindingNodeData {
 
 type DinoscanTreeNode = FileTreeItem | FindingTreeItem;
 
+/**
+ * Provides a tree view of DinoScan findings grouped by file and individual diagnostics.
+ * Implements the vscode.TreeDataProvider interface for DinoscanTreeNode items.
+ */
 export class DinoscanFindingsTreeProvider
   implements vscode.TreeDataProvider<DinoscanTreeNode>
 {
@@ -16,22 +20,41 @@ export class DinoscanFindingsTreeProvider
   >();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
+  /**
+   * Initializes a new instance of the DinoscanFindingsTreeProvider.
+   * Registers for diagnostics change events to refresh the tree.
+   * @param context The extension context used to subscribe to VSCode events.
+   */
   constructor(private readonly context: vscode.ExtensionContext) {
     context.subscriptions.push(
       vscode.languages.onDidChangeDiagnostics(() => this.refresh()),
     );
   }
 
+  /**
+   * Refreshes the tree view by firing the tree data change event.
+   * @returns void
+   */
   refresh(): void {
     this._onDidChangeTreeData.fire(undefined);
   }
 
+  /**
+   * Returns a TreeItem representation of the given DinoscanTreeNode.
+   * @param element The tree node to convert to a TreeItem.
+   * @returns A TreeItem or a promise resolving to a TreeItem.
+   */
   static getTreeItem(
     element: DinoscanTreeNode,
   ): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
   }
 
+  /**
+   * Retrieves the children of a given tree node or root items if no element is provided.
+   * @param element Optional tree node for which to retrieve children.
+   * @returns An array or promise of DinoscanTreeNode items.
+   */
   getChildren(
     element?: DinoscanTreeNode,
   ): vscode.ProviderResult<DinoscanTreeNode[]> {
@@ -46,6 +69,10 @@ export class DinoscanFindingsTreeProvider
     return [];
   }
 
+  /**
+   * Collects diagnostics from all files and creates FileTreeItem instances.
+   * @returns An array of FileTreeItem objects representing files with DinoScan findings.
+   */
   private getFilesWithFindings(): FileTreeItem[] {
     const diagnosticsByFile = this.collectDiagnostics();
 
@@ -55,6 +82,11 @@ export class DinoscanFindingsTreeProvider
     });
   }
 
+  /**
+   * Gets the diagnostic findings for a specific file URI.
+   * @param uri The URI of the file for which to retrieve diagnostics.
+   * @returns An array of FindingTreeItem objects for the specified file.
+   */
   private static getFindingsForFile(uri: vscode.Uri): FindingTreeItem[] {
     const diagnostics = vscode.languages
       .getDiagnostics()
@@ -70,6 +102,10 @@ export class DinoscanFindingsTreeProvider
     );
   }
 
+  /**
+   * Collects and filters diagnostics from all open files for the "DinoScan" source.
+   * @returns An array of objects each containing a file URI and its relevant diagnostics.
+   */
   private static collectDiagnostics(): Array<{
     uri: vscode.Uri;
     diagnostics: vscode.Diagnostic[];
@@ -93,7 +129,17 @@ export class DinoscanFindingsTreeProvider
   }
 }
 
+/**
+ * Represents a file item in the findings view tree.
+ * Extends vscode.TreeItem to display file information such as path and finding count.
+ */
 class FileTreeItem extends vscode.TreeItem {
+  /**
+   * Initializes a new instance of FileTreeItem.
+   * @param label - The display label for the tree item.
+   * @param uri - The URI of the file.
+   * @param count - The number of findings associated with the file.
+   */
   constructor(
     label: string,
     public readonly uri: vscode.Uri,
@@ -109,7 +155,18 @@ class FileTreeItem extends vscode.TreeItem {
   }
 }
 
+/**
+ * Represents a tree item for a diagnostic finding in the VSCode TreeView.
+ * Displays the finding's message with the appropriate severity icon,
+ * provides a description with line and column information, and
+ * includes a command to open the file at the finding location.
+ */
 class FindingTreeItem extends vscode.TreeItem {
+  /**
+   * Creates a new FindingTreeItem.
+   * @param uri - The URI of the file containing the finding.
+   * @param finding - The diagnostic information for the finding.
+   */
   constructor(
     public readonly uri: vscode.Uri,
     private readonly finding: vscode.Diagnostic,
@@ -133,6 +190,11 @@ class FindingTreeItem extends vscode.TreeItem {
   }
 }
 
+/**
+ * Returns a ThemeIcon corresponding to a given diagnostic severity.
+ * @param severity The diagnostic severity level.
+ * @returns The ThemeIcon representing the severity.
+ */
 function severityIcon(severity: vscode.DiagnosticSeverity): vscode.ThemeIcon {
   switch (severity) {
     case vscode.DiagnosticSeverity.Error:
@@ -148,6 +210,12 @@ function severityIcon(severity: vscode.DiagnosticSeverity): vscode.ThemeIcon {
   }
 }
 
+/**
+ * Generates a label for the given number of findings, pluralizing "finding" as needed.
+ *
+ * @param count - The number of findings.
+ * @returns The formatted label string (e.g., "1 finding" or "2 findings").
+ */
 function countLabel(count: number): string {
   return `${count} finding${count === 1 ? "" : "s"}`;
 }

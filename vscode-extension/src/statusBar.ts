@@ -7,9 +7,17 @@
 
 import * as vscode from "vscode";
 
+/**
+ * Manages the VS Code status bar integration for DinoScan.
+ * Displays analysis progress, findings count, and provides quick actions.
+ */
 export class DinoscanStatusBar {
   private readonly statusBarItem: vscode.StatusBarItem;
 
+  /**
+   * Creates a new DinoscanStatusBar.
+   * Initializes the status bar item and sets it to ready state.
+   */
   constructor() {
     this.statusBarItem = vscode.window.createStatusBarItem(
       vscode.StatusBarAlignment.Right,
@@ -31,6 +39,7 @@ export class DinoscanStatusBar {
 
   /**
    * Set status to analyzing state
+   * @param analyzing - whether analysis is in progress
    */
   public setAnalyzing(analyzing: boolean): void {
     if (analyzing) {
@@ -51,12 +60,26 @@ export class DinoscanStatusBar {
 
   /**
    * Set status showing findings count
+   * @param count - number of findings
    */
   public setFindings(count: number): void {
     if (count === 0) {
       this.setClean();
       return;
     }
+    this.statusBarItem.text = `$(alert) DinoScan: ${count} findings`;
+    this.statusBarItem.tooltip = `DinoScan: ${count} findings detected`;
+  }
+
+  /**
+   * Set status indicating a clean scan (no findings)
+   */
+  private setClean(): void {
+    this.statusBarItem.text = "$(check) DinoScan: Clean";
+    this.statusBarItem.tooltip = "DinoScan: No issues found";
+    this.statusBarItem.backgroundColor = undefined;
+  }
+}
 
     const severity = this.getSeverityIcon(count);
     this.statusBarItem.text = `${severity} DinoScan: ${count} issue${count > 1 ? "s" : ""}`;

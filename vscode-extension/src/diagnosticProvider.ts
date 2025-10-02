@@ -18,9 +18,17 @@ export interface DinoscanFinding {
   fix_suggestion?: string;
 }
 
+/**
+ * Provides diagnostics for DinoScan findings and offers code actions to fix issues.
+ *
+ * Implements vscode.CodeActionProvider to generate and manage diagnostics based on findings.
+ */
 export class DinoscanDiagnosticProvider implements vscode.CodeActionProvider {
   private readonly diagnosticCollection: vscode.DiagnosticCollection;
 
+  /**
+   * Initializes a new instance of DinoscanDiagnosticProvider and creates the diagnostic collection.
+   */
   constructor() {
     this.diagnosticCollection =
       vscode.languages.createDiagnosticCollection("dinoscan");
