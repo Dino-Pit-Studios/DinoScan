@@ -182,7 +182,6 @@ export class DinoscanReporter {
                   .info { color: var(--vscode-list-highlightForeground); }
                   .findings-list {
                       margin-top: 20px;
-  `,`file_path`:`/code/d5d93f99-abe1-4222-b6f8-617a12f1e633/new_code/vscode-extension/src/reporter.ts`,
                 }
                 .finding-item {
                     background: var(--vscode-editor-background);
