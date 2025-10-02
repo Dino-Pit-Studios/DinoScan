@@ -116,7 +116,7 @@ export class DinoscanDiagnosticProvider implements vscode.CodeActionProvider {
   /**
    * Provide code actions for DinoScan diagnostics
    */
-  public provideCodeActions(
+  public static provideCodeActions(
     document: vscode.TextDocument,
     range: vscode.Range | vscode.Selection,
     context: vscode.CodeActionContext,
@@ -178,7 +178,7 @@ export class DinoscanDiagnosticProvider implements vscode.CodeActionProvider {
   /**
    * Map DinoScan severity to VS Code diagnostic severity
    */
-  private mapSeverity(severity: string): vscode.DiagnosticSeverity {
+  private static mapSeverity(severity: string): vscode.DiagnosticSeverity {
     switch (severity.toLowerCase()) {
       case 'high':
         return vscode.DiagnosticSeverity.Error;

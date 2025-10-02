@@ -20,7 +20,7 @@ export class DinoscanFindingsTreeProvider implements vscode.TreeDataProvider<Din
     this._onDidChangeTreeData.fire(undefined);
   }
 
-  getTreeItem(element: DinoscanTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  static getTreeItem(element: DinoscanTreeNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
   }
 
@@ -45,7 +45,7 @@ export class DinoscanFindingsTreeProvider implements vscode.TreeDataProvider<Din
     });
   }
 
-  private getFindingsForFile(uri: vscode.Uri): FindingTreeItem[] {
+  private static getFindingsForFile(uri: vscode.Uri): FindingTreeItem[] {
     const diagnostics = vscode.languages
       .getDiagnostics()
       .find(([entryUri]) => entryUri.toString() === uri.toString())?.[1]
@@ -58,7 +58,7 @@ export class DinoscanFindingsTreeProvider implements vscode.TreeDataProvider<Din
     return diagnostics.map(diagnostic => new FindingTreeItem(uri, diagnostic));
   }
 
-  private collectDiagnostics(): Array<{ uri: vscode.Uri; diagnostics: vscode.Diagnostic[] }> {
+  private static collectDiagnostics(): Array<{ uri: vscode.Uri; diagnostics: vscode.Diagnostic[] }> {
     const diagnostics: Array<{ uri: vscode.Uri; diagnostics: vscode.Diagnostic[] }> = [];
 
     vscode.languages.getDiagnostics().forEach(([uri, uriDiagnostics]) => {

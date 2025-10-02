@@ -104,7 +104,7 @@ export class DinoscanStatusBar {
   /**
    * Get appropriate severity icon based on findings count
    */
-  private getSeverityIcon(count: number): string {
+  private static getSeverityIcon(count: number): string {
     if (count > 10) {
       return '$(error)';
     } else if (count > 5) {
