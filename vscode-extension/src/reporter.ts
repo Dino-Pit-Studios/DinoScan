@@ -80,7 +80,7 @@ export class DinoscanReporter {
   /**
    * Collect all DinoScan diagnostics from all open documents
    */
-  private async collectAllDiagnostics(): Promise<DiagnosticInfo[]> {
+  private static async collectAllDiagnostics(): Promise<DiagnosticInfo[]> {
     const diagnostics: DiagnosticInfo[] = [];
 
     // Get all diagnostics from the collection
@@ -131,57 +131,57 @@ export class DinoscanReporter {
    * Generate HTML content for the report
    */
   // eslint-disable-next-line max-lines-per-function
-  private generateReportHTML(diagnostics: DiagnosticInfo[]): string {
+  private static generateReportHTML(diagnostics: DiagnosticInfo[]): string {
     const totalFindings = diagnostics.length;
     const severityCounts = DinoscanReporter.getSeverityCounts(diagnostics);
 
     return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>DinoScan Analysis Report</title>
-            <style>
-                body {
-                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    margin: 20px;
-                    background-color: var(--vscode-editor-background);
-                    color: var(--vscode-editor-foreground);
-                }
-                .header {
-                    border-bottom: 1px solid var(--vscode-panel-border);
-                    padding-bottom: 20px;
-                    margin-bottom: 20px;
-                }
-                .logo {
-                    font-size: 24px;
-                    font-weight: bold;
-                    color: var(--vscode-textLink-foreground);
-                    margin-bottom: 10px;
-                }
-                .summary {
-                    display: flex;
-                    gap: 20px;
-                    margin: 20px 0;
-                }
-                .summary-item {
-                    background: var(--vscode-button-secondaryBackground);
-                    padding: 15px;
-                    border-radius: 5px;
-                    text-align: center;
-                    flex: 1;
-                }
-                .summary-number {
-                    font-size: 24px;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-                .error { color: var(--vscode-errorForeground); }
-                .warning { color: var(--vscode-list-warningForeground); }
-                .info { color: var(--vscode-list-highlightForeground); }
-                .findings-list {
-                    margin-top: 20px;
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>DinoScan Analysis Report</title>
+              <style>
+                  body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      margin: 20px;
+                      background-color: var(--vscode-editor-background);
+                      color: var(--vscode-editor-foreground);
+                  }
+                  .header {
+                      border-bottom: 1px solid var(--vscode-panel-border);
+                      padding-bottom: 20px;
+                      margin-bottom: 20px;
+                  }
+                  .logo {
+                      font-size: 24px;
+                      font-weight: bold;
+                      color: var(--vscode-textLink-foreground);
+                      margin-bottom: 10px;
+                  }
+                  .summary {
+                      display: flex;
+                      gap: 20px;
+                      margin: 20px 0;
+                  }
+                  .summary-item {
+                      background: var(--vscode-button-secondaryBackground);
+                      padding: 15px;
+                      border-radius: 5px;
+                      text-align: center;
+                      flex: 1;
+                  }
+                  .summary-number {
+                      font-size: 24px;
+                      font-weight: bold;
+                      margin-bottom: 5px;
+                  }
+                  .error { color: var(--vscode-errorForeground); }
+                  .warning { color: var(--vscode-list-warningForeground); }
+                  .info { color: var(--vscode-list-highlightForeground); }
+                  .findings-list {
+                      margin-top: 20px;
                 }
                 .finding-item {
                     background: var(--vscode-editor-background);
