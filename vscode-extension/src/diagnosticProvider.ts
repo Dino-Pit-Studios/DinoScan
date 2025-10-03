@@ -5,7 +5,15 @@
  * code actions for fixing issues.
  */
 
-import { CodeActionProvider, languages, TextDocument, Range, Position, Diagnostic, DiagnosticCollection } from "vscode";
+import {
+  CodeActionProvider,
+  languages,
+  TextDocument,
+  Range,
+  Position,
+  Diagnostic,
+  DiagnosticCollection,
+} from "vscode";
 
 export interface DinoscanFinding {
   file: string;

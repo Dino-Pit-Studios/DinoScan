@@ -1,5 +1,13 @@
 import * as path from "path";
-import { Uri, Diagnostic, TreeDataProvider, EventEmitter, languages, ExtensionContext, TreeItem } from "vscode";
+import {
+  Uri,
+  Diagnostic,
+  TreeDataProvider,
+  EventEmitter,
+  languages,
+  ExtensionContext,
+  TreeItem,
+} from "vscode";
 
 interface FindingNodeData {
   uri: Uri;
@@ -44,9 +52,7 @@ export class DinoscanFindingsTreeProvider
    * @param element The tree node to convert to a TreeItem.
    * @returns A TreeItem or a promise resolving to a TreeItem.
    */
-  static getTreeItem(
-    element: DinoscanTreeNode,
-  ): TreeItem | Thenable<TreeItem> {
+  static getTreeItem(element: DinoscanTreeNode): TreeItem | Thenable<TreeItem> {
     return element;
   }
 
