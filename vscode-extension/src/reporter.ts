@@ -13,7 +13,6 @@ import {
   ViewColumn,
   Uri,
 } from "vscode";
-import * as vscode from "vscode";
 import { join } from "path";
 
 /**

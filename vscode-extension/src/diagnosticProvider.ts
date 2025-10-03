@@ -5,7 +5,15 @@
  * code actions for fixing issues.
  */
 
-import * as vscode from "vscode";
+import {
+  CodeActionProvider,
+  languages,
+  TextDocument,
+  Range,
+  Position,
+  Diagnostic,
+  DiagnosticCollection,
+} from "vscode";
 
 export interface DinoscanFinding {
   file: string;
@@ -23,36 +31,36 @@ export interface DinoscanFinding {
  *
  * Implements vscode.CodeActionProvider to generate and manage diagnostics based on findings.
  */
-export class DinoscanDiagnosticProvider implements vscode.CodeActionProvider {
-  private readonly diagnosticCollection: vscode.DiagnosticCollection;
+export class DinoscanDiagnosticProvider implements CodeActionProvider {
+  private readonly diagnosticCollection: DiagnosticCollection;
 
   /**
    * Initializes a new instance of DinoscanDiagnosticProvider and creates the diagnostic collection.
    */
   constructor() {
     this.diagnosticCollection =
-      vscode.languages.createDiagnosticCollection("dinoscan");
+      languages.createDiagnosticCollection("dinoscan");
   }
 
   /**
    * Update diagnostics for a document based on DinoScan findings
    */
   public updateDiagnostics(
-    document: vscode.TextDocument,
+    document: TextDocument,
     findings: DinoscanFinding[],
   ): void {
-    const diagnostics: vscode.Diagnostic[] = [];
+    const diagnostics: Diagnostic[] = [];
 
     findings.forEach((finding) => {
       const line = Math.max(0, finding.line - 1); // Convert to 0-based
       const column = Math.max(0, finding.column - 1);
 
-      const range = new vscode.Range(
-        new vscode.Position(line, column),
-        new vscode.Position(line, column + 10), // Approximate range
+      const range = new Range(
+        new Position(line, column),
+        new Position(line, column + 10), // Approximate range
       );
 
-      const diagnostic = new vscode.Diagnostic(
+      const diagnostic = new Diagnostic(
         range,
         finding.message,
         this.mapSeverity(finding.severity),
