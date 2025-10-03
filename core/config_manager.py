@@ -13,7 +13,7 @@ from typing import Any
 
 class ConfigManager:
     """Manages configuration for DinoScan analyzers."""
-    
+
     def __init__(self, config_path: str | None = None):
         """Initialize configuration manager."""
         self.config_path = config_path
@@ -22,7 +22,7 @@ class ConfigManager:
         if config_path:
             self._load_config_file(config_path)
         self._load_environment_overrides()
-    
+
     def _load_default_config(self) -> None:
         """Load default configuration."""
         self._config = {
@@ -130,7 +130,7 @@ class ConfigManager:
                 "max_workers": None  # None = auto-detect
             }
         }
-    
+
     def _load_config_file(self, config_path: str) -> None:
         """Load configuration from file."""
         path = Path(config_path)
@@ -161,7 +161,7 @@ class ConfigManager:
             print(f"Warning: Failed to parse config file {config_path}: {e}")
         except Exception as e:
             print(f"Warning: Error loading config file {config_path}: {e}")
-    
+
     def _load_environment_overrides(self) -> None:
         """Load configuration overrides from environment variables."""
         # Support common environment variable patterns
@@ -187,11 +187,11 @@ class ConfigManager:
                     
                 except (ValueError, TypeError) as e:
                     print(f"Warning: Invalid value for {env_var}: {value} ({e})")
-    
+
     def _merge_config(self, new_config: dict[str, Any]) -> None:
         """Merge new configuration with existing configuration."""
         self._config = self._deep_merge(self._config, new_config)
-    
+
     def _deep_merge(self, base: dict[str, Any], update: dict[str, Any]) -> dict[str, Any]:
         """Deep merge two dictionaries."""
         result = base.copy()
@@ -203,7 +203,7 @@ class ConfigManager:
                 result[key] = value
         
         return result
-    
+
     def _set_nested_config(self, path: str, value: Any) -> None:
         """Set a nested configuration value using dot notation."""
         keys = path.split('.')
@@ -215,7 +215,7 @@ class ConfigManager:
             current = current[key]
         
         current[keys[-1]] = value
-    
+
     def get(self, path: str, default: Any = None) -> Any:
         """Get a configuration value using dot notation."""
         keys = path.split('.')
@@ -227,35 +227,35 @@ class ConfigManager:
             return current
         except (KeyError, TypeError):
             return default
-    
+
     def get_analyzer_config(self, analyzer_name: str) -> dict[str, Any]:
         """Get configuration for a specific analyzer."""
         return self.get(f'analyzers.{analyzer_name}', {})
-    
+
     def is_analyzer_enabled(self, analyzer_name: str) -> bool:
         """Check if an analyzer is enabled."""
         return self.get(f'analyzers.{analyzer_name}.enabled', False)
-    
+
     def get_rule_config(self, analyzer_name: str, rule_id: str) -> dict[str, Any]:
         """Get configuration for a specific rule."""
         return self.get(f'analyzers.{analyzer_name}.rules.{rule_id}', {})
-    
+
     def is_rule_enabled(self, analyzer_name: str, rule_id: str) -> bool:
         """Check if a specific rule is enabled."""
         return self.get(f'analyzers.{analyzer_name}.rules.{rule_id}.enabled', True)
-    
+
     def get_exclusions(self) -> dict[str, Any]:
         """Get file and directory exclusions."""
         return self.get('exclusions', {})
-    
+
     def get_output_config(self) -> dict[str, Any]:
         """Get output configuration."""
         return self.get('output', {})
-    
+
     def get_performance_config(self) -> dict[str, Any]:
         """Get performance configuration."""
         return self.get('performance', {})
-    
+
     def validate_config(self) -> list[str]:
         """Validate configuration and return list of issues."""
         issues = []
@@ -294,7 +294,7 @@ class ConfigManager:
                 issues.append(f"Config '{config_path}' must be between {min_val} and {max_val}")
         
         return issues
-    
+
     def save_config(self, output_path: str) -> None:
         """Save current configuration to file."""
         path = Path(output_path)
@@ -312,15 +312,14 @@ class ConfigManager:
                     raise ValueError("PyYAML not installed, cannot save YAML config")
             else:
                 raise ValueError(f"Unsupported config file format: {path.suffix}")
-                
         except Exception as e:
             print(f"Error saving config to {output_path}: {e}")
             raise
-    
+
     def to_dict(self) -> dict[str, Any]:
         """Return configuration as dictionary."""
         return self._config.copy()
-    
+
     def __repr__(self) -> str:
         """Return string representation of configuration."""
         return f"ConfigManager(config_path={self.config_path})"
