@@ -126,8 +126,8 @@ def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     lines.append("")
     return lines
 
-@staticmethod
 
+@staticmethod
 def _format_category_breakdown(result: AnalysisResult) -> list[str]:
     """Format the category breakdown section."""
     stats = result.get_summary_stats()
@@ -167,8 +167,8 @@ def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
 
     return lines
 
-@staticmethod
 
+@staticmethod
 def _group_findings_by_file(findings: list[Finding]) -> dict[str, list[Finding]]:
     """Group findings by file path."""
     findings_by_file = {}
