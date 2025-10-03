@@ -97,12 +97,13 @@ class ConsoleReporter(Reporter):
         """Format the analysis summary section."""
         stats = result.get_summary_stats()
         return [
-        "📊 Analysis Summary:",
-        f"   Files analyzed: {stats['files_analyzed']}",
-        f"   Total findings: {stats['total_findings']}",
-        f"   Analysis time: {result.analysis_duration:.2f} seconds",
-        "",
-    ]
+            "📊 Analysis Summary:",
+            f"   Files analyzed: {stats['files_analyzed']}",
+            f"   Total findings: {stats['total_findings']}",
+            f"   Analysis time: {result.analysis_duration:.2f} seconds",
+            "",
+        ]
+
 
 def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     """Format the severity breakdown section."""
@@ -118,6 +119,7 @@ def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     lines.append("")
     return lines
 
+
 @staticmethod
 def _format_category_breakdown(result: AnalysisResult) -> list[str]:
     """Format the category breakdown section."""
@@ -130,6 +132,7 @@ def _format_category_breakdown(result: AnalysisResult) -> list[str]:
         lines.append(f"   {category}: {count}")
     lines.append("")
     return lines
+
 
 def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
     """Format the detailed findings section."""
@@ -147,10 +150,9 @@ def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
 
     return lines
 
+
 @staticmethod
-def _group_findings_by_file(
-    findings: list[Finding]
-) -> dict[str, list[Finding]]:
+def _group_findings_by_file(findings: list[Finding]) -> dict[str, list[Finding]]:
     """Group findings by file path."""
     findings_by_file = {}
     for finding in findings:
@@ -158,6 +160,7 @@ def _group_findings_by_file(
             findings_by_file[finding.file_path] = []
         findings_by_file[finding.file_path].append(finding)
     return findings_by_file
+
 
 def _format_file_findings(
     self, file_path: str, file_findings: list[Finding], project_path: str
@@ -179,6 +182,7 @@ def _format_file_findings(
 
     return lines
 
+
 @staticmethod
 def _get_relative_path(file_path: str, project_path: str) -> str:
     """Get relative path for display."""
@@ -186,6 +190,7 @@ def _get_relative_path(file_path: str, project_path: str) -> str:
         return str(Path(file_path).relative_to(project_path))
     except ValueError:
         return file_path
+
 
 def _sort_and_limit_findings(self, file_findings: list[Finding]) -> list[Finding]:
     """Sort findings by severity and limit the count."""
@@ -200,6 +205,7 @@ def _sort_and_limit_findings(self, file_findings: list[Finding]) -> list[Finding
         file_findings[: self.max_findings_per_file],
         key=lambda f: severity_order.index(f.severity),
     )
+
 
 def _format_single_finding(self, finding: Finding) -> list[str]:
     """Format a single finding with all its details."""
@@ -227,6 +233,7 @@ def _format_single_finding(self, finding: Finding) -> list[str]:
     lines.append("")
     return lines
 
+
 @staticmethod
 def _format_location(finding: Finding) -> str:
     """Format the location information for a finding."""
@@ -234,6 +241,7 @@ def _format_location(finding: Finding) -> str:
     if finding.column_number:
         location += f", Col {finding.column_number}"
     return location
+
 
 @staticmethod
 def _format_finding_details(finding: Finding) -> str:
@@ -245,6 +253,7 @@ def _format_finding_details(finding: Finding) -> str:
         details.append(f"CWE: {finding.cwe}")
     return " | ".join(details)
 
+
 def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
     """Format remaining findings count if truncated."""
     if len(file_findings) <= self.max_findings_per_file:
@@ -252,6 +261,7 @@ def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
 
     remaining = len(file_findings) - self.max_findings_per_file
     return [f"  ... and {remaining} more findings in this file", ""]
+
 
 @staticmethod
 def _format_footer(result: AnalysisResult) -> list[str]:
