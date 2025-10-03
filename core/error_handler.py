@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Centralized error handling for DinoScan analyzers.
-"""
+"""Centralized error handling for DinoScan analyzers."""
 
 import logging
 from contextlib import contextmanager

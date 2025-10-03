@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-DinoScan command-line interface for VS Code integration
-"""
+"""DinoScan command-line interface for VS Code integration"""
 
 import fnmatch
 import json
