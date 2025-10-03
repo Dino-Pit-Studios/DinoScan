@@ -104,218 +104,201 @@ class ConsoleReporter(Reporter):
             "",
         ]
 
-    def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
-        """Format the severity breakdown section."""
-        stats = result.get_summary_stats()
-        if not stats["severity_breakdown"]:
-            return []
 
-        lines = ["⚠️  Severity Breakdown:"]
-        for severity, count in stats["severity_breakdown"].items():
-            severity_enum = Severity(severity)
-            colored_line = self._colorize(f"   {severity}: {count}", severity_enum)
-            lines.append(colored_line)
-        lines.append("")
-        return lines
+def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
+    """Format the severity breakdown section."""
+    stats = result.get_summary_stats()
+    if not stats["severity_breakdown"]:
+        return []
 
-    @staticmethod
-    def _format_category_breakdown(result: AnalysisResult) -> list[str]:
-        """Format the category breakdown section."""
-        stats = result.get_summary_stats()
-        if not stats["category_breakdown"]:
-            return []
-
-        lines = ["🔍 Category Breakdown:"]
-        for category, count in stats["category_breakdown"].items():
-            lines.append(f"   {category}: {count}")
-        lines.append("")
-        return lines
-
-    def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
-        """Format the detailed findings section."""
-        if not result.findings:
-            return []
-
-        lines = ["🐛 Detailed Findings:", ""]
-        findings_by_file = self._group_findings_by_file(result.findings)
-
-        for file_path in sorted(findings_by_file.keys()):
-            file_lines = self._format_file_findings(
-                file_path, findings_by_file[file_path], result.project_path
-            )
-            lines.extend(file_lines)
-
-        return lines
-
-    def _group_findings_by_file(
-        self, findings: list[Finding]
-    ) -> dict[str, list[Finding]]:
-        """Group findings by file path."""
-        findings_by_file = {}
-        for finding in findings:
-            if finding.file_path not in findings_by_file:
-                findings_by_file[finding.file_path] = []
-            findings_by_file[finding.file_path].append(finding)
-        return findings_by_file
-
-    def _format_file_findings(
-        self, file_path: str, file_findings: list[Finding], project_path: str
-    ) -> list[str]:
-        """Format findings for a specific file."""
-        # Show relative path
-        rel_path = self._get_relative_path(file_path, project_path)
-
-        lines = [f"📄 {rel_path}", "-" * len(rel_path)]
-
-        # Sort and limit findings
-        sorted_findings = self._sort_and_limit_findings(file_findings)
-
-        for finding in sorted_findings:
-            lines.extend(self._format_single_finding(finding))
-
-        # Show remaining count if truncated
-        lines.extend(self._format_remaining_count(file_findings))
-
-        return lines
-
-    @staticmethod
-    def _get_relative_path(file_path: str, project_path: str) -> str:
-        """Get relative path for display."""
-        try:
-            return str(Path(file_path).relative_to(project_path))
-        except ValueError:
-            return file_path
-
-    def _sort_and_limit_findings(self, file_findings: list[Finding]) -> list[Finding]:
-        """Sort findings by severity and limit the count."""
-        severity_order = [
-            Severity.CRITICAL,
-            Severity.HIGH,
-            Severity.MEDIUM,
-            Severity.LOW,
-            Severity.INFO,
-        ]
-        return sorted(
-            file_findings[: self.max_findings_per_file],
-            key=lambda f: severity_order.index(f.severity),
-        )
-
-    def _format_single_finding(self, finding: Finding) -> list[str]:
-        """Format a single finding with all its details."""
-        lines = []
-
-        # Main finding line
-        location = self._format_location(finding)
-        finding_line = f"  {location}: [{finding.severity.value}] {finding.message}"
-        colored_line = self._colorize(finding_line, finding.severity)
+    lines = ["⚠️  Severity Breakdown:"]
+    for severity, count in stats["severity_breakdown"].items():
+        severity_enum = Severity(severity)
+        colored_line = self._colorize(f"   {severity}: {count}", severity_enum)
         lines.append(colored_line)
+    lines.append("")
+    return lines
 
-        # Context if enabled
-        if self.show_context and finding.context:
-            lines.append(f"    Context: {finding.context}")
 
-        # Suggestion if available
+@staticmethod
+def _format_category_breakdown(result: AnalysisResult) -> list[str]:
+    """Format the category breakdown section."""
+    stats = result.get_summary_stats()
+    if not stats["category_breakdown"]:
+        return []
+
+    lines = ["🔍 Category Breakdown:"]
+    for category, count in stats["category_breakdown"].items():
+        lines.append(f"   {category}: {count}")
+    lines.append("")
+    return lines
+
+
+def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
+    """Format the detailed findings section."""
+    if not result.findings:
+        return []
+
+    lines = ["🐛 Detailed Findings:", ""]
+    findings_by_file = self._group_findings_by_file(result.findings)
+
+    for file_path in sorted(findings_by_file.keys()):
+        file_lines = self._format_file_findings(
+            file_path, findings_by_file[file_path], result.project_path
+        )
+        lines.extend(file_lines)
+
+    return lines
+
+
+@staticmethod
+def _group_findings_by_file(findings: list[Finding]) -> dict[str, list[Finding]]:
+    """Group findings by file path."""
+    findings_by_file = {}
+    for finding in findings:
+        if finding.file_path not in findings_by_file:
+            findings_by_file[finding.file_path] = []
+        findings_by_file[finding.file_path].append(finding)
+    return findings_by_file
+
+
+def _format_file_findings(
+    self, file_path: str, file_findings: list[Finding], project_path: str
+) -> list[str]:
+    """Format findings for a specific file."""
+    # Show relative path
+    rel_path = self._get_relative_path(file_path, project_path)
+
+    lines = [f"📄 {rel_path}", "-" * len(rel_path)]
+
+    # Sort and limit findings
+    sorted_findings = self._sort_and_limit_findings(file_findings)
+
+    for finding in sorted_findings:
+        lines.extend(self._format_single_finding(finding))
+
+    # Show remaining count if truncated
+    lines.extend(self._format_remaining_count(file_findings))
+
+    return lines
+
+
+@staticmethod
+def _get_relative_path(file_path: str, project_path: str) -> str:
+    """Get relative path for display."""
+    try:
+        return str(Path(file_path).relative_to(project_path))
+    except ValueError:
+        return file_path
+
+
+def _sort_and_limit_findings(self, file_findings: list[Finding]) -> list[Finding]:
+    """Sort findings by severity and limit the count."""
+    severity_order = [
+        Severity.CRITICAL,
+        Severity.HIGH,
+        Severity.MEDIUM,
+        Severity.LOW,
+        Severity.INFO,
+    ]
+    return sorted(
+        file_findings[: self.max_findings_per_file],
+        key=lambda f: severity_order.index(f.severity),
+    )
+
+
+def _format_single_finding(self, finding: Finding) -> list[str]:
+    """Format a single finding with all its details."""
+    lines = []
+
+    # Main finding line
+    location = self._format_location(finding)
+    finding_line = f"  {location}: [{finding.severity.value}] {finding.message}"
+    colored_line = self._colorize(finding_line, finding.severity)
+    lines.append(colored_line)
+
+    # Context if enabled
+    if self.show_context and finding.context:
+        lines.append(f"    Context: {finding.context}")
+
+    # Suggestion if available
+    if finding.suggestion:
+        lines.append(f"    💡 Suggestion: {finding.suggestion}")
+
+    # Rule ID and CWE
+    details = self._format_finding_details(finding)
+    if details:
+        lines.append(f"    ℹ️  {details}")
+
+    lines.append("")
+    return lines
+
+
+@staticmethod
+def _format_location(finding: Finding) -> str:
+    """Format the location information for a finding."""
+    location = f"Line {finding.line_number}"
+    if finding.column_number:
+        location += f", Col {finding.column_number}"
+    return location
+
+
+@staticmethod
+def _format_finding_details(finding: Finding) -> str:
+    """Format rule ID and CWE details."""
+    details = []
+    if finding.rule_id:
+        details.append(f"Rule: {finding.rule_id}")
+    if finding.cwe:
+        details.append(f"CWE: {finding.cwe}")
+    return " | ".join(details)
+
+
+def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
+    """Format remaining findings count if truncated."""
+    if len(file_findings) <= self.max_findings_per_file:
+        return []
+
+    remaining = len(file_findings) - self.max_findings_per_file
+    return [f"  ... and {remaining} more findings in this file", ""]
+
+
+@staticmethod
+def _format_footer(result: AnalysisResult) -> list[str]:
+    """Format the report footer."""
+    return ["=" * 80, f"Analysis completed at {result.timestamp}", "=" * 80]
+    SubElement(statistics, "total_findings").text = str(stats["total_findings"])
+    SubElement(statistics, "files_analyzed").text = str(stats["files_analyzed"])
+    SubElement(statistics, "files_skipped").text = str(stats["files_skipped"])
+
+    # Severity breakdown
+    severity_elem = SubElement(statistics, "severity_breakdown")
+    for severity, count in stats["severity_breakdown"].items():
+        severity_item = SubElement(severity_elem, "severity")
+        severity_item.set("level", severity)
+        severity_item.text = str(count)
+
+    # Findings
+    findings_elem = SubElement(root, "findings")
+    for finding in result.findings:
+        finding_elem = SubElement(findings_elem, "finding")
+        finding_elem.set("id", finding.rule_id)
+        finding_elem.set("severity", finding.severity.value)
+        finding_elem.set("category", finding.category.value)
+
+        SubElement(finding_elem, "message").text = finding.message
+        SubElement(finding_elem, "file_path").text = finding.file_path
+        SubElement(finding_elem, "line_number").text = str(finding.line_number)
+        SubElement(finding_elem, "column_number").text = str(finding.column_number)
+
+        if finding.context:
+            SubElement(finding_elem, "context").text = finding.context
         if finding.suggestion:
-            lines.append(f"    💡 Suggestion: {finding.suggestion}")
-
-        # Rule ID and CWE
-        details = self._format_finding_details(finding)
-        if details:
-            lines.append(f"    ℹ️  {details}")
-
-        lines.append("")
-        return lines
-
-    def _format_location(self, finding: Finding) -> str:
-        """Format the location information for a finding."""
-        location = f"Line {finding.line_number}"
-        if finding.column_number:
-            location += f", Col {finding.column_number}"
-        return location
-
-    def _format_finding_details(self, finding: Finding) -> str:
-        """Format rule ID and CWE details."""
-        details = []
-        if finding.rule_id:
-            details.append(f"Rule: {finding.rule_id}")
+            SubElement(finding_elem, "suggestion").text = finding.suggestion
         if finding.cwe:
-            details.append(f"CWE: {finding.cwe}")
-        return " | ".join(details)
+            SubElement(finding_elem, "cwe").text = finding.cwe
 
-    def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
-        """Format remaining findings count if truncated."""
-        if len(file_findings) <= self.max_findings_per_file:
-            return []
-
-        remaining = len(file_findings) - self.max_findings_per_file
-        return [f"  ... and {remaining} more findings in this file", ""]
-
-    @staticmethod
-    def _format_footer(result: AnalysisResult) -> list[str]:
-        """Format the report footer."""
-        return ["=" * 80, f"Analysis completed at {result.timestamp}", "=" * 80]
-
-
-class JSONReporter(Reporter):
-    """JSON output reporter."""
-
-    def format_results(self, result: AnalysisResult) -> str:
-        """Format results as JSON."""
-        return json.dumps(result.to_dict(), indent=2, sort_keys=True, default=str)
-
-
-class XMLReporter(Reporter):
-    """XML output reporter."""
-
-    def format_results(self, result: AnalysisResult) -> str:
-        """Format results as XML."""
-        import defusedxml.ElementTree as ET
-
-        root = Element("DinoScanReport")
-
-        # Metadata
-        metadata = SubElement(root, "metadata")
-        SubElement(metadata, "analyzer_name").text = result.analyzer_name
-        SubElement(metadata, "version").text = result.version
-        SubElement(metadata, "timestamp").text = result.timestamp
-        SubElement(metadata, "project_path").text = result.project_path
-        SubElement(metadata, "analysis_duration").text = str(result.analysis_duration)
-
-        # Statistics
-        stats = result.get_summary_stats()
-        statistics = SubElement(root, "statistics")
-        SubElement(statistics, "total_findings").text = str(stats["total_findings"])
-        SubElement(statistics, "files_analyzed").text = str(stats["files_analyzed"])
-        SubElement(statistics, "files_skipped").text = str(stats["files_skipped"])
-
-        # Severity breakdown
-        severity_elem = SubElement(statistics, "severity_breakdown")
-        for severity, count in stats["severity_breakdown"].items():
-            severity_item = SubElement(severity_elem, "severity")
-            severity_item.set("level", severity)
-            severity_item.text = str(count)
-
-        # Findings
-        findings_elem = SubElement(root, "findings")
-        for finding in result.findings:
-            finding_elem = SubElement(findings_elem, "finding")
-            finding_elem.set("id", finding.rule_id)
-            finding_elem.set("severity", finding.severity.value)
-            finding_elem.set("category", finding.category.value)
-
-            SubElement(finding_elem, "message").text = finding.message
-            SubElement(finding_elem, "file_path").text = finding.file_path
-            SubElement(finding_elem, "line_number").text = str(finding.line_number)
-            SubElement(finding_elem, "column_number").text = str(finding.column_number)
-
-            if finding.context:
-                SubElement(finding_elem, "context").text = finding.context
-            if finding.suggestion:
-                SubElement(finding_elem, "suggestion").text = finding.suggestion
-            if finding.cwe:
-                SubElement(finding_elem, "cwe").text = finding.cwe
-
-        return ET.tostring(root, encoding="unicode", xml_declaration=True)
+    return ET.tostring(root, encoding="unicode", xml_declaration=True)
 
 
 class SARIFReporter(Reporter):
