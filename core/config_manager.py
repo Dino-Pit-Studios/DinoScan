@@ -379,6 +379,7 @@ class ConfigManager:
                     raise ValueError("PyYAML not installed, cannot save YAML config")
             else:
                 raise ValueError(f"Unsupported config file format: {path.suffix}")
+
         except Exception as e:
             print(f"Error saving config to {output_path}: {e}")
             raise

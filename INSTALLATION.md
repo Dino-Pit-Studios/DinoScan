@@ -3,6 +3,7 @@
 ## 📦 Installation Options
 
 ### Option 1: PyPI Package (Recommended)
+
 ```bash
 # Install from PyPI
 pip install dinoscan
@@ -16,6 +17,7 @@ dinoscan all --format json --output report.json myproject/
 ```
 
 ### Option 2: Standalone Executable
+
 ```bash
 # Download from releases page
 wget https://github.com/DinoAir/DinoScan/releases/latest/download/dinoscan.exe
@@ -28,6 +30,7 @@ chmod +x dinoscan
 ```
 
 ### Option 3: Docker Container
+
 ```bash
 # Pull the image
 docker pull dinoair/dinoscan:latest
@@ -41,6 +44,7 @@ docker run --rm -v $(pwd):/workspace dinoair/dinoscan:latest \
 ```
 
 ### Option 4: Development Installation
+
 ```bash
 # Clone repository
 git clone https://github.com/DinoAir/DinoScan.git
@@ -56,6 +60,7 @@ poetry run python dinoscan_cli.py security myproject/
 ## 🚀 Quick Start Examples
 
 ### Basic Analysis
+
 ```bash
 # Security analysis only
 dinoscan security myproject/
@@ -68,11 +73,12 @@ dinoscan dead-code --format json --output dead_code_report.json myproject/
 ```
 
 ### Advanced Usage
+
 ```bash
 # Strict analysis profile
 dinoscan all --profile strict myproject/
 
-# Exclude test directories  
+# Exclude test directories
 dinoscan security --exclude "tests/" --exclude "venv/" myproject/
 
 # Custom configuration file
@@ -85,6 +91,7 @@ dinoscan security --verbose myproject/
 ## 🔧 CI/CD Integration
 
 ### GitHub Actions
+
 ```yaml
 # .github/workflows/dinoscan.yml
 name: Code Analysis
@@ -97,13 +104,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dinoair/dinoscan-action@v2
         with:
-          path: '.'
-          analyzers: 'all'
-          format: 'sarif'
-          fail-on: 'high'
+          path: "."
+          analyzers: "all"
+          format: "sarif"
+          fail-on: "high"
 ```
 
 ### Pre-commit Integration
+
 ```yaml
 # .pre-commit-config.yaml
 repos:
@@ -116,25 +124,25 @@ repos:
 
 ## 🎯 Analyzer Profiles
 
-| Profile | Description | Use Case |
-|---------|-------------|----------|
-| `strict` | Maximum scrutiny, all rules enabled | Production/critical code |
-| `standard` | Balanced analysis (default) | General development |  
-| `relaxed` | Fewer false positives | Legacy/experimental code |
+| Profile    | Description                         | Use Case                 |
+| ---------- | ----------------------------------- | ------------------------ |
+| `strict`   | Maximum scrutiny, all rules enabled | Production/critical code |
+| `standard` | Balanced analysis (default)         | General development      |
+| `relaxed`  | Fewer false positives               | Legacy/experimental code |
 
 ## 📊 Output Formats
 
-| Format | Description | Best For |
-|--------|-------------|----------|
-| `console` | Human-readable terminal output | Development |
-| `json` | Structured JSON data | Automation/scripting |
-| `xml` | XML format | Legacy tooling |
-| `sarif` | SARIF 2.1 standard | CI/CD/IDEs |
+| Format    | Description                    | Best For             |
+| --------- | ------------------------------ | -------------------- |
+| `console` | Human-readable terminal output | Development          |
+| `json`    | Structured JSON data           | Automation/scripting |
+| `xml`     | XML format                     | Legacy tooling       |
+| `sarif`   | SARIF 2.1 standard             | CI/CD/IDEs           |
 
 ## 🔍 Available Analyzers
 
 - **security**: Vulnerability detection, secret scanning, injection analysis
-- **circular**: Circular import detection using advanced graph algorithms  
+- **circular**: Circular import detection using advanced graph algorithms
 - **dead-code**: Unused code identification with framework awareness
 - **docs**: Documentation quality analysis (multiple formats)
 - **duplicates**: Code duplication detection using winnowing algorithm
@@ -150,6 +158,7 @@ repos:
 ## 🛠️ Troubleshooting
 
 ### Import Errors
+
 ```bash
 # Ensure proper installation
 pip install --upgrade dinoscan
@@ -159,6 +168,7 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 ```
 
 ### Memory Issues (Large Codebases)
+
 ```bash
 # Analyze in smaller chunks
 dinoscan security src/module1/
