@@ -233,8 +233,10 @@ def _identify_entry_points(self, project_path: str) -> None:
 def is_dead_symbol(self, symbol) -> bool:
     return self._is_dead_symbol(symbol)
 
+
 def create_dead_code_finding(self, symbol) -> Finding | None:
     return self._create_dead_code_finding(symbol)
+
 
 def _analyze_dead_code(self) -> list[Finding]:
     """Analyze collected symbols and usages to find dead code."""
@@ -281,11 +283,14 @@ def _is_dead_symbol(self, symbol: Symbol) -> bool:
 
     return len(external_usages) == 0
 
+
 def is_public_api_symbol(self, symbol: Symbol) -> bool:
     return self._is_public_api_symbol(symbol)
 
+
 def is_framework_symbol(self, symbol: Symbol) -> bool:
     return self._is_framework_symbol(symbol)
+
 
 def is_meaningful_usage(self, usage, symbol: Symbol) -> bool:
     return self._is_meaningful_usage(usage, symbol)
@@ -320,6 +325,7 @@ def _is_meaningful_usage(usage: Usage, symbol: Symbol) -> bool:
 def get_removal_suggestion(self, symbol: Symbol):
     return self._get_removal_suggestion(symbol)
 
+
 def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
     """Create a finding for dead code symbol."""
     severity_map = {
@@ -353,6 +359,8 @@ def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
         fixable=True,
         tags={f"dead-{symbol.symbol_type}", "unused"},
     )
+
+
 def _get_removal_suggestion(self, symbol: Symbol) -> str:
     """Get suggestion for removing dead code."""
     suggestions = {

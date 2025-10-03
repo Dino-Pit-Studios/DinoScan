@@ -110,6 +110,7 @@ class ConsoleReporter(Reporter):
 def colorize(self, text: str, severity: Severity) -> str:
     return self._colorize(text, severity)
 
+
 def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     """Format the severity breakdown section."""
     stats = result.get_summary_stats()
@@ -123,6 +124,8 @@ def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
         lines.append(colored_line)
     lines.append("")
     return lines
+
+
 @staticmethod
 def _format_category_breakdown(result: AnalysisResult) -> list[str]:
     """Format the category breakdown section."""
@@ -140,8 +143,10 @@ def _format_category_breakdown(result: AnalysisResult) -> list[str]:
 def group_findings_by_file(self, findings):
     return self._group_findings_by_file(findings)
 
+
 def format_file_findings(self, file_path, findings, project_path):
     return self._format_file_findings(file_path, findings, project_path)
+
 
 def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
     """Format the detailed findings section."""
