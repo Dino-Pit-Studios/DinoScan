@@ -180,6 +180,7 @@ class DeadCodeAnalyzer(ASTAnalyzer):
             # Skip excluded directories
             dirs[:] = [d for d in dirs if d not in self._excluded_dirs]
 
+"""Module for analyzing and detecting dead/unreferenced code symbols in a project."""
             for file in files:
                 if not file.endswith((".py", ".pyi", ".pyw")):
                     continue
@@ -231,10 +232,18 @@ def _identify_entry_points(self, project_path: str) -> None:
 
 
 def is_dead_symbol(self, symbol) -> bool:
+    """Return whether the given symbol is considered dead/unreferenced."""
     return self._is_dead_symbol(symbol)
 
 
+def is_dead_symbol(self, symbol) -> bool:
+    """Return True if the given symbol is dead; otherwise False."""
+    return self._is_dead_symbol(symbol)
+
 def create_dead_code_finding(self, symbol) -> Finding | None:
+    """Create a Finding object for the given symbol if it is dead; otherwise return None."""
+    if not self.is_dead_symbol(symbol):
+        return None
     return self._create_dead_code_finding(symbol)
 
 
@@ -285,45 +294,29 @@ def _is_dead_symbol(self, symbol: Symbol) -> bool:
 
 
 def is_public_api_symbol(self, symbol: Symbol) -> bool:
+    """Return True if the symbol is considered part of the public API."""
     return self._is_public_api_symbol(symbol)
 
 
 def is_framework_symbol(self, symbol: Symbol) -> bool:
+    """Return True if the symbol matches known framework-specific patterns."""
     return self._is_framework_symbol(symbol)
 
 
 def is_meaningful_usage(self, usage, symbol: Symbol) -> bool:
+    """Return True if a usage in the same file is considered meaningful beyond definition."""
     return self._is_meaningful_usage(usage, symbol)
     # Public if not private and at module level
     return not symbol.is_private and symbol.scope == "module"
 
 
-def _is_framework_symbol(self, symbol: Symbol) -> bool:
-    """Check if symbol follows framework patterns."""
-    # Check decorators for framework patterns
-    for decorator in symbol.decorators:
-        if any(
-            pattern in decorator
-            for framework_patterns in self.framework_patterns.values()
-            for pattern in framework_patterns
-        ):
-            return True
-
-    # Check name patterns
-    return any(
-        re.match(pattern, symbol.name) for pattern in self.external_call_patterns
-    )
-
-
-@staticmethod
-def _is_meaningful_usage(usage: Usage, symbol: Symbol) -> bool:
-    """Check if usage in same file is meaningful (not just definition)."""
-    # Usage after definition line is meaningful
-    return usage.line_number > symbol.line_number
-
-
 def get_removal_suggestion(self, symbol: Symbol):
+    """Return a suggested fix message for removing the given dead symbol."""
     return self._get_removal_suggestion(symbol)
+
+
+def create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
+    return self._create_dead_code_finding(symbol)
 
 
 def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
