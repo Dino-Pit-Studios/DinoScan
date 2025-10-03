@@ -13,6 +13,8 @@ from typing import Any
 from defusedxml.ElementTree import Element, SubElement
 
 from core.base_analyzer import AnalysisResult, Finding, Severity
+from core.json_reporter import JSONReporter
+from core.xml_reporter import XMLReporter
 
 
 class Reporter(ABC):
@@ -267,38 +269,6 @@ def _format_remaining_count(self, file_findings: list[Finding]) -> list[str]:
 def _format_footer(result: AnalysisResult) -> list[str]:
     """Format the report footer."""
     return ["=" * 80, f"Analysis completed at {result.timestamp}", "=" * 80]
-    SubElement(statistics, "total_findings").text = str(stats["total_findings"])
-    SubElement(statistics, "files_analyzed").text = str(stats["files_analyzed"])
-    SubElement(statistics, "files_skipped").text = str(stats["files_skipped"])
-
-    # Severity breakdown
-    severity_elem = SubElement(statistics, "severity_breakdown")
-    for severity, count in stats["severity_breakdown"].items():
-        severity_item = SubElement(severity_elem, "severity")
-        severity_item.set("level", severity)
-        severity_item.text = str(count)
-
-    # Findings
-    findings_elem = SubElement(root, "findings")
-    for finding in result.findings:
-        finding_elem = SubElement(findings_elem, "finding")
-        finding_elem.set("id", finding.rule_id)
-        finding_elem.set("severity", finding.severity.value)
-        finding_elem.set("category", finding.category.value)
-
-        SubElement(finding_elem, "message").text = finding.message
-        SubElement(finding_elem, "file_path").text = finding.file_path
-        SubElement(finding_elem, "line_number").text = str(finding.line_number)
-        SubElement(finding_elem, "column_number").text = str(finding.column_number)
-
-        if finding.context:
-            SubElement(finding_elem, "context").text = finding.context
-        if finding.suggestion:
-            SubElement(finding_elem, "suggestion").text = finding.suggestion
-        if finding.cwe:
-            SubElement(finding_elem, "cwe").text = finding.cwe
-
-    return ET.tostring(root, encoding="unicode", xml_declaration=True)
 
 
 class SARIFReporter(Reporter):
