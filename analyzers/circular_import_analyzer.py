@@ -363,6 +363,7 @@ class CircularImportAnalyzer(ASTAnalyzer):
     @staticmethod
     @staticmethod
     @staticmethod
+    @staticmethod
     def _find_import_line(module_info: ModuleInfo, target_module: str) -> int:
         """Find the line number where the problematic import occurs."""
         for import_info in module_info.imports:
