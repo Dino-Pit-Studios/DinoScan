@@ -1,7 +1,8 @@
 """
 DinoScan Analyzers Package.
 
-This package contains all the static analysis tools for comprehensive Python code analysis.
+This package contains all the static analysis tools for
+comprehensive Python code analysis.
 """
 
 from analyzers.advanced_security_analyzer import AdvancedSecurityAnalyzer

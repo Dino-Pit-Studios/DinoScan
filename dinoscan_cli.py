@@ -110,7 +110,8 @@ def load_analyzers(analyzer_name):
 
 def print_run_info(path, analyzers, profile, quiet):
     """
-    Print information about the current run including path, selected analyzers, and profile.
+    Print information about the current run including path, selected analyzers,
+    and profile.
     Does nothing if quiet mode is enabled.
     """
     if not quiet:

@@ -71,7 +71,8 @@ class ConsoleReporter(Reporter):
         return f"{color_code}{text}{reset_code}"
 
     def format_results(self, result: AnalysisResult) -> str:
-        """Format results into a console-friendly report, combining header, summary, breakdowns, detailed findings, and footer."""
+        """Format results into a console-friendly report, combining header,
+        summary, breakdowns, detailed findings, and footer."""
         lines = []
 
         # Build report sections
@@ -108,7 +109,8 @@ class ConsoleReporter(Reporter):
 
 
 def colorize(self, text: str, severity: Severity) -> str:
-    """Delegate to the internal colorization logic to wrap text with ANSI codes based on severity."""
+    """Delegate to the internal colorization logic to wrap text with
+    ANSI codes based on severity."""
     return self._colorize(text, severity)
 
 
@@ -142,12 +144,16 @@ def _format_category_breakdown(result: AnalysisResult) -> list[str]:
 
 
 def group_findings_by_file(self, findings):
-    """Group a list of findings by their file path, returning a mapping from each file to its findings."""
+    """
+    Group a list of findings by their file path, returning a mapping from
+    each file to its findings.
+    """
     return self._group_findings_by_file(findings)
 
 
 def format_file_findings(self, file_path, findings, project_path):
-    """Format the findings for a single file, including its relative path and detailed finding lines."""
+    """Format the findings for a single file, including its relative
+    path and detailed finding lines."""
     return self._format_file_findings(file_path, findings, project_path)
 
 
