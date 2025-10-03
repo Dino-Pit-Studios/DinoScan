@@ -107,6 +107,9 @@ class ConsoleReporter(Reporter):
         ]
 
 
+def colorize(self, text: str, severity: Severity) -> str:
+    return self._colorize(text, severity)
+
 def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     """Format the severity breakdown section."""
     stats = result.get_summary_stats()
@@ -116,12 +119,10 @@ def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     lines = ["⚠️  Severity Breakdown:"]
     for severity, count in stats["severity_breakdown"].items():
         severity_enum = Severity(severity)
-        colored_line = self._colorize(f"   {severity}: {count}", severity_enum)
+        colored_line = self.colorize(f"   {severity}: {count}", severity_enum)
         lines.append(colored_line)
     lines.append("")
     return lines
-
-
 @staticmethod
 def _format_category_breakdown(result: AnalysisResult) -> list[str]:
     """Format the category breakdown section."""
@@ -136,16 +137,22 @@ def _format_category_breakdown(result: AnalysisResult) -> list[str]:
     return lines
 
 
+def group_findings_by_file(self, findings):
+    return self._group_findings_by_file(findings)
+
+def format_file_findings(self, file_path, findings, project_path):
+    return self._format_file_findings(file_path, findings, project_path)
+
 def _format_detailed_findings(self, result: AnalysisResult) -> list[str]:
     """Format the detailed findings section."""
     if not result.findings:
         return []
 
     lines = ["🐛 Detailed Findings:", ""]
-    findings_by_file = self._group_findings_by_file(result.findings)
+    findings_by_file = self.group_findings_by_file(result.findings)
 
     for file_path in sorted(findings_by_file.keys()):
-        file_lines = self._format_file_findings(
+        file_lines = self.format_file_findings(
             file_path, findings_by_file[file_path], result.project_path
         )
         lines.extend(file_lines)
@@ -169,18 +176,18 @@ def _format_file_findings(
 ) -> list[str]:
     """Format findings for a specific file."""
     # Show relative path
-    rel_path = self._get_relative_path(file_path, project_path)
+    rel_path = self.get_relative_path(file_path, project_path)
 
     lines = [f"📄 {rel_path}", "-" * len(rel_path)]
 
     # Sort and limit findings
-    sorted_findings = self._sort_and_limit_findings(file_findings)
+    sorted_findings = self.sort_and_limit_findings(file_findings)
 
     for finding in sorted_findings:
-        lines.extend(self._format_single_finding(finding))
+        lines.extend(self.format_single_finding(finding))
 
     # Show remaining count if truncated
-    lines.extend(self._format_remaining_count(file_findings))
+    lines.extend(self.format_remaining_count(file_findings))
 
     return lines
 
@@ -214,9 +221,9 @@ def _format_single_finding(self, finding: Finding) -> list[str]:
     lines = []
 
     # Main finding line
-    location = self._format_location(finding)
+    location = self.format_location(finding)
     finding_line = f"  {location}: [{finding.severity.value}] {finding.message}"
-    colored_line = self._colorize(finding_line, finding.severity)
+    colored_line = self.colorize(finding_line, finding.severity)
     lines.append(colored_line)
 
     # Context if enabled
@@ -228,7 +235,7 @@ def _format_single_finding(self, finding: Finding) -> list[str]:
         lines.append(f"    💡 Suggestion: {finding.suggestion}")
 
     # Rule ID and CWE
-    details = self._format_finding_details(finding)
+    details = self.format_finding_details(finding)
     if details:
         lines.append(f"    ℹ️  {details}")
 

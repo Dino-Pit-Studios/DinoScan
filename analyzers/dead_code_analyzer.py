@@ -230,14 +230,20 @@ def _identify_entry_points(self, project_path: str) -> None:
                 self.entry_points.add(symbol.file_path)
 
 
+def is_dead_symbol(self, symbol) -> bool:
+    return self._is_dead_symbol(symbol)
+
+def create_dead_code_finding(self, symbol) -> Finding | None:
+    return self._create_dead_code_finding(symbol)
+
 def _analyze_dead_code(self) -> list[Finding]:
     """Analyze collected symbols and usages to find dead code."""
     findings = []
 
     for _symbol_name, symbols_list in self.symbols.items():
         for symbol in symbols_list:
-            if self._is_dead_symbol(symbol):
-                finding = self._create_dead_code_finding(symbol)
+            if self.is_dead_symbol(symbol):
+                finding = self.create_dead_code_finding(symbol)
                 if finding:
                     findings.append(finding)
 
@@ -255,11 +261,11 @@ def _is_dead_symbol(self, symbol: Symbol) -> bool:
         return False
 
     # Skip public API symbols if configured
-    if self.exclude_public_api and self._is_public_api_symbol(symbol):
+    if self.exclude_public_api and self.is_public_api_symbol(symbol):
         return False
 
     # Skip framework-specific patterns
-    if self._is_framework_symbol(symbol):
+    if self.is_framework_symbol(symbol):
         return False
 
     # Check for usages
@@ -270,19 +276,19 @@ def _is_dead_symbol(self, symbol: Symbol) -> bool:
         usage
         for usage in usages
         if usage.file_path != symbol.file_path
-        or self._is_meaningful_usage(usage, symbol)
+        or self.is_meaningful_usage(usage, symbol)
     ]
 
     return len(external_usages) == 0
 
+def is_public_api_symbol(self, symbol: Symbol) -> bool:
+    return self._is_public_api_symbol(symbol)
 
-def _is_public_api_symbol(self, symbol: Symbol) -> bool:
-    """Check if symbol is part of public API."""
-    # Check __all__ definitions
-    public_symbols = self.public_apis.get(symbol.file_path, set())
-    if public_symbols and symbol.name in public_symbols:
-        return True
+def is_framework_symbol(self, symbol: Symbol) -> bool:
+    return self._is_framework_symbol(symbol)
 
+def is_meaningful_usage(self, usage, symbol: Symbol) -> bool:
+    return self._is_meaningful_usage(usage, symbol)
     # Public if not private and at module level
     return not symbol.is_private and symbol.scope == "module"
 
@@ -311,6 +317,9 @@ def _is_meaningful_usage(usage: Usage, symbol: Symbol) -> bool:
     return usage.line_number > symbol.line_number
 
 
+def get_removal_suggestion(self, symbol: Symbol):
+    return self._get_removal_suggestion(symbol)
+
 def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
     """Create a finding for dead code symbol."""
     severity_map = {
@@ -329,7 +338,7 @@ def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
         )  # Private symbols or functions with decorators (might be framework callbacks)
 
     message = f"Unused {symbol.symbol_type}: '{symbol.name}'"
-    suggestion = self._get_removal_suggestion(symbol)
+    suggestion = self.get_removal_suggestion(symbol)
 
     return Finding(
         rule_id=f"dead-code-{symbol.symbol_type}",
@@ -344,8 +353,6 @@ def _create_dead_code_finding(self, symbol: Symbol) -> Finding | None:
         fixable=True,
         tags={f"dead-{symbol.symbol_type}", "unused"},
     )
-
-
 def _get_removal_suggestion(self, symbol: Symbol) -> str:
     """Get suggestion for removing dead code."""
     suggestions = {
