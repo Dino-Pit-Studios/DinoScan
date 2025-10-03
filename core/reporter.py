@@ -115,6 +115,7 @@ def colorize(self, text: str, severity: Severity) -> str:
     """
     return self._colorize(text, severity)
 
+
 def _format_severity_breakdown(self, result: AnalysisResult) -> list[str]:
     """Format the severity breakdown section."""
     stats = result.get_summary_stats()
