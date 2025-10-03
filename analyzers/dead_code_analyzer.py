@@ -231,10 +231,6 @@ def _identify_entry_points(self, project_path: str) -> None:
                 self.entry_points.add(symbol.file_path)
 
 
-def is_dead_symbol(self, symbol) -> bool:
-    """Return whether the given symbol is considered dead/unreferenced."""
-    return self._is_dead_symbol(symbol)
-
 
 def is_dead_symbol(self, symbol) -> bool:
     """Return True if the given symbol is dead; otherwise False."""
