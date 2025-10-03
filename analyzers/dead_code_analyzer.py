@@ -307,7 +307,6 @@ def is_meaningful_usage(self, usage, symbol: Symbol) -> bool:
     """Return True if a usage in the same file is considered meaningful beyond definition."""
     return self._is_meaningful_usage(usage, symbol)
     # Public if not private and at module level
-    return not symbol.is_private and symbol.scope == "module"
 
 
 def get_removal_suggestion(self, symbol: Symbol):
