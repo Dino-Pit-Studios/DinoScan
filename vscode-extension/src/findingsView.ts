@@ -1,9 +1,9 @@
 import * as path from "path";
-import * as vscode from "vscode";
+import { Uri, Diagnostic, TreeDataProvider, EventEmitter, languages, ExtensionContext, TreeItem } from "vscode";
 
 interface FindingNodeData {
-  uri: vscode.Uri;
-  diagnostic: vscode.Diagnostic;
+  uri: Uri;
+  diagnostic: Diagnostic;
 }
 
 type DinoscanTreeNode = FileTreeItem | FindingTreeItem;
@@ -13,9 +13,9 @@ type DinoscanTreeNode = FileTreeItem | FindingTreeItem;
  * Implements the vscode.TreeDataProvider interface for DinoscanTreeNode items.
  */
 export class DinoscanFindingsTreeProvider
-  implements vscode.TreeDataProvider<DinoscanTreeNode>
+  implements TreeDataProvider<DinoscanTreeNode>
 {
-  private readonly _onDidChangeTreeData = new vscode.EventEmitter<
+  private readonly _onDidChangeTreeData = new EventEmitter<
     DinoscanTreeNode | undefined
   >();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -25,9 +25,9 @@ export class DinoscanFindingsTreeProvider
    * Registers for diagnostics change events to refresh the tree.
    * @param context The extension context used to subscribe to VSCode events.
    */
-  constructor(private readonly context: vscode.ExtensionContext) {
+  constructor(private readonly context: ExtensionContext) {
     context.subscriptions.push(
-      vscode.languages.onDidChangeDiagnostics(() => this.refresh()),
+      languages.onDidChangeDiagnostics(() => this.refresh()),
     );
   }
 
@@ -46,7 +46,7 @@ export class DinoscanFindingsTreeProvider
    */
   static getTreeItem(
     element: DinoscanTreeNode,
-  ): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  ): TreeItem | Thenable<TreeItem> {
     return element;
   }
 

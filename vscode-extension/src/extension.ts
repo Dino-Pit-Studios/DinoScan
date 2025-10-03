@@ -6,7 +6,7 @@
  */
 
 import { spawn, spawnSync } from "child_process";
-import * as vscode from "vscode";
+import type { ExtensionContext } from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import type { DinoscanFinding } from "./diagnosticProvider";
@@ -52,7 +52,7 @@ function normalizeAnalyzerName(
  * Initializes diagnostic providers, status bar, reporter, views, and registers commands.
  * @param context The extension context provided by VS Code.
  */
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
   console.log("DinoScan extension is now active!");
 
   // Initialize providers
