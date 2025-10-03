@@ -240,12 +240,6 @@ def is_dead_symbol(self, symbol) -> bool:
     """Return True if the given symbol is dead; otherwise False."""
     return self._is_dead_symbol(symbol)
 
-def create_dead_code_finding(self, symbol) -> Finding | None:
-    """Create a Finding object for the given symbol if it is dead; otherwise return None."""
-    if not self.is_dead_symbol(symbol):
-        return None
-    return self._create_dead_code_finding(symbol)
-
 
 def _analyze_dead_code(self) -> list[Finding]:
     """Analyze collected symbols and usages to find dead code."""
