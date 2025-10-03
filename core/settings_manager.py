@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Enhanced settings management with proper integration.
-"""
+"""Enhanced settings management with proper integration."""
 
 import fnmatch
 import json

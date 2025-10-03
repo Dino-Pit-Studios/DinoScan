@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Enhanced file type detection and language mapping.
-"""
+"""Enhanced file type detection and language mapping."""
 
 import mimetypes
 from pathlib import Path
