@@ -118,7 +118,8 @@ class ConsoleReporter(Reporter):
         lines.append("")
         return lines
 
-    def _format_category_breakdown(self, result: AnalysisResult) -> list[str]:
+    @staticmethod
+    def _format_category_breakdown(result: AnalysisResult) -> list[str]:
         """Format the category breakdown section."""
         stats = result.get_summary_stats()
         if not stats["category_breakdown"]:
@@ -249,7 +250,8 @@ class ConsoleReporter(Reporter):
         remaining = len(file_findings) - self.max_findings_per_file
         return [f"  ... and {remaining} more findings in this file", ""]
 
-    def _format_footer(self, result: AnalysisResult) -> list[str]:
+    @staticmethod
+    def _format_footer(result: AnalysisResult) -> list[str]:
         """Format the report footer."""
         return ["=" * 80, f"Analysis completed at {result.timestamp}", "=" * 80]
 
