@@ -21,7 +21,6 @@ import argparse
 import ast
 import builtins
 import os
-import re
 import sys
 import traceback
 from collections import defaultdict
