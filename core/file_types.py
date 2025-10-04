@@ -181,14 +181,13 @@ class FileTypeManager:
 
         if language == "markdown":
             return "documentation"
-        elif language in {"config", "yaml", "json", "xml"}:
+        if language in {"config", "yaml", "json", "xml"}:
             return "configuration"
-        elif language in {"dockerfile"}:
+        if language in {"dockerfile"}:
             return "infrastructure"
-        elif self.is_source_code_file(file_path):
+        if self.is_source_code_file(file_path):
             return "source"
-        else:
-            return "other"
+        return "other"
 
     def should_analyze_for_security(self, file_path: str) -> bool:
         """Determine if file should be analyzed for security issues."""
